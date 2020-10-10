@@ -1,0 +1,4 @@
+aws lambda update-function-code --function-name TestDataRetriever --zip-file fileb://./MongoDBDataRetriever.zip
+
+
+Allow cors on API and Lambda

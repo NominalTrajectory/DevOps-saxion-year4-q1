@@ -1,0 +1,303 @@
+# Ivan Shishkalov | Cloud Automation Concepts | Assessment Assignment 1
+Description: This stack contains the base network configuration with an empty VPC, two Public subnets, two Private subnets in two different availability zones, Internet Gateway, NAT Instance, Route tables
+
+Parameters:
+  # The IP address range to be used for this VPC
+  VPCCIDR:
+    Description: Please enter the IP range (CIDR notation) for this VPC.
+    Type: String
+    Default: 10.0.0.0/16
+  
+  # The IP address range to be used for the Public Subnet 1
+  PublicSubnet1CIDR:
+    Description: Please enter the IP range (CIDR notation) for the first public subnet
+    Type: String
+    Default: 10.0.1.0/24
+
+  # The IP address range to be used for the Public Subnet 2
+  PublicSubnet2CIDR:
+    Description: Please enter the IP range (CIDR notation) for the second public subnet
+    Type: String
+    Default: 10.0.2.0/24
+
+  # The IP address range to be used for the Private Subnet 1
+  PrivateSubnet1CIDR:
+    Description: Please enter the IP range (CIDR notation) for the first private subnet
+    Type: String
+    Default: 10.0.51.0/24
+
+  # The IP address range to be used for the Private Subnet 2
+  PrivateSubnet2CIDR:
+    Description: Please enter the IP range (CIDR notation) for the second private subnet
+    Type: String
+    Default: 10.0.52.0/24
+
+  # The name of the first availability zone to be used. By default picks the first from the array of available zones
+  AvailabilityZone1:
+    Description: Please enter the name of the first Availability Zone
+    Type: AWS::EC2::AvailabilityZone::Name
+    
+  # The name of the second availability zone to be used. By default picks the second from the array of available zones
+  AvailabilityZone2:
+    Description: Please enter the name of the second Availability Zone
+    Type: AWS::EC2::AvailabilityZone::Name
+
+#TODO: Add a condition to ensure usage of two different AZs
+#Conditions:
+
+
+# The cloud resources your template is going to create.
+Resources:
+
+  CACAA1VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCIDR
+      Tags: 
+        - Key: Name
+          Value: CACAA1VPC
+
+  CACAA1InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: CACAA1InternetGateway
+
+  CACAA1VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref CACAA1InternetGateway
+      VpcId: !Ref CACAA1VPC          
+
+  CACAA1SubnetPublic1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref PublicSubnet1CIDR
+      MapPublicIpOnLaunch: 'true'
+      AvailabilityZone: !Ref AvailabilityZone1
+      VpcId: !Ref CACAA1VPC
+      Tags:
+        - Key: Name
+          Value: CACAA1SubnetPublic1
+
+  CACAA1SubnetPublic2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref PublicSubnet2CIDR
+      MapPublicIpOnLaunch: 'true'
+      AvailabilityZone: !Ref AvailabilityZone2
+      VpcId: !Ref CACAA1VPC
+      Tags:
+        - Key: Name
+          Value: CACAA1SubnetPublic2 
+
+  CACAA1SubnetPrivate1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref PrivateSubnet1CIDR
+      MapPublicIpOnLaunch: 'false'
+      VpcId: !Ref CACAA1VPC
+      Tags:
+        - Key: Name
+          Value: CACAA1SubnetPrivate1
+      
+  CACAA1SubnetPrivate2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref PrivateSubnet2CIDR
+      MapPublicIpOnLaunch: 'false'
+      AvailabilityZone: !Ref AvailabilityZone2
+      VpcId: !Ref CACAA1VPC
+      Tags:
+        - Key: Name
+          Value: CACAA1SubnetPrivate2
+
+  CACAA1PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      Tags: 
+        - Key: Name
+          Value: CACAA1PublicRouteTable
+      VpcId: !Ref CACAA1VPC
+
+  CACAA1PublicDefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref CACAA1InternetGateway
+      RouteTableId: !Ref CACAA1PublicRouteTable
+
+  CACAA1PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref CACAA1PublicRouteTable
+      SubnetId: !Ref CACAA1SubnetPublic1
+
+  CACAA1PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref CACAA1PublicRouteTable
+      SubnetId: !Ref CACAA1SubnetPublic2
+
+  # NAT Instance instead of NAT Gateway because of the limitations of AWS Educate account
+  CACAA1NATSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: This security group is dedicated to the NAT instance
+      GroupName: NATSecurityGroup
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: !Ref PrivateSubnet1CIDR
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref PrivateSubnet1CIDR
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: !Ref PrivateSubnet1CIDR
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: !Ref PrivateSubnet2CIDR
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref PrivateSubnet2CIDR
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: !Ref PrivateSubnet2CIDR
+      SecurityGroupEgress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      Tags: 
+        - Key: Name
+          Value: CACAA1NATSecurityGroup
+      VpcId: !Ref CACAA1VPC
+
+  CACAA1NATInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-01ef31f9f39c5aaed
+      SubnetId: !Ref CACAA1SubnetPublic1
+      SourceDestCheck: false
+      KeyName: CAC_Assignments
+      SecurityGroupIds: 
+        - !Ref CACAA1NATSecurityGroup
+      Tags:
+        - Key: Name
+          Value: CACAA1NATInstance
+
+  CACAA1NATPrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref CACAA1VPC
+      Tags:
+        - Key: Name
+          Value: CACAA1NATPrivateRouteTable
+
+  CACAA1PrivateDefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      InstanceId: !Ref CACAA1NATInstance
+      RouteTableId: !Ref CACAA1NATPrivateRouteTable
+
+  CACAA1PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref CACAA1NATPrivateRouteTable
+      SubnetId: !Ref CACAA1SubnetPrivate1
+
+  CACAA1PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref CACAA1NATPrivateRouteTable
+      SubnetId: !Ref CACAA1SubnetPrivate2
+
+Outputs:
+
+  VPCRef:
+    Description: Reference to the VPC
+    Value: !Ref CACAA1VPC
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", VPC ] ]
+
+  InternetGatewayRef:
+    Description: Reference to the Internet Gateway
+    Value: !Ref CACAA1InternetGateway
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", InternetGateway ] ]
+    
+  VPCGatewayAttachmentRef:
+    Description: Reference to the VPC gateway attachment
+    Value: !Ref CACAA1VPCGatewayAttachment
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", CACAA1VPCGatewayAttachment ] ]
+
+  PublicSubnet1Ref:
+    Description: Reference to the first public subnet
+    Value: !Ref CACAA1SubnetPublic1
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", PublicSubnet1 ] ]
+
+  PublicSubnet2Ref:
+    Description: Reference to the first public subnet
+    Value: !Ref CACAA1SubnetPublic2
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", PublicSubnet2 ] ]
+
+  PrivateSubnet1Ref:
+    Description: Reference to the first private subnet
+    Value: !Ref CACAA1SubnetPrivate1
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", PrivateSubnet1 ] ]
+
+  PrivateSubnet2Ref:
+    Description: Reference to the first private subnet
+    Value: !Ref CACAA1SubnetPrivate2
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", PrivateSubnet2 ] ]
+
+  # AvailabilityZone1Ref:
+  #   Description: Reference to Availability Zone 1
+  #   Value: !Ref AvailabilityZone1
+  #   Export:
+  #     Name: !Join [ ":", [ !Ref "AWS::StackName", AvailabilityZone1 ] ]
+
+  # AvailabilityZone2Ref:
+  #   Description: Reference to Availability Zone 2
+  #   Value: !Ref AvailabilityZone2
+  #   Export:
+  #     Name: !Join [ ":", [ !Ref "AWS::StackName", AvailabilityZone2 ] ]
+
+  PublicRouteTableRef: 
+    Description: Reference to the public route table
+    Value: !Ref CACAA1PublicRouteTable
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", PublicRouteTable ] ]
+
+  NATInstanceRef:
+    Description: Reference to the NAT Instance
+    Value: !Ref CACAA1NATInstance
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", NATInstance ] ]
+
+  NATSecurityGroupRef:
+    Description: Reference to the NAT SecurityGroup
+    Value: !Ref CACAA1NATSecurityGroup
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", NATSecurityGroup ] ]
+
+

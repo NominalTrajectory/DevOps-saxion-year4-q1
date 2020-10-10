@@ -1,0 +1,114 @@
+# Ivan Shishkalov | Cloud Automation Concepts | Assessment Assignment 1
+Description: This stack deploys an EC2 instance based MongoDB replicated over two availability zones
+
+
+#TODO: Configure replication between MongoDB instances
+
+Resources: 
+
+  CACAA1MongoDBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: This security groups allows incoming connection to port 27017 (MongoDB)
+      GroupName: CACAA1MongoDBSecurityGroup
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 27017
+          ToPort: 27017
+          CidrIp: 0.0.0.0/0
+      Tags: 
+        - Key: Name
+          Value: CACAA1MongoDBSecurityGroup
+      VpcId: !ImportValue BaseStack:VPC
+
+  CACAA1MongoDBInstancePrimary:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-06b263d6ceff0b3dd
+      SubnetId: !ImportValue BaseStack:PrivateSubnet1
+      KeyName: CAC_Assignments
+      UserData: 
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
+            sudo apt update
+            wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
+            echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
+            sudo apt-get update
+            sudo apt-get install -y mongodb-org
+            sudo sed -i 's/127.0.0.1/0.0.0.0/' /etc/mongod.conf
+            sudo systemctl start mongod
+            sudo systemctl enable mongod 
+                          
+      SecurityGroupIds: 
+        - !Ref CACAA1MongoDBSecurityGroup
+      Tags:
+        - Key: Name
+          Value: CACAA1MongoDBInstancePrimary
+
+  CACAA1MongoDBInstanceSecondary:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-06b263d6ceff0b3dd
+      SubnetId: !ImportValue BaseStack:PrivateSubnet2
+      KeyName: CAC_Assignments
+      UserData: 
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
+            sudo apt update
+            wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
+            echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
+            sudo apt-get update
+            sudo apt-get install -y mongodb-org
+            sudo sed -i 's/127.0.0.1/0.0.0.0/' /etc/mongod.conf
+            sudo systemctl start mongod
+            sudo systemctl enable mongod 
+                          
+      SecurityGroupIds: 
+        - !Ref CACAA1MongoDBSecurityGroup
+      Tags:
+        - Key: Name
+          Value: CACAA1MongoDBInstanceSecondary
+
+CACAA1MongoDBDataRefresher:
+    Type: AWS::Lambda::Function
+    DependsOn: #MongoDB ?
+      FunctionName: CACAA1MongoDBDataRefresher
+      Description: Pull data from covid board github and save it in the MongoDB, refreshes every 1 hour
+      Role:
+        Fn::GetAtt: [ CACAA1LambdaS3Role, "Arn" ]
+      Runtime: nodejs12.x
+      Timeout: 120
+      Environment:
+        Variables:
+          MONGODB_URI: !Ref #Connection string for MongoDB read-write any db with username and password
+      Handler: index.handler
+      Layers:
+        - arn:aws:lambda:us-east-1:553035198032:layer:git-lambda2:7 # Git layer
+      Code: #Dummy code below, Function code should be updated from awc cli to contain npm modules Function Zip
+        ZipFile: |
+          
+  
+
+Outputs:
+
+  MongoDBSecurityGroupRef:
+    Description: Reference to the security group for MongoDB
+    Value: !Ref CACAA1MongoDBSecurityGroup
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", MongoDBSecurityGroup ] ]
+
+  MongoDBPrimaryInstanceRef:
+    Description: Reference to the primary MongoDB instance
+    Value: !Ref CACAA1MongoDBInstancePrimary
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", MongoDBPrimaryInstance ] ]
+
+  MongoDBSecondaryInstanceRef:
+    Description: Reference to the secondary MongoDB instance
+    Value: !Ref CACAA1MongoDBInstanceSecondary
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", MongoDBSecondaryInstance ] ]

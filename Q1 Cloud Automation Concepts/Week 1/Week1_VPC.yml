@@ -1,0 +1,119 @@
+# A description of what your template does.
+Description: My first VPC (10.0.0.0/16) with a public subnet (10.0.10.0/24).
+# Parameters you can set in CloudFormation when you roll out your stack.
+Parameters:
+  VPCCIDR:
+    Description: Please enter the IP range (CIDR notation) for this VPC.
+    Type: String
+    Default: 10.0.0.0/16
+  PublicSubnetCIDR:
+    Description: Please enter the IP range (CIDR notation) for the public subnet
+    Type: String
+    Default: 10.0.10.0/24
+# The cloud resources your template is going to create.
+Resources:
+  MyFirstVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCIDR
+      Tags: # Good practice is to add tags!
+        - Key: Name
+          Value: MyFirstVPC
+  MyFirstSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref PublicSubnetCIDR
+      MapPublicIpOnLaunch: 'true' # Important! See documentation.
+      VpcId: !Ref MyFirstVPC
+      Tags:
+        - Key: Name
+          Value: MyFirstSubnet
+  # Define an internet gateway
+  MyFirstInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: MyFirstInternetGateway
+  # Connect the internet gateway to the VPC
+  MyInternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties: 
+      InternetGatewayId: !Ref MyFirstInternetGateway
+      VpcId: !Ref MyFirstVPC
+  # Define a route table
+  MyFirstRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      Tags: 
+        - Key: Name
+          Value: MyFirstRouteTable
+      VpcId: !Ref MyFirstVPC
+  # Define a default route to internet gateway
+  MyFirstDefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref MyFirstInternetGateway
+      RouteTableId: !Ref MyFirstRouteTable
+
+  # Define a subnet-routetable association
+  MyFirstSubnetRoutetableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref MyFirstRouteTable
+      SubnetId: !Ref MyFirstSubnet
+  # Define a security group allowing HTTP, HTTPS, SSH inbound
+  MyVPCSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: This security groups allows incoming connection to ports 80, 443 and 22
+      GroupName: MyVPCSecurityGroup
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      Tags: 
+        - Key: Name
+          Value: MyVPCSecurityGroup
+      VpcId: !Ref MyFirstVPC
+  # Define an EC2 instance
+  MyFirstEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-0bcc094591f354be2
+      SubnetId: !Ref MyFirstSubnet
+      KeyName: 4amnyKP
+      SecurityGroupIds:
+        - !Ref MyVPCSecurityGroup
+      UserData: 
+        Fn::Base64:
+         !Sub |
+          #!/bin/bash
+           apt-get update
+           apt-get install -y nginx
+           service nginx start
+           chkconfig nginx on
+           
+      Tags:
+        - Key: Name
+          Value: MyFirstEC2Instance
+
+
+
+
+    
+
+
+
+        

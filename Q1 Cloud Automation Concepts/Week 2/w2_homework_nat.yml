@@ -1,0 +1,27 @@
+Description: Stack with NAT gateway for Week 2 homework. 
+
+Resources:
+
+  ElasticIP:
+    Type: AWS::EC2::EIP
+    Properties: 
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value: ElasticIP
+
+  NATGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt ElasticIP.AllocationId
+      SubnetId: !ImportValue BaseStack:PublicSubnet
+      Tags:
+        - Key: Name
+          Value: NATGateway
+ 
+  NATRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !ImportValue BaseStack:PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NATGateway

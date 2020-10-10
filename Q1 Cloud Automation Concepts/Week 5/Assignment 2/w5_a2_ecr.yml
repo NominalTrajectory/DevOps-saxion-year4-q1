@@ -1,0 +1,21 @@
+Description: This stack contains an ECR (Elastic Container Repository) / Cloud Automation Concepts / Week 5 / Assignment 2
+
+Parameters: 
+
+  ECRName:
+    Description: Provide a name for Elastic Container Repository 
+    Type: String
+    AllowedPattern: (?:[a-z0-9]+(?:[._-][a-z0-9]+)*/)*[a-z0-9]+(?:[._-][a-z0-9]+)*
+    Default: cac-w5-ecr-ivan
+
+Resources:
+
+  ECR:
+    Type: AWS::ECR::Repository
+    DeletionPolicy: Delete
+    Properties: 
+      RepositoryName: !Ref ECRName
+      Tags: 
+        - Key: Name
+          Value: ECR
+

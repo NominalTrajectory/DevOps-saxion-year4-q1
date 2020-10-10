@@ -1,0 +1,78 @@
+Description: Assignment 2 - Create a template to deploy a simple todo website with a mongo database
+
+Resources: 
+
+  W3A2Webserver1:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-06b263d6ceff0b3dd
+      SubnetId: !ImportValue BaseStack:PublicSubnet
+      KeyName: CAC_Assignments
+      UserData: 
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
+            sudo apt update
+            sudo apt install nodejs -y
+            sudo apt install npm -y
+            sudo apt install git -y
+            git clone -b todos --single-branch https://github.com/TimothySealy/cac-simple-webapp.git 
+            cd cac-simple-webapp
+            npm i
+            sudo sed -i -- 's/3000/80/g' app.js
+            sudo sed -i -- 's/localhost/${W3A2MongoDBInstance1.PrivateIp}/g' app.js
+            sudo npm i -g pm2
+            sudo npm start
+              
+      SecurityGroupIds: 
+        - !ImportValue BaseStack:SecurityGroup
+      Tags:
+        - Key: Name
+          Value: W3A2Webserver1
+
+  MongoDBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: This security groups allows incoming connection to port 27017
+      GroupName: MongoDBSecurityGroup
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 27017
+          ToPort: 27017
+          CidrIp: 0.0.0.0/0
+      Tags: 
+        - Key: Name
+          Value: MongoDBSecurityGroup
+      VpcId: !ImportValue BaseStack:VPC
+
+  W3A2MongoDBInstance1:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-06b263d6ceff0b3dd
+      SubnetId: !ImportValue BaseStack:PrivateSubnet
+      KeyName: CAC_Assignments
+      UserData: 
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
+            sudo apt update
+            wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
+            echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
+            sudo apt-get update
+            sudo apt-get install -y mongodb-org
+            sudo sed -i 's/127.0.0.1/0.0.0.0/' /etc/mongod.conf
+            sudo systemctl start mongod
+            sudo systemctl enable mongod 
+                          
+      SecurityGroupIds: 
+        - !ImportValue BaseStack:SecurityGroup
+        - !Ref MongoDBSecurityGroup
+      Tags:
+        - Key: Name
+          Value: W3A2MongoDBInstance1
+
+
+
+

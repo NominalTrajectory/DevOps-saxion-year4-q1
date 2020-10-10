@@ -1,0 +1,75 @@
+Description: A template which includes a load balancer and an autoscaling group CAC Week 2 assignment 2
+
+Resources:
+
+  CACW2A1LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: CACW2A1LoadBalancer
+      Scheme: internet-facing
+      SecurityGroups: 
+        - !ImportValue BaseStack:SecurityGroup
+      Subnets: 
+        - !ImportValue BaseStack:MyFirstSubnet
+        - !ImportValue BaseStack:MySecondSubnet
+      Tags: 
+        - Key: Name
+          Value: CACW2A1LoadBalancer
+
+  TargetGroup1:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: TargetGroup1
+      Port: 80
+      Protocol: HTTP
+      Targets:
+        - Id: !ImportValue InstancesStack:Instance1
+          Port: 80
+        - Id: !ImportValue InstancesStack:Instance2
+          Port: 80
+      VpcId: !ImportValue BaseStack:VPC
+
+  Listener1:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties: 
+      DefaultActions: 
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup1
+      LoadBalancerArn: !Ref CACW2A1LoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+  # Autoscaling
+
+  LaunchConfiguration: 
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      AssociatePublicIpAddress: true
+      InstanceId: !ImportValue InstancesStack:Instance1
+
+  AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      LaunchConfigurationName: !Ref LaunchConfiguration
+      MinSize: 1
+      MaxSize: 3
+      TargetGroupARNs: 
+        - !Ref TargetGroup1
+      VPCZoneIdentifier:
+        - !ImportValue BaseStack:MyFirstSubnet
+        - !ImportValue BaseStack:MySecondSubnet
+  
+  ScalingPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AutoScalingGroupName: !Ref AutoScalingGroup
+      EstimatedInstanceWarmup: 60
+      PolicyType: TargetTrackingScaling
+      TargetTrackingConfiguration: 
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ALBRequestCountPerTarget
+          ResourceLabel: !Join 
+            - '/' 
+            - - !GetAtt CACW2A1LoadBalancer.LoadBalancerFullName
+              - !GetAtt TargetGroup1.TargetGroupFullName 
+        TargetValue: 1

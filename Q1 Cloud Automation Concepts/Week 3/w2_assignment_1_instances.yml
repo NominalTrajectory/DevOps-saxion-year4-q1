@@ -1,0 +1,76 @@
+Description: Two EC2 instances for Week2 assignment 1 with web applications
+
+
+Resources:
+
+  CACW2A1Instance1:
+      Type: AWS::EC2::Instance
+      Properties:
+        InstanceType: t2.micro
+        ImageId: ami-06b263d6ceff0b3dd
+        SubnetId: !ImportValue BaseStack:MyFirstSubnet
+        KeyName: CAC_Assignments
+        SecurityGroupIds: 
+         - !ImportValue BaseStack:SecurityGroup
+        UserData: 
+          Fn::Base64:
+            !Sub |
+              #!/bin/bash
+              sudo apt update
+              sudo apt install nodejs -y
+              sudo apt install npm -y
+              sudo apt install git -y
+              git clone -b todos --single-branch https://github.com/TimothySealy/cac-simple-webapp.git 
+              cd cac-simple-webapp
+              npm i
+              sudo sed -i -- 's/3000/80/g' app.js
+              sudo sed -i -- 's/localhost/${CACW2A1Instance2.PrivateIp}/g' app.js
+              sudo npm i -g pm2
+              pm2 start app.js
+                      
+        Tags:
+          - Key: Name
+            Value: CACW2A1Instance1
+        DependsOn: 
+          - CACW2A1Instance2
+
+  CACW2A1Instance2:
+      Type: AWS::EC2::Instance
+      Properties:
+        InstanceType: t2.micro
+        ImageId: ami-06b263d6ceff0b3dd
+        SubnetId: !ImportValue BaseStack:MySecondSubnet
+        KeyName: CAC_Assignments
+        SecurityGroupIds: 
+          - !ImportValue BaseStack:SecurityGroup
+        UserData: 
+          Fn::Base64:
+            !Sub |
+              #!/bin/bash
+              sudo apt update
+              sudo apt install nodejs -y
+              sudo apt install npm -y
+              sudo apt install git -y
+              git clone https://github.com/TimothySealy/cac-simple-webapp
+              cd cac-simple-webapp
+              npm i
+              sudo sed -i -- 's/3000/80/g' app.js
+              sudo npm i -g pm2
+              pm2 start app.js
+              pm2 startup | bash
+                      
+        Tags:
+          - Key: Name
+            Value: CACW2A1Instance2
+
+Outputs:
+  Instance1Ref:
+    Description: Reference to the first instance
+    Value: !Ref CACW2A1Instance1
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", Instance1 ] ]
+  Instance2Ref:
+    Description: Reference to the second instance
+    Value: !Ref CACW2A1Instance2
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", Instance2 ] ]

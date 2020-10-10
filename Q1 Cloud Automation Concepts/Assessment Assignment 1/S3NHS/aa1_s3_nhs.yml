@@ -1,0 +1,213 @@
+Description: This stack deploys an S3 bucket and hosts the COVID-19 test registration form provided by NHS
+
+Parameters:
+
+  GitRepositoryWithNHSForm:
+    Description: Please enter the url of a git repository with website files
+    Type: String
+    Default: https://github.com/BFL-Psycho/cac-aa1-static-website
+
+  S3BucketName:
+    Description: Please enter the name for the S3 bucket to be created
+    Type: String
+    Default: cac-aa1-static-website-covid-game
+
+Resources:
+
+  CACAA1S3Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties: 
+      BucketName: !Ref S3BucketName
+      AccessControl: PublicRead
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+  
+  CACAA1BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      PolicyDocument:
+        Id: MyPolicy
+        Version: 2012-10-17
+        Statement:
+          - Sid: PublicReadForGetBucketObjects
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:GetObject'
+            Resource: !Join 
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref CACAA1S3Bucket
+                - /*
+      Bucket: !Ref CACAA1S3Bucket
+
+      #TODO: Upload files into S3 automatically (maybe from git)
+  
+  #Create S3 access role for Lambda
+  CACAA1LambdaS3Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - lambda.amazonaws.com
+            Action:
+            - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/CloudWatchFullAccess
+        - arn:aws:iam::aws:policy/AWSLambdaFullAccess
+      RoleName: CACAA1LambdaS3Role
+
+  #This Lambda function will pull static website files from Github and upload them to S3 automatically
+  #This function uses an additional layer with git, and it uses child process to perform bash commands in the underlying Amazon Linux
+  #Then, it clones the git repo into /tmp directory - this is the only directory we have write permissions for
+  #After that it loops through all the cloned files and uploads them to S3 using aws sdk
+  #All variables are dynamic through environment variables of lambda
+  #Timeout set to 1 minute
+
+  CAC1AA1StaticWebsiteUploaderLambda:
+    Type: AWS::Lambda::Function
+    DependsOn: CACAA1S3Bucket
+    Properties: 
+      FunctionName: CAC1AA1StaticWebsiteUploaderLambda
+      Description: Pull the static website files from Github repo and upload them to the S3 bucket
+      Role:
+        Fn::GetAtt: [ CACAA1LambdaS3Role, "Arn" ]
+      Runtime: nodejs12.x
+      Timeout: 60
+      Environment:
+        Variables:
+          repoUrl: !Ref GitRepositoryWithNHSForm
+          bucketName: !Ref S3BucketName
+      Handler: index.handler
+      Layers:
+        - arn:aws:lambda:us-east-1:553035198032:layer:git-lambda2:7 # Git layer
+      Code: 
+        ZipFile: |
+          const { execSync } = require("child_process");
+          const fs = require("fs");
+          const AWS = require("aws-sdk");
+          const s3 = new AWS.S3();
+          const lambda = new AWS.Lambda();
+
+          exports.handler = async (event, context) => {
+            execSync("rm -rf /tmp/*", { encoding: "utf8", stdio: "inherit" });
+            let repoUrlString = process.env.repoUrl;
+            let repoNameString = repoUrlString.substring(
+              repoUrlString.lastIndexOf("/") + 1
+            );
+            let s3BucketName = process.env.bucketName;
+            execSync(`cd /tmp && git clone ${repoUrlString}`, {
+              encoding: "utf8",
+              stdio: "inherit",
+            });
+            let fileNames = execSync(`ls /tmp/${repoNameString}`)
+              .toString()
+              .split(/\r?\n/);
+          
+            for (let i = 0; i < fileNames.length; i++) {
+              let fileName = fileNames[i];
+              if (fileName.length > 0) {
+                try {
+                  let f = fs.readFileSync(`/tmp/${repoNameString}/${fileName}`);
+                  const destparams = {
+                    Bucket: `${s3BucketName}`,
+                    Key: fileName,
+                    ContentType: getContentTypeString(fileName),
+                    Body: f,
+                    ACL: "public-read",
+                  };
+          
+                  const putResult = await s3.putObject(destparams).promise();
+                } catch (error) {
+                  return error;
+                }
+              }
+            }
+            return;
+          };
+
+          function getContentTypeString(fileName) {
+            if(fileName) {
+                let fileExtension = fileName.substring(fileName.lastIndexOf(".")+1);
+                switch(fileExtension) {
+                    case 'html': return 'text/html';
+                    case 'js': return 'text/javascript';
+                    case 'css': return 'text/css';
+                    default: return 'text/html';
+                }
+            }
+            return "text/html";
+          }
+
+  #This function will be invoked by the custom resource and the uploader function will be called
+  CAC1AA1CFNInvokerLambda:
+    Type: AWS::Lambda::Function
+    DependsOn: CAC1AA1StaticWebsiteUploaderLambda
+    Properties: 
+      FunctionName: CAC1AA1CFNInvokerLambda
+      Description: Invoke uploader lambda
+      Role:
+        Fn::GetAtt: [ CACAA1LambdaS3Role, "Arn" ]
+      Runtime: nodejs12.x
+      Timeout: 60
+      Handler: index.handler
+      Code:
+        ZipFile: |
+          var aws = require('aws-sdk')
+          var response = require('cfn-response')
+          exports.handler = function(event, context) {
+              console.log("REQUEST RECEIVED:\n" + JSON.stringify(event))
+              // For Delete requests, immediately send a SUCCESS response.
+              if (event.RequestType == "Delete") {
+                  response.send(event, context, "SUCCESS")
+                  return
+              }
+              var responseStatus = "FAILED"
+              var responseData = {}
+              var functionName = "CAC1AA1StaticWebsiteUploaderLambda"
+              var lambda = new aws.Lambda()
+              lambda.invoke({ FunctionName: functionName }, function(err, invokeResult) {
+                  if (err) {
+                      responseData = {Error: "Invoke call failed"}
+                      console.log(responseData.Error + ":\n", err)
+                  }
+                  else responseStatus = "SUCCESS"
+                  response.send(event, context, responseStatus, responseData)
+              })
+          }
+        
+  CACAA1LambdaInvoker:
+    Type: AWS::CloudFormation::CustomResource
+    DependsOn: CAC1AA1CFNInvokerLambda
+    Properties: 
+      ServiceToken: 
+        Fn::GetAtt: [ CAC1AA1CFNInvokerLambda, "Arn" ]
+
+Outputs:
+
+  S3BucketRef:
+    Description: Reference to the S3 bucket hosting NHS form
+    Value: !Ref CACAA1S3Bucket
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", S3Bucket ] ]
+  
+  NHSFormURL:
+    Description: URL for the NHS form hosted on S3
+    Value: !GetAtt 
+      - CACAA1S3Bucket
+      - WebsiteURL
+
+  S3BucketSecureURL:
+    Value: !Join 
+      - ''
+      - - 'https://'
+        - !GetAtt 
+          - CACAA1S3Bucket
+          - DomainName
+    Description: Name of S3 bucket to hold website content

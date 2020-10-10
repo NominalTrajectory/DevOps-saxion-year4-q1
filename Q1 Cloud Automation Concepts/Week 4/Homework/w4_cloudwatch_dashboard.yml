@@ -1,0 +1,97 @@
+Description: This stack contains a CloudWatch dashboard along with alarms and metric filters
+
+Parameters:
+
+  EC2InstanceId:
+    Description: ID of the monitored host 
+    Type: String
+    Default: ""
+  AlarmPeriod:
+    Description: Data evaluation period in seconds
+    Type: Number
+    Default: 60
+  AlarmEvaluationPeriods:
+    Description: Group size of data evaluation periods
+    Type: Number
+    Default: 1
+  AlarmThreshold:
+    Description: Limit in percent above which alarms are raised
+    Type: Number
+    Default: 80
+  EmailAddressToNotify:
+    Description: Email to send alarms to
+    Type: String
+
+Conditions:
+  # only create defined resources
+  EC2InstanceIdDefined:
+    !Not [!Equals [!Ref EC2InstanceId, '']]
+  
+Resources:
+  
+  SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties: 
+      DisplayName: Instance alert topic
+      Subscription: 
+        - Endpoint: !Ref EmailAddressToNotify
+          Protocol: email
+      Tags: 
+        - Key: Name
+          Value: SNSTopic
+  
+  InstanceCPUAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: EC2InstanceIdDefined
+    Properties:
+      AlarmName: "EC2 instance too high CPU utilization"
+      AlarmDescription: "Raise alarm if CPU utilization > ${AlarmThreshold}% for ${AlarmPeriod}s"
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      Statistic: Average
+      AlarmActions:
+        - !Ref "SNSTopic"
+      Period: !Ref "AlarmPeriod"
+      EvaluationPeriods: !Ref "AlarmEvaluationPeriods"
+      Threshold: !Ref "AlarmThreshold"
+      Dimensions:
+        - Name: "InstanceId"
+          Value:
+            !Ref EC2InstanceId
+      ComparisonOperator: GreaterThanThreshold
+
+  StatusCheckFailedAlarm:
+    Type: 'AWS::CloudWatch::Alarm'
+    Properties:
+      AlarmActions:
+      - !Ref Topic
+      AlarmDescription: 'EC2 instance status check or the system status check has failed. (created by marbot)'
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+      - Name: InstanceId
+        Value: !Ref EC2InstanceId
+      EvaluationPeriods: !Ref "AlarmEvaluationPeriods"
+      MetricName: StatusCheckFailed
+      Namespace: 'AWS/EC2'
+      OKActions:
+      - !Ref SNSTopic
+      Period: !Ref "AlarmPeriod"
+      Statistic: Sum
+      Threshold: 0
+      TreatMissingData: notBreaching
+
+  LogGroup1:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: LogGroup1
+      RetentionInDays: 3
+  
+  InstanceMemoryConsumptionMetricFilter:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      FilterPattern: '[report_name="REPORT", request_id_name="RequestId:", request_id_value, duration_name="Duration:", duration_value, duration_unit="ms", billed_duration_name_1="Billed", bill_duration_name_2="Duration:", billed_duration_value, billed_duration_unit="ms", memory_size_name_1="Memory", memory_size_name_2="Size:", memory_size_value, memory_size_unit="MB", max_memory_used_name_1="Max", max_memory_used_name_2="Memory", max_memory_used_name_3="Used:", max_memory_used_value, max_memory_used_unit="MB"]'
+      LogGroupName: !Ref LogGroup1
+      MetricTransformations:
+        - MetricValue: "$max_memory_used_value"
+          MetricNamespace: !Sub "${AWS::StackName}/EC2InstanceId"
+          MetricName: "Memory"

@@ -1,0 +1,41 @@
+Description: Two EC2 instances for Week2 homework, one in public subnet and one in private subnet
+
+Resources:
+
+  PublicInstance:
+      Type: AWS::EC2::Instance
+      Properties:
+        InstanceType: t2.micro
+        ImageId: ami-06b263d6ceff0b3dd
+        SubnetId: !ImportValue BaseStack:PublicSubnet
+        KeyName: CAC_Assignments
+        SecurityGroupIds: 
+         - !ImportValue BaseStack:SecurityGroup
+        Tags:
+          - Key: Name
+            Value: PublicInstance
+
+  PrivateInstance:
+      Type: AWS::EC2::Instance
+      Properties:
+        InstanceType: t2.micro
+        ImageId: ami-06b263d6ceff0b3dd
+        SubnetId: !ImportValue BaseStack:PrivateSubnet
+        KeyName: CAC_Assignments
+        SecurityGroupIds: 
+          - !ImportValue BaseStack:SecurityGroup
+        Tags:
+          - Key: Name
+            Value: PrivateInstance
+
+Outputs:
+  PublicInstanceRef:
+    Description: Reference to the first instance
+    Value: !Ref PublicInstance
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", PublicInstance ] ]
+  PrivateInstanceRef:
+    Description: Reference to the second instance
+    Value: !Ref PrivateInstance
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", PrivateInstance ] ]

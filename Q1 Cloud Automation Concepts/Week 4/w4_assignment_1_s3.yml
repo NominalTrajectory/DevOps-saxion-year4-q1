@@ -1,0 +1,10 @@
+Description: This CFN stack creates an S3 bucket
+
+
+Resources:
+
+  W4A1S3Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties: 
+      BucketName: cac.w4a1.s3bucket

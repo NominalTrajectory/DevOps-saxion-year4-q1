@@ -1,0 +1,297 @@
+# Week 2. Homework assignment.
+# We want to create a wordpress webserver. This is a multitier application. It uses a relational database
+# (choose AWS Aurora) and a linux instance. After the configuration of this webserver we want to
+# autoscale the instances of the webserver (automatically create multiple instances) and to loadbalance
+# the webserver (distribute the load to different instances).
+
+Description: Multi AZ, autoscalable WordPress environment with AuroraDB
+
+Parameters:
+  VPCCIDR:
+    Description: Please enter the IP range (CIDR notation) for this VPC.
+    Type: String
+    Default: 10.0.0.0/16
+  FirstPublicSubnetCIDR:
+    Description: Please enter the IP range (CIDR notation) for the first public subnet
+    Type: String
+    Default: 10.0.1.0/24
+  FirstPrivateSubnetCIDR:
+    Description: Please enter the IP range (CIDR notation) for the first private subnet
+    Type: String
+    Default: 10.0.3.0/24
+  SecondPublicSubnetCIDR:
+    Description: Please enter the IP range (CIDR notation) for the second public subnet
+    Type: String
+    Default: 10.0.2.0/24
+  SecondPrivateSubnetCIDR:
+    Description: Please enter the IP range (CIDR notation) for the second private subnet
+    Type: String
+    Default: 10.0.4.0/24
+  DatabaseUsername:
+    AllowedPattern: "[a-zA-Z0-9]+"
+    ConstraintDescription: must be between 1 to 16 alphanumeric characters.
+    Description: The database admin account user name, between 1 to 16 alphanumeric characters.
+    MaxLength: '16'
+    MinLength: '1'
+    Type: String
+  DatabasePassword:
+    AllowedPattern: "[a-zA-Z0-9]+"
+    ConstraintDescription: must be between 8 to 41 alphanumeric characters.
+    Description: The database admin account password, between 8 to 41 alphanumeric characters.
+    MaxLength: '41'
+    MinLength: '8'
+    NoEcho: 'true'
+    Type: String
+
+
+# The cloud resources your template is going to create.
+Resources:
+
+  W2AssignmentVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCIDR
+      Tags:
+        - Key: Name
+          Value: W2AssignmentVPC
+
+  W2AssignmentInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: W2AssignmentInternetGateway
+
+  W2AssignmentInternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref W2AssignmentInternetGateway
+      VpcId: !Ref W2AssignmentVPC          
+
+  W2AssignmentSubnetPublic1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref FirstPublicSubnetCIDR
+      MapPublicIpOnLaunch: 'true'
+      AvailabilityZone: 
+        Fn::Select: 
+          - 0
+          - Fn::GetAZs: ""
+      VpcId: !Ref W2AssignmentVPC
+      Tags:
+        - Key: Name
+          Value: W2AssignmentSubnetPublic1
+
+  W2AssignmentSubnetPublic2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref SecondPublicSubnetCIDR
+      MapPublicIpOnLaunch: 'true'
+      AvailabilityZone: 
+        Fn::Select: 
+          - 1
+          - Fn::GetAZs: ""
+      VpcId: !Ref W2AssignmentVPC
+      Tags:
+        - Key: Name
+          Value: W2AssignmentSubnetPublic2
+
+  W2AssignmentPublicSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: This security groups allows incoming connection to ports 80 and 22
+      GroupName: W2AssignmentPublicSecurityGroup
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      Tags: 
+        - Key: Name
+          Value: W2AssignmentPublicSecurityGroup
+      VpcId: !Ref W2AssignmentVPC
+
+  W2AssignmentPublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      Tags: 
+        - Key: Name
+          Value: W2AssignmentPublicRouteTable
+      VpcId: !Ref W2AssignmentVPC
+  # Define a default route to internet gateway
+  W2AssignmentDefaultPublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref W2AssignmentInternetGateway
+      RouteTableId: !Ref W2AssignmentPublicRouteTable
+
+  # Define a subnet-routetable association
+  W2AssignmentPublicSubnet1RoutetableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref W2AssignmentPublicRouteTable
+      SubnetId: !Ref W2AssignmentSubnetPublic1
+
+  W2AssignmentPublicSubnet2RoutetableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref W2AssignmentPublicRouteTable
+      SubnetId: !Ref W2AssignmentSubnetPublic2
+
+  W2AssignmentSubnetPrivate1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref FirstPrivateSubnetCIDR
+      MapPublicIpOnLaunch: 'false'
+      AvailabilityZone: 
+        Fn::Select: 
+          - 0
+          - Fn::GetAZs: ""
+      VpcId: !Ref W2AssignmentVPC
+      Tags:
+        - Key: Name
+          Value: W2AssignmentSubnetPrivate1
+
+  W2AssignmentSubnetPrivate2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref SecondPrivateSubnetCIDR
+      MapPublicIpOnLaunch: 'false'
+      AvailabilityZone: 
+        Fn::Select: 
+          - 1
+          - Fn::GetAZs: ""
+      VpcId: !Ref W2AssignmentVPC
+      Tags:
+        - Key: Name
+          Value: W2AssignmentSubnetPrivate2
+
+  W2AssignmentPrivateSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: This security groups allows incoming connection to 3306 (database) from the public and private subnets
+      GroupName: W2AssignmentPrivateSecurityGroup
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: !Ref FirstPublicSubnetCIDR
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: !Ref SecondPublicSubnetCIDR
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: !Ref FirstPrivateSubnetCIDR
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: !Ref SecondPrivateSubnetCIDR
+      Tags: 
+        - Key: Name
+          Value: W2AssignmentPrivateSecurityGroup
+      VpcId: !Ref W2AssignmentVPC
+
+  W2AssignmentPrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      Tags: 
+        - Key: Name
+          Value: W2AssignmentPrivateRouteTable
+      VpcId: !Ref W2AssignmentVPC
+
+  # Define a subnet-routetable association
+  W2AssignmentPrivateSubnet1RoutetableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref W2AssignmentPublicRouteTable
+      SubnetId: !Ref W2AssignmentSubnetPrivate1
+
+  W2AssignmentPrivateSubnet2RoutetableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref W2AssignmentPublicRouteTable
+      SubnetId: !Ref W2AssignmentSubnetPrivate2
+      
+  w2assignmentrdssubnetgroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties: 
+      DBSubnetGroupDescription: DB Subnet group for Aurora instances
+      DBSubnetGroupName: w2assignmentrdssubnetgroup
+      SubnetIds: 
+        - !Ref W2AssignmentSubnetPrivate1
+        - !Ref W2AssignmentSubnetPrivate2
+      Tags: 
+        - Key: Name
+          Value: w2assignmentrdssubnetgroup
+    DependsOn:
+      - W2AssignmentSubnetPrivate1
+      - W2AssignmentSubnetPrivate2
+
+  W2AssignmentDatabaseCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      Engine: aurora
+      MasterUsername: !Ref DatabaseUsername
+      MasterUserPassword: !Ref DatabasePassword
+      DatabaseName: wordpressdb
+      BackupRetentionPeriod: 1
+      PreferredBackupWindow: 01:00-02:00
+      PreferredMaintenanceWindow: mon:03:00-mon:04:00
+      DBSubnetGroupName: w2assignmentrdssubnetgroup
+      VpcSecurityGroupIds: 
+        - !Ref W2AssignmentPrivateSecurityGroup
+    DependsOn: w2assignmentrdssubnetgroup
+
+  W2AssignmentDatabasePrimaryInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      Engine: aurora
+      DBClusterIdentifier: !Ref W2AssignmentDatabaseCluster
+      DBInstanceClass: db.t2.small
+      DBSubnetGroupName: w2assignmentrdssubnetgroup
+    DependsOn: w2assignmentrdssubnetgroup
+
+
+  W2AssignmentEC2Instance1:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-00514a528eadbc95b
+      SubnetId: !Ref W2AssignmentSubnetPublic1
+      KeyName: PCC_Assignments
+      SecurityGroupIds:
+        - !Ref W2AssignmentPublicSecurityGroup
+      UserData: 
+        Fn::Base64:
+         !Sub |
+          #!/bin/bash
+          sudo -i
+          yum -y update
+          service httpd stop
+          yum -y erase httpd httpd-tools apr apr-util
+          yum remove php-*
+          yum -y install php56 php56-mysqlnd php56-pdo php56-ldap
+          service httpd start
+          chkconfig httpd on
+          cd /var/www/html
+          wget http://wordpress.org/latest.tar.gz
+          tar -xzvf latest.tar.gz
+          mv wordpress mysite
+          cd mysite
+          cp wp-config-sample.php wp-config.php
+          sed -i 's/database_name_here/wordpressdb/g' wp-config.php
+          sed -i 's/username_here/${DatabaseUsername}/g' wp-config.php
+          sed -i 's/password_here/${DatabasePassword}/g' wp-config.php
+          sed -i 's/localhost/!GetAtt w2assignmentdatabasecluster.Endpoint.Address/g' wp-config.php
+           
+      Tags:
+        - Key: Name
+          Value: W2AssignmentEC2Instance1
+    DependsOn: W2AssignmentDatabasePrimaryInstance  

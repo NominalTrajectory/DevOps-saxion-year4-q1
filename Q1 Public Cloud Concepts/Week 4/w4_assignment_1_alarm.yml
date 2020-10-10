@@ -1,0 +1,144 @@
+Description: Public Cloud Concepts, Week 4, Assignment 1 - Base Stack + Alarm configuration using SNS Topic
+
+Parameters:
+  VPCCIDR:
+    Description: Please enter the IP range (CIDR notation) for this VPC.
+    Type: String
+    Default: 10.0.0.0/16
+  PublicSubnetCIDR:
+    Description: Please enter the IP range (CIDR notation) for the first public subnet
+    Type: String
+    Default: 10.0.1.0/24
+  PhoneNumber: 
+    Description: Please the phone number to send alerts to.
+    Type: String
+
+# The cloud resources your template is going to create.
+Resources:
+
+  W4A1VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCIDR
+      Tags:
+        - Key: Name
+          Value: W4A1VPC
+
+  W4A1InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: W4A1InternetGateway
+
+  W4A1IGAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref W4A1InternetGateway
+      VpcId: !Ref W4A1VPC          
+
+  W4A1PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref PublicSubnetCIDR
+      MapPublicIpOnLaunch: 'true'
+      AvailabilityZone: 
+        Fn::Select: 
+          - 0
+          - Fn::GetAZs: ""
+      VpcId: !Ref W4A1VPC
+      Tags:
+        - Key: Name
+          Value: W4A1PublicSubnet
+
+  W4A1SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: This security groups allows incoming connection to ports 80 and 22
+      GroupName: W4A1SecurityGroup
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      Tags: 
+        - Key: Name
+          Value: W4A1SecurityGroup
+      VpcId: !Ref W4A1VPC
+
+  W4A1PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      Tags: 
+        - Key: Name
+          Value: W4A1PublicRouteTable
+      VpcId: !Ref W4A1VPC
+  # Define a default route to internet gateway
+  W4A1DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref W4A1InternetGateway
+      RouteTableId: !Ref W4A1PublicRouteTable
+
+  # Define a subnet-routetable association
+  W4A1PublicSubnetRoutetableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref W4A1PublicRouteTable
+      SubnetId: !Ref W4A1PublicSubnet
+
+  W4A1Webserver1:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-00514a528eadbc95b
+      SubnetId: !Ref W4A1PublicSubnet
+      KeyName: PCC_Assignments
+      SecurityGroupIds:
+        - !Ref W4A1SecurityGroup
+      UserData: 
+        Fn::Base64:
+         !Sub |
+          #!/bin/bash
+          yum -y update
+          yum -y install httpd php php-mysql php-pdo php-ldap
+          service httpd start
+ 
+      Tags:
+        - Key: Name
+          Value: W4A1Webserver1
+
+  W4A1SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties: 
+      DisplayName: Instance alert topic
+      Subscription: 
+        - Endpoint: !Ref PhoneNumber
+          Protocol: sms
+      Tags: 
+        - Key: Name
+          Value: W4A1SNSTopic
+
+  W4A1EventRule: 
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: Send a message when an EC2 instance is stopped
+      EventPattern: 
+        source: 
+          - "aws.ec2"
+        detail-type: 
+          - "EC2 Instance State-change Notification"
+        detail: 
+          state: 
+            - "stopping"
+            - "stopped"
+      State: "ENABLED"
+      Name: W4A1EventRule
+      Targets: 
+        - Arn: !Ref W4A1SNSTopic
+          Id: !Ref W4A1SNSTopic

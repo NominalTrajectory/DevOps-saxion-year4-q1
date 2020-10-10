@@ -1,0 +1,43 @@
+Description: Assignment 1. Create an email trigger in CloudWatch for when an instance is shutdown.
+
+
+Parameters:
+
+  Email: 
+    Description: Please the email address to send alerts to.
+    Type: String
+
+Resources: 
+
+  W3A1SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties: 
+      DisplayName: Instance alert topic
+      Subscription: 
+        - Endpoint: !Ref Email
+          Protocol: email
+      Tags: 
+        - Key: Name
+          Value: W3A1SNSTopic
+
+  W3A1EventRule: 
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: Send a message when an EC2 instance is stopped
+      EventPattern: 
+        source: 
+          - "aws.ec2"
+        detail-type: 
+          - "EC2 Instance State-change Notification"
+        detail: 
+          state: 
+            - "stopping",
+            - "stopped"
+      State: "ENABLED"
+      Name: W3A1EventRule
+      Targets: 
+        - Arn: !Ref W3A1SNSTopic
+          Id: !Ref W3A1SNSTopic
+
+# Couldn't create. Error User: arn:aws:sts::251277730687:assumed-role/vocstartsoft/user927552=450037@student.saxion.nl 
+# is not authorized to perform: events:PutRule on resource: arn:aws:events:us-east-1:251277730687:rule/TestEventRule with an explicit deny.

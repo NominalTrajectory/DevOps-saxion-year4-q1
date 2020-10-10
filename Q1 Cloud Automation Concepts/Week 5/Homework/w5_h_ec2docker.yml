@@ -1,0 +1,39 @@
+Description: This stack contains an EC2 instace that installs Docker and runs container with cac-simple-webapp / Cloud Automation Concepts / Week 5 / Homework
+
+
+Resources:
+
+    W5HInstanceProfile:
+        Type: AWS::IAM::InstanceProfile
+        Properties: 
+          InstanceProfileName: W5HInstanceProfile
+          Roles: 
+            - 'EC2ECR'
+
+
+    W5HDockerMachine:
+        Type: AWS::EC2::Instance
+        Properties:
+          InstanceType: t2.micro
+          ImageId:  ami-0947d2ba12ee1ff75
+          SubnetId: !ImportValue BaseStack:PublicSubnet
+          KeyName: CAC_Assignments
+          IamInstanceProfile: !Ref W5HInstanceProfile
+          UserData: 
+            Fn::Base64:
+              !Sub |
+                #!/bin/bash
+                sudo yum update -y
+                sudo amazon-linux-extras install docker -y
+                sudo service docker start
+                sudo usermod -a -G docker ec2-user
+                sudo aws ecr get-login --no-include-email --region us-east-1 | sed -e 's/-e none//' | sudo bash
+                sudo docker pull 736760414373.dkr.ecr.us-east-1.amazonaws.com/cac-w5-ecr-ivan:latest
+                sudo docker run -d -p 80:80 -e PORT=80 736760414373.dkr.ecr.us-east-1.amazonaws.com/cac-w5-ecr-ivan
+
+          SecurityGroupIds: 
+            - !ImportValue BaseStack:SecurityGroup
+          Tags:
+            - Key: Name
+              Value: W5HDockerMachine
+

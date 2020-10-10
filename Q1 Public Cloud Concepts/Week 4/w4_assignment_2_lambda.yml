@@ -1,0 +1,101 @@
+Description: Public Cloud Concepts, Week 4, Assignment 2 - This stack contains DynamoDB, APIGateway, Lambda functions
+
+Parameters: 
+  DynamoDBTableName:
+    Description: Please enter a name for DynamoDB table
+    Type: String
+
+Resources:
+
+  DynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref DynamoDBTableName
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: 'N'
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      Tags:
+        - Key: Name
+          Value: DynamoDBTable
+
+
+  LambdaDynamoRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - lambda.amazonaws.com
+            Action:
+            - sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaToDynamoDB
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: 'dynamodb:*'
+                Resource: '*'
+      RoleName: LambdaDynamoRole
+
+
+  LambdaDynamoDBFunction:
+    Type: AWS::Lambda::Function
+    Properties: 
+      FunctionName: dynamotest
+      Role:
+        Fn::GetAtt: [ LambdaDynamoRole , "Arn" ]
+      Runtime: nodejs12.x
+      Handler: index.handler
+      Description: Post and get items to and from DynamoDB
+      Code: 
+        ZipFile: |
+          const AWS = require('aws-sdk');
+          const dynamo = new AWS.DynamoDB.DocumentClient();
+          exports.handler = async (event, context) => {
+              //console.log('Received event:', JSON.stringify(event, null, 2));
+              let body;
+              let statusCode = '200';
+              const headers = {
+                  'Content-Type': 'application/json',
+              };
+              try {
+                  switch (event.httpMethod) {
+                      case 'DELETE':
+                          body = await dynamo.delete(JSON.parse(event.body)).promise();
+                          break;
+                      case 'GET':
+                          body = await dynamo.scan({ TableName: event.queryStringParameters.TableName }).promise();
+                          break;
+                      case 'POST':
+                          body = await dynamo.put(JSON.parse(event.body)).promise();
+                          break;
+                      case 'PUT':
+                          body = await dynamo.update(JSON.parse(event.body)).promise();
+                          break;
+                      default:
+                          throw new Error(`Unsupported method "${event.httpMethod}"`);
+                  }
+              } catch (err) {
+                  statusCode = '400';
+                  body = err.message;
+              } finally {
+                  body = JSON.stringify(body);
+              }
+
+              return {
+                  statusCode,
+                  body,
+                  headers,
+              };
+          };
+

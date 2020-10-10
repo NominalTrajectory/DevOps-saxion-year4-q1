@@ -1,0 +1,40 @@
+Description: Cloud Automation Concepts, Week 4, Assignment 2, creating EFS
+
+
+Resources:
+
+  EFSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: This security groups allows incoming connection to port 2049
+      GroupName: EFSSecurityGroup
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 2049
+          ToPort: 2049
+          CidrIp: 0.0.0.0/0
+      Tags: 
+        - Key: Name
+          Value: EFSSecurityGroup
+      VpcId: !ImportValue BaseStack:VPC
+
+  EFSFileSystem:
+    Type: AWS::EFS::FileSystem
+    Properties:
+      ThroughputMode: bursting
+
+  EFSMountTarget1:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref EFSFileSystem
+      SecurityGroups: 
+        - !Ref EFSSecurityGroup
+      SubnetId: !ImportValue BaseStack:PublicSubnet
+
+  EFSMountTarget2:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref EFSFileSystem
+      SecurityGroups: 
+        - !Ref EFSSecurityGroup
+      SubnetId: !ImportValue BaseStack:PublicSubnet2

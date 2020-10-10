@@ -1,0 +1,86 @@
+Description: Homework - Todo Application with RDS Postgres
+
+Parameters:
+
+  DatabaseUsername:
+    AllowedPattern: "[a-zA-Z0-9]+"
+    ConstraintDescription: must be between 1 to 16 alphanumeric characters.
+    Description: The database admin account user name, between 1 to 16 alphanumeric characters.
+    MaxLength: '16'
+    MinLength: '1'
+    Type: String
+
+  DatabasePassword:
+    Description: The database admin account password, between 8 to 41 alphanumeric characters.
+    Type: String
+
+Resources: 
+
+  PostgresSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: This security groups allows incoming connection to port 5432 which is PostgreSQL
+      GroupName: PostgresSecurityGroup
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          CidrIp: 0.0.0.0/0
+      Tags: 
+        - Key: Name
+          Value: PostgresSecurityGroup
+      VpcId: !ImportValue BaseStack:VPC
+
+  w3hdbsubnetgroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties: 
+      DBSubnetGroupDescription: DB Subnet group for Postgres
+      DBSubnetGroupName: w3hdbsubnetgroup
+      SubnetIds: 
+        - !ImportValue BaseStack:PrivateSubnet
+        - !ImportValue BaseStack:PrivateSubnet2
+      Tags: 
+        - Key: Name
+          Value: w3hdbsubnetgroup
+    
+  W3HPostgresInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: '5'
+      DBSubnetGroupName: w3hdbsubnetgroup
+      DBName: todoappdb
+      DBInstanceClass: db.t2.micro
+      Engine: postgres
+      MasterUsername: !Ref DatabaseUsername
+      MasterUserPassword: !Ref DatabasePassword
+      VPCSecurityGroups:
+        - !Ref PostgresSecurityGroup
+
+  W3HWebserver1:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-06b263d6ceff0b3dd
+      SubnetId: !ImportValue BaseStack:PublicSubnet
+      KeyName: CAC_Assignments
+      UserData: 
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
+            sudo apt update
+            sudo apt install nodejs -y
+            sudo apt install npm -y
+            sudo apt install git -y
+            git clone -b todos-postgres --single-branch https://github.com/TimothySealy/cac-simple-webapp.git 
+            cd cac-simple-webapp
+            npm i
+            sudo sed -i -- 's/3000/80/g' app.js
+            sudo sed -i -- 's#postgres://postgres@localhost:5432/tododb#postgres://${DatabaseUsername}:${DatabasePassword}@${W3HPostgresInstance.Endpoint.Address}:5432/todoappdb#g' app.js
+            sudo npm start
+              
+      SecurityGroupIds: 
+        - !ImportValue BaseStack:SecurityGroup
+      Tags:
+        - Key: Name
+          Value: W3HWebserver1
+    DependsOn: W3HPostgresInstance

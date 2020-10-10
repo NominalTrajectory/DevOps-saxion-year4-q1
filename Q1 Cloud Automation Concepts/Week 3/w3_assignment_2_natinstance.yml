@@ -1,0 +1,76 @@
+Description: This stack contains a NAT instance
+
+Resources:
+
+  NATInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-01ef31f9f39c5aaed
+      SubnetId: !ImportValue BaseStack:PublicSubnet
+      SourceDestCheck: false
+      KeyName: CAC_Assignments
+      SecurityGroupIds: 
+        - !Ref NATSecurityGroup
+      Tags:
+        - Key: Name
+          Value: NATInstance
+
+  NATSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: This security group is dedicated to the NAT instance
+      GroupName: NATSecurityGroup
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 10.0.51.0/24
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 10.0.51.0/24
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 10.0.51.0/24
+      SecurityGroupEgress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      Tags: 
+        - Key: Name
+          Value: NATSecurityGroup
+      VpcId: !ImportValue BaseStack:VPC
+
+  NATPrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !ImportValue BaseStack:VPC
+      Tags:
+        - Key: Name
+          Value: NATPrivateRouteTable
+
+  NATDefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      InstanceId: !Ref NATInstance
+      RouteTableId: !Ref NATPrivateRouteTable
+
+  NATPrivateSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref NATPrivateRouteTable
+      SubnetId: !ImportValue BaseStack:PrivateSubnet
+
+  NATPrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref NATPrivateRouteTable
+      SubnetId: !ImportValue BaseStack:PrivateSubnet2

@@ -1,0 +1,164 @@
+# Week 1. Homework assignment 2.
+# Create a CloudFormation template which creates a VPC with two Availability Zones. Each Availability Zone contains one public and one private subnet. 
+# The VPC should contain an internet gateway and proper routing for the public subnets. A NAT gateway for the private subnets is not required.
+Description: A VPC with two availability zones, an internet gateway and a route table. Each VPC has one public and one private subnet.
+
+Parameters:
+  VPCCIDR:
+    Description: Please enter the IP range (CIDR notation) for this VPC.
+    Type: String
+    Default: 10.0.0.0/16
+  FirstPublicSubnetCIDR:
+    Description: Please enter the IP range (CIDR notation) for the first public subnet
+    Type: String
+    Default: 10.0.1.0/24
+  FirstPrivateSubnetCIDR:
+    Description: Please enter the IP range (CIDR notation) for the first private subnet
+    Type: String
+    Default: 10.0.51.0/24
+  SecondPublicSubnetCIDR:
+    Description: Please enter the IP range (CIDR notation) for the second public subnet
+    Type: String
+    Default: 10.0.2.0/24
+  SecondPrivateSubnetCIDR:
+    Description: Please enter the IP range (CIDR notation) for the second private subnet
+    Type: String
+    Default: 10.0.52.0/24
+
+
+# The cloud resources your template is going to create.
+Resources:
+
+  CACWeek1Assignment2VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCIDR
+      Tags: # Good practice is to add tags!
+        - Key: Name
+          Value: CACWeek1Assignment2VPC
+
+  CACWeek1Assignment2InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: CACWeek1Assignment2InternetGateway
+
+  CACWeek1Assignment2InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref CACWeek1Assignment2InternetGateway
+      VpcId: !Ref CACWeek1Assignment2VPC          
+
+  CACWeek1Assignment2SubnetPublic1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref FirstPublicSubnetCIDR
+      MapPublicIpOnLaunch: 'true' # Important! See documentation.
+      AvailabilityZone: 
+        Fn::Select: 
+          - 0
+          - Fn::GetAZs: ""
+      VpcId: !Ref CACWeek1Assignment2VPC
+      Tags:
+        - Key: Name
+          Value: CACWeek1Assignment2SubnetPublic1
+
+  CACWeek1Assignment2SubnetPrivate1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref FirstPrivateSubnetCIDR
+      MapPublicIpOnLaunch: 'false' # Important! See documentation.
+      AvailabilityZone: 
+        Fn::Select: 
+          - 0
+          - Fn::GetAZs: ""
+      VpcId: !Ref CACWeek1Assignment2VPC
+      Tags:
+        - Key: Name
+          Value: CACWeek1Assignment2SubnetPrivate1
+
+  CACWeek1Assignment2SubnetPublic2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref SecondPublicSubnetCIDR
+      MapPublicIpOnLaunch: 'true' # Important! See documentation.
+      AvailabilityZone: 
+        Fn::Select: 
+          - 1
+          - Fn::GetAZs: ""
+      VpcId: !Ref CACWeek1Assignment2VPC
+      Tags:
+        - Key: Name
+          Value: CACWeek1Assignment2SubnetPublic2 
+
+  CACWeek1Assignment2SubnetPrivate2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref SecondPrivateSubnetCIDR
+      MapPublicIpOnLaunch: 'false' # Important! See documentation.
+      AvailabilityZone: 
+        Fn::Select: 
+          - 1
+          - Fn::GetAZs: ""
+      VpcId: !Ref CACWeek1Assignment2VPC
+      Tags:
+        - Key: Name
+          Value: CACWeek1Assignment2SubnetPrivate2
+
+  CACWeek1Assignment2PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      Tags: 
+        - Key: Name
+          Value: CACWeek1Assignment2PublicRouteTable
+      VpcId: !Ref CACWeek1Assignment2VPC
+
+  CACWeek1Assignment2DefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref CACWeek1Assignment2InternetGateway
+      RouteTableId: !Ref CACWeek1Assignment2PublicRouteTable
+
+  CACWeek1Assignment2FirstPublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref CACWeek1Assignment2PublicRouteTable
+      SubnetId: !Ref CACWeek1Assignment2SubnetPublic1
+
+  CACWeek1Assignment2SecondPublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      RouteTableId: !Ref CACWeek1Assignment2PublicRouteTable
+      SubnetId: !Ref CACWeek1Assignment2SubnetPublic2
+
+Outputs:
+
+  VPC:
+    Description: A reference to the created VPC
+    Value: !Ref CACWeek1Assignment2VPC
+
+  PublicSubnets:
+    Description: A list of the public subnets
+    Value: !Join [ ",", [ !Ref CACWeek1Assignment2SubnetPublic1, !Ref CACWeek1Assignment2SubnetPublic2 ]]
+
+  PrivateSubnets:
+    Description: A list of the private subnets
+    Value: !Join [ ",", [ !Ref CACWeek1Assignment2SubnetPrivate1, !Ref CACWeek1Assignment2SubnetPrivate2 ]]
+
+  PublicSubnet1:
+    Description: A reference to the public subnet in the 1st Availability Zone
+    Value: !Ref CACWeek1Assignment2SubnetPublic1
+
+  PublicSubnet2:
+    Description: A reference to the public subnet in the 2nd Availability Zone
+    Value: !Ref CACWeek1Assignment2SubnetPublic2
+
+  PrivateSubnet1:
+    Description: A reference to the private subnet in the 1st Availability Zone
+    Value: !Ref CACWeek1Assignment2SubnetPrivate1
+
+  PrivateSubnet2:
+    Description: A reference to the private subnet in the 2nd Availability Zone
+    Value: !Ref CACWeek1Assignment2SubnetPrivate2
