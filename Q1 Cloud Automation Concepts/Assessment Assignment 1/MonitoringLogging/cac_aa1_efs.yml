@@ -1,0 +1,67 @@
+Description: This CloudFormation stack deploys an Elastic File System and mount targets to facilitate daily logs storage. 
+
+
+Resources:
+
+  #Define a security group for EFS
+  CACAA1EFSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: This security groups allows incoming connection to port 2049
+      GroupName: CACAA1EFSSecurityGroup
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 2049
+          ToPort: 2049
+          CidrIp: 0.0.0.0/0
+      Tags: 
+        - Key: Name
+          Value: CACAA1EFSSecurityGroup
+      VpcId: !ImportValue BaseStack:VPC
+
+  #Elastic File System with bursting throughput
+  CACAA1EFSFileSystem:
+    Type: AWS::EFS::FileSystem
+    Properties:
+      ThroughputMode: bursting
+  
+  #A mount target for the first public subnet
+  CACAA1EFSMountTarget1:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref CACAA1EFSFileSystem
+      SecurityGroups: 
+        - !Ref CACAA1EFSSecurityGroup
+      SubnetId: !ImportValue BaseStack:PublicSubnet1
+
+  #A mount target for the second public subnet
+  CACAA1EFSMountTarget2:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref CACAA1EFSFileSystem
+      SecurityGroups: 
+        - !Ref CACAA1EFSSecurityGroup
+      SubnetId: !ImportValue BaseStack:PublicSubnet2
+
+Outputs:
+  
+  EFSSecurityGroupRef:
+    Description: Reference to the security group for EFS
+    Value: !Ref CACAA1EFSSecurityGroup
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", EFSSecurityGroup ] ]
+  EFSFileSystemRef:
+    Description: Reference to the elastic file system 
+    Value: !Ref CACAA1EFSFileSystem
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", EFSFileSystem ] ]
+  EFSMountTarget1Ref:
+    Description: Reference to the first mount target public subnet 1
+    Value: !Ref CACAA1EFSMountTarget1
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", EFSMountTarget1 ] ]
+  EFSMountTarget2Ref:
+    Description: Reference to the second mount target public subnet 2
+    Value: !Ref CACAA1EFSMountTarget2
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", EFSMountTarget2 ] ]

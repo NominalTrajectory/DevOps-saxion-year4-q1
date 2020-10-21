@@ -2,3 +2,12 @@ aws lambda update-function-code --function-name TestDataRetriever --zip-file fil
 
 
 Allow cors on API and Lambda
+
+
+Rollout procedure:
+
+1. Base Stack
+2. EFS Stack
+3. MongoDB Stack
+4. Monitoring and Logging
+5. S3 static

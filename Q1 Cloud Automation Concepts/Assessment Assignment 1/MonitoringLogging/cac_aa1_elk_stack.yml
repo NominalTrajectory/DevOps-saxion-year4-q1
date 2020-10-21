@@ -1,0 +1,89 @@
+Description: This CloudFormation stack deploys the ELK stack for log aggregation and alalytics.
+
+Parameters:
+
+
+
+Resources:
+
+  #Resources for ELK stack
+  #For the purpose of this assignment (and to save credits) a siplified configuration will be used
+  #ELK stack will run on a single EC2 instance and won't be configured for high availability
+
+  CACAA1ELKSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: This security is for ELK stack, allows connection to 80, 443, 22 and 5601 (Kibana)
+      GroupName: CACAA1ELKSecurityGroup
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 5601
+          ToPort: 5601
+          CidrIp: 0.0.0.0/0
+      Tags: 
+        - Key: Name
+          Value: CACAA1ELKSecurityGroup
+      VpcId: !ImportValue BaseStack:VPC
+
+  CACAA1ELKInstance: 
+    Type: AWS::EC2::Instance
+      Properties:
+        InstanceType: m4.large
+        ImageId: ami-0f82752aa17ff8f5d #Ubuntu 16.04
+        SubnetId: !ImportValue BaseStack:PublicSubnet1
+        KeyName: CAC_Assignments
+        SecurityGroupIds: 
+          - CACAA1ELKSecurityGroup
+        UserData: #latest: elasticsearch throwing exception / use newer guide maybe containers?
+          Fn::Base64:
+            !Sub |
+              sudo apt-get update -y
+              sudo apt-get upgrade -y
+              wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+              sudo apt-get install apt-transport-https -y
+              echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
+              sudo apt-get update && sudo apt-get install elasticsearch -y
+              sudo chown -R ubuntu:ubuntu /etc/elasticsearch
+              echo "network.host: \"localhost\"" >> /etc/elasticsearch/elasticsearch.yml
+              echo "http.port: 9200" >> /etc/elasticsearch/elasticsearch.yml
+              PIP=$(echo `hostname -I` | sed 's/ //g') && echo "cluster.initial_master_nodes: [\"`echo $PIP`\"]">>/etc/elasticsearch/elasticsearch.yml
+              sudo chown -R elasticsearch:elasticsearch /etc/elasticsearch/
+              sudo service elasticsearch start
+              sudo update-rc.d elasticsearch defaults 95 10
+              sudo apt-get install default-jre -y
+              sudo apt-get install logstash -y
+              
+
+                      
+        Tags:
+          - Key: Name
+            Value: CACAA1ELKInstance
+
+  
+
+Outputs:
+
+  ELKSecurityGroupRef:
+    Description: Reference to the security group for ELK instances
+    Value: !Ref CACAA1ELKSecurityGroup
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", ELKSecurityGroup ] ]
+  ELKInstanceRef:
+    Description: Reference to the ELK instance
+    Value: !Ref CACAA1ELKInstance
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", ELKInstanceRef ] ]
+
+

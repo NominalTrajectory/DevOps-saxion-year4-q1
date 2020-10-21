@@ -1,0 +1,21 @@
+#! /bin/bash
+apt-get update
+apt-get upgrade -y
+apt-get install docker.io -y
+echo 'sudo usermod -aG docker $USER' >>/node1
+echo "sudo systemctl start docker" >>/node1
+echo "sudo systemctl enable docker" >>/node1
+echo 'curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add' >>/node1
+echo 'sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"' >>/node1
+echo "sudo apt-get install kubeadm kubelet kubectl -y" >>/node1
+echo "sudo hostnamectl set-hostname node1" >>/node1
+echo "sudo swapoff -a" >>/node1
+echo "10.0.1.2 kubemaster" >>/etc/hosts
+echo "10.0.1.3 node1" >>/etc/hosts
+echo "10.0.2.3 node2" >>/etc/hosts
+echo "10.0.3.3 node3" >>/etc/hosts
+
+
+# the file is created with Notepad++
+# Choose Edit: End of Line Conversion and choose Linux. 
+# otherwise windows Carriage Returns in document and that does not work

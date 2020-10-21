@@ -1,0 +1,30 @@
+#! /bin/bash
+apt-get update
+apt-get upgrade -y
+apt-get install docker.io -y
+echo 'sudo usermod -aG docker $USER' >>/kubmaster
+echo "sudo systemctl start docker" >>/kubmaster
+echo "sudo systemctl enable docker" >>/kubmaster
+echo 'curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add' >>/kubmaster
+echo 'sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"' >>/kubmaster
+echo "sudo apt-get install kubeadm kubelet kubectl -y" >>/kubmaster
+echo "sudo hostnamectl set-hostname kubemaster" >>/kubmaster
+echo "sudo swapoff -a" >>/kubmaster
+echo "10.0.1.2 kubemaster" >>/etc/hosts
+echo "10.0.1.3 node1" >>/etc/hosts
+echo 'sudo kubeadm init --pod-network-cidr=10.244.0.0/16' >>/kubmaster
+# (must not me ip master. No overlap with node network)
+echo 'mkdir -p $HOME/.kube' >>/kubmaster
+echo 'sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config' >>/kubmaster
+echo 'sudo chown $(id -u):$(id -g) $HOME/.kube/config' >>/kubmaster
+echo 'sudo kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml' >>/kubmaster
+# onderstaande regels creeren een scripot om een eerste kubernetes applicatie te bouwen
+# is een webserver die Hello Kubernetes! antwoord.
+echo 'kubectl apply -f https://k8s.io/examples/service/load-balancer-example.yaml' > /createwebapp
+echo 'kubectl expose deployment hello-world --type=NodePort --name=my-service' >> /createwebapp
+
+# the file is created with Notepad++
+# kies Edit: End of Line Conversion en kies Linux. 
+# anders windows Carriage Returns in document end at werkt niet
+
+# The file excecutes some commands at startup, others are written to bash-program.
