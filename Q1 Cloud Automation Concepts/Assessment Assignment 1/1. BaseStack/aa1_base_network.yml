@@ -234,72 +234,72 @@ Outputs:
     Description: Reference to the VPC
     Value: !Ref CACAA1VPC
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", VPC ] ]
+      Name: BaseStack:VPC
 
   InternetGatewayRef:
     Description: Reference to the Internet Gateway
     Value: !Ref CACAA1InternetGateway
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", InternetGateway ] ]
+      Name: BaseStack:InternetGateway
     
   VPCGatewayAttachmentRef:
     Description: Reference to the VPC gateway attachment
     Value: !Ref CACAA1VPCGatewayAttachment
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", CACAA1VPCGatewayAttachment ] ]
+      Name: BaseStack:CACAA1VPCGatewayAttachment
 
   PublicSubnet1Ref:
     Description: Reference to the first public subnet
     Value: !Ref CACAA1SubnetPublic1
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", PublicSubnet1 ] ]
+      Name: BaseStack:PublicSubnet1
 
   PublicSubnet2Ref:
     Description: Reference to the first public subnet
     Value: !Ref CACAA1SubnetPublic2
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", PublicSubnet2 ] ]
+      Name: BaseStack:PublicSubnet2
 
   PrivateSubnet1Ref:
     Description: Reference to the first private subnet
     Value: !Ref CACAA1SubnetPrivate1
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", PrivateSubnet1 ] ]
+      Name: BaseStack:PrivateSubnet1
 
   PrivateSubnet2Ref:
     Description: Reference to the first private subnet
     Value: !Ref CACAA1SubnetPrivate2
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", PrivateSubnet2 ] ]
+      Name: BaseStack:PrivateSubnet2
 
   # AvailabilityZone1Ref:
   #   Description: Reference to Availability Zone 1
   #   Value: !Ref AvailabilityZone1
   #   Export:
-  #     Name: !Join [ ":", [ !Ref "AWS::StackName", AvailabilityZone1 ] ]
+  #     Name: BaseStack:AvailabilityZone1
 
   # AvailabilityZone2Ref:
   #   Description: Reference to Availability Zone 2
   #   Value: !Ref AvailabilityZone2
   #   Export:
-  #     Name: !Join [ ":", [ !Ref "AWS::StackName", AvailabilityZone2 ] ]
+  #     Name: BaseStack:AvailabilityZone2
 
   PublicRouteTableRef: 
     Description: Reference to the public route table
     Value: !Ref CACAA1PublicRouteTable
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", PublicRouteTable ] ]
+      Name: BaseStack:PublicRouteTable
 
   NATInstanceRef:
     Description: Reference to the NAT Instance
     Value: !Ref CACAA1NATInstance
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", NATInstance ] ]
+      Name: BaseStack:NATInstance
 
   NATSecurityGroupRef:
     Description: Reference to the NAT SecurityGroup
     Value: !Ref CACAA1NATSecurityGroup
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", NATSecurityGroup ] ]
+      Name: BaseStack:NATSecurityGroup
 
 
