@@ -84,16 +84,18 @@ Parameters:
 #   8 8888     `88. 8 888888888888 `Y8888P ,88P'     `8888888P'        `Y88888P'   8 8888     `88.    `8888888P'    8 888888888888 `Y8888P ,88P'
 Resources:
 
+  #Description: This is the VPC, within this VPC the solution is build.
   CACAA1VPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: !Ref VPCCIDR
+      CidrBlock: !Ref VPCCIDR                                             #This property is filled in by the parameter: VPCCIDR   (This is a IP range)
       EnableDnsSupport: true
       EnableDnsHostnames: true
       Tags: 
         - Key: Name
           Value: CACAA1VPC
 
+  #Description: This is the internet gateway, that is the portal to the internet for the solution and is connected to the public subnets via the route table.
   CACAA1InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
@@ -101,19 +103,23 @@ Resources:
         - Key: Name
           Value: CACAA1InternetGateway
 
+  #Description: This is the VPCGatewayAttachment, that acts as an connection between the Internet gateway and the VPC allowing it to be used within the 
+  #             VPC by things like route tables.
   CACAA1VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
-      InternetGatewayId: !Ref CACAA1InternetGateway
-      VpcId: !Ref CACAA1VPC          
+      InternetGatewayId: !Ref CACAA1InternetGateway                       #This property depends on: CACAA1VPC  (The VPC)
+      VpcId: !Ref CACAA1VPC                                               #This property depends on: CACAA1InternetGateway  (The internet gateway)
 
+  #Description: This is a subnet, it is one of the four subnets and one of the two public subnets This subnet is in the first of the two availability zones 
+  #             that are used and instances within this subnet will by default get a public IP address.
   CACAA1SubnetPublic1:
     Type: AWS::EC2::Subnet
     Properties:
-      CidrBlock: !Ref PublicSubnet1CIDR
+      CidrBlock: !Ref PublicSubnet1CIDR                                   #This property is filled in by the parameter: PublicSubnet1CIDR   (This is a IP adress)
       MapPublicIpOnLaunch: 'true'
-      AvailabilityZone: !Ref AvailabilityZone1
-      VpcId: !Ref CACAA1VPC
+      AvailabilityZone: !Ref AvailabilityZone1                            #This property is filled in by the parameter: AvailabilityZone1   (This is a AvailabilityZone Name)
+      VpcId: !Ref CACAA1VPC                                               #This property depends on: CACAA1VPC  (The VPC)
       Tags:
         - Key: Name
           Value: CACAA1SubnetPublic1
