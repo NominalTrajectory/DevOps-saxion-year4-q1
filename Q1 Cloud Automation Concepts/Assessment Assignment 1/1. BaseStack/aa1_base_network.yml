@@ -84,16 +84,23 @@ Parameters:
 #   8 8888     `88. 8 888888888888 `Y8888P ,88P'     `8888888P'        `Y88888P'   8 8888     `88.    `8888888P'    8 888888888888 `Y8888P ,88P'
 Resources:
 
+  #DO = Dependent on
+  #Par = Parameter
+
   #Description: This is the VPC, within this VPC the solution is build.
   CACAA1VPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: !Ref VPCCIDR                                             #This property is filled in by the parameter: VPCCIDR   (This is a IP range)
+      CidrBlock: !Ref VPCCIDR                                             #Par: VPCCIDR                     (This is a IP range)
       EnableDnsSupport: true
       EnableDnsHostnames: true
       Tags: 
         - Key: Name
           Value: CACAA1VPC
+
+
+
+
 
   #Description: This is the internet gateway, that is the portal to the internet for the solution and is connected to the public subnets via the route table.
   CACAA1InternetGateway:
@@ -108,82 +115,111 @@ Resources:
   CACAA1VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
-      InternetGatewayId: !Ref CACAA1InternetGateway                       #This property depends on: CACAA1VPC  (The VPC)
-      VpcId: !Ref CACAA1VPC                                               #This property depends on: CACAA1InternetGateway  (The internet gateway)
+      InternetGatewayId: !Ref CACAA1InternetGateway                       #DO: CACAA1InternetGateway        (The internet gateway)
+      VpcId: !Ref CACAA1VPC                                               #DO: CACAA1VPC                    (The VPC)
 
-  #Description: This is a subnet, it is one of the four subnets and one of the two public subnets This subnet is in the first of the two availability zones 
-  #             that are used and instances within this subnet will by default get a public IP address.
+
+
+
+
+  #Description: This is a subnet, it is the first of the four subnets and the first of the two public subnets This subnet is in the first of the two  
+  #             availability zones that are used and instances within this subnet will by default get a public IP address.
   CACAA1SubnetPublic1:
     Type: AWS::EC2::Subnet
     Properties:
-      CidrBlock: !Ref PublicSubnet1CIDR                                   #This property is filled in by the parameter: PublicSubnet1CIDR   (This is a IP adress)
+      CidrBlock: !Ref PublicSubnet1CIDR                                   #Par: PublicSubnet1CIDR           (This is a IP range)
       MapPublicIpOnLaunch: 'true'
-      AvailabilityZone: !Ref AvailabilityZone1                            #This property is filled in by the parameter: AvailabilityZone1   (This is a AvailabilityZone Name)
-      VpcId: !Ref CACAA1VPC                                               #This property depends on: CACAA1VPC  (The VPC)
+      AvailabilityZone: !Ref AvailabilityZone1                            #Par: AvailabilityZone1           (This is a AvailabilityZone Name)
+      VpcId: !Ref CACAA1VPC                                               #DO: CACAA1VPC                    (The VPC)
       Tags:
         - Key: Name
           Value: CACAA1SubnetPublic1
 
+  #Description: This is a subnet, it is the second of the four subnets and the second of the two public subnets This subnet is in the second of the two  
+  #             availability zones that are used and instances within this subnet will by default get a public IP address.
   CACAA1SubnetPublic2:
     Type: AWS::EC2::Subnet
     Properties:
-      CidrBlock: !Ref PublicSubnet2CIDR
+      CidrBlock: !Ref PublicSubnet2CIDR                                   #Par: PublicSubnet2CIDR           (This is a IP range)
       MapPublicIpOnLaunch: 'true'
-      AvailabilityZone: !Ref AvailabilityZone2
-      VpcId: !Ref CACAA1VPC
+      AvailabilityZone: !Ref AvailabilityZone2                            #Par: AvailabilityZone2           (This is a AvailabilityZone Name)
+      VpcId: !Ref CACAA1VPC                                               #DO: CACAA1VPC                    (The VPC)
       Tags:
         - Key: Name
           Value: CACAA1SubnetPublic2 
 
+  #Description: This is a subnet, it is the third of the four subnets and the first of the two private subnets This subnet is in the first of the two  
+  #             availability zones that are used and instances within this subnet will by default NOT get a public IP address.
   CACAA1SubnetPrivate1:
     Type: AWS::EC2::Subnet
     Properties:
-      CidrBlock: !Ref PrivateSubnet1CIDR
+      CidrBlock: !Ref PrivateSubnet1CIDR                                  #Par: PrivateSubnet1CIDR          (This is a IP range)
       MapPublicIpOnLaunch: 'false'
-      VpcId: !Ref CACAA1VPC
+      AvailabilityZone: !Ref AvailabilityZone1                            #Par: AvailabilityZone1           (This is a AvailabilityZone Name)
+      VpcId: !Ref CACAA1VPC                                               #DO: CACAA1VPC                    (The VPC)
       Tags:
         - Key: Name
           Value: CACAA1SubnetPrivate1
-      
+  
+  #Description: This is a subnet, it is the fourth of the four subnets and the second of the two private subnets This subnet is in the second of the two  
+  #             availability zones that are used and instances within this subnet will by default NOT get a public IP address.
   CACAA1SubnetPrivate2:
     Type: AWS::EC2::Subnet
     Properties:
-      CidrBlock: !Ref PrivateSubnet2CIDR
+      CidrBlock: !Ref PrivateSubnet2CIDR                                  #Par: PrivateSubnet2CIDR          (This is a IP range)
       MapPublicIpOnLaunch: 'false'
-      AvailabilityZone: !Ref AvailabilityZone2
-      VpcId: !Ref CACAA1VPC
+      AvailabilityZone: !Ref AvailabilityZone2                            #Par: AvailabilityZone2           (This is a AvailabilityZone Name)
+      VpcId: !Ref CACAA1VPC                                               #DO: CACAA1VPC                    (The VPC)
       Tags:
         - Key: Name
           Value: CACAA1SubnetPrivate2
 
+
+
+
+
+  #Description: This is a route table, it is the first of the two route tables, it is connected to the two public subnets via route table associations
+  #             and to the internet gateway via the default route. Finally the route table also connects to the VPC itself by default.
   CACAA1PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties: 
+      VpcId: !Ref CACAA1VPC                                               #DO: CACAA1VPC                    (The VPC)
       Tags: 
         - Key: Name
           Value: CACAA1PublicRouteTable
-      VpcId: !Ref CACAA1VPC
 
+  #Description: This is a route, it is part of the public route table, it connects to the internet gateway sending all traffic that is not meant for the VPC to there.
   CACAA1PublicDefaultRoute:
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref CACAA1InternetGateway
-      RouteTableId: !Ref CACAA1PublicRouteTable
+      GatewayId: !Ref CACAA1InternetGateway                               #DO: CACAA1InternetGateway        (The internet gateway)
+      RouteTableId: !Ref CACAA1PublicRouteTable                           #DO: CACAA1PublicRouteTable       (The route table for public subnets)
 
+  #Description: This is a SubnetRouteTableAssociation, it connects the first of the two public subnets to the public route table.
   CACAA1PublicSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties: 
-      RouteTableId: !Ref CACAA1PublicRouteTable
-      SubnetId: !Ref CACAA1SubnetPublic1
+      RouteTableId: !Ref CACAA1PublicRouteTable                           #DO: CACAA1PublicRouteTable       (The route table for public subnets)
+      SubnetId: !Ref CACAA1SubnetPublic1                                  #DO: CACAA1SubnetPublic1          (The first public subnet)
 
+  #Description: This is a SubnetRouteTableAssociation, it connects the second of the two public subnets to the public route table.
   CACAA1PublicSubnet2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties: 
-      RouteTableId: !Ref CACAA1PublicRouteTable
-      SubnetId: !Ref CACAA1SubnetPublic2
+      RouteTableId: !Ref CACAA1PublicRouteTable                           #DO: CACAA1PublicRouteTable       (The route table for public subnets)
+      SubnetId: !Ref CACAA1SubnetPublic2                                  #DO: CACAA1SubnetPublic2          (The second public subnet)
+
+
+
+
 
   # NAT Instance instead of NAT Gateway because of the limitations of AWS Educate account
+  # TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+  #O TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TOD
+  #DO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TO
+  #ODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO T
+  #TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
   CACAA1NATSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties: 
@@ -226,8 +262,13 @@ Resources:
       Tags: 
         - Key: Name
           Value: CACAA1NATSecurityGroup
-      VpcId: !Ref CACAA1VPC
+      VpcId: !Ref CACAA1VPC                                               #DO: CACAA1VPC                    (The VPC)
 
+  # TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+  #O TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TOD
+  #DO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TO
+  #ODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO T
+  #TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
   CACAA1NATInstance:
     Type: AWS::EC2::Instance
     Properties:
@@ -242,14 +283,25 @@ Resources:
         - Key: Name
           Value: CACAA1NATInstance
 
+
+
+
+  #Description: This is a route table, it is the second of the two route tables, it is connected to the two private subnets via route table associations
+  #             and to the nat gateway via the default route. Finally the route table also connects to the VPC itself by default.
   CACAA1NATPrivateRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
-      VpcId: !Ref CACAA1VPC
+      VpcId: !Ref CACAA1VPC                                               #DO: CACAA1VPC                    (The VPC)
       Tags:
         - Key: Name
           Value: CACAA1NATPrivateRouteTable
 
+  #Description: This is a route, it is part of the public route table, it connects to the nat instance sending all traffic that is not meant for the VPC to there.
+  # TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+  #O TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TOD
+  #DO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TO
+  #ODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO T
+  #TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
   CACAA1PrivateDefaultRoute:
     Type: AWS::EC2::Route
     Properties:
@@ -257,17 +309,19 @@ Resources:
       InstanceId: !Ref CACAA1NATInstance
       RouteTableId: !Ref CACAA1NATPrivateRouteTable
 
+  #Description: This is a SubnetRouteTableAssociation, it connects the first of the two private subnets to the private route table.
   CACAA1PrivateSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref CACAA1NATPrivateRouteTable
-      SubnetId: !Ref CACAA1SubnetPrivate1
+      RouteTableId: !Ref CACAA1NATPrivateRouteTable                       #DO: CACAA1NATPrivateRouteTable   (The route table for private subnets)
+      SubnetId: !Ref CACAA1SubnetPrivate1                                 #DO: CACAA1SubnetPrivate1         (The first private subnet)
 
+  #Description: This is a SubnetRouteTableAssociation, it connects the second of the two private subnets to the private route table.
   CACAA1PrivateSubnet2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref CACAA1NATPrivateRouteTable
-      SubnetId: !Ref CACAA1SubnetPrivate2
+      RouteTableId: !Ref CACAA1NATPrivateRouteTable                       #DO: CACAA1NATPrivateRouteTable   (The route table for private subnets)
+      SubnetId: !Ref CACAA1SubnetPrivate2                                 #DO: CACAA1SubnetPrivate2         (The second private subnet)
 
 
 
