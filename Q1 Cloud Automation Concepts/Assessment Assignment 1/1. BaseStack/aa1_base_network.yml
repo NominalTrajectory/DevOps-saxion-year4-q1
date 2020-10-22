@@ -14,6 +14,11 @@ Description: This is Stack 01 of Cloud Engineering\Cloud Automation Concepts\Ass
 
 
 
+
+
+
+
+
 #   8 888888888o      .8.          8 888888888o.            .8.                   ,8.       ,8.          8 8888888888 8888888 8888888888 8 8888888888   8 888888888o.     d888888o.
 #   8 8888    `88.   .888.         8 8888    `88.          .888.                 ,888.     ,888.         8 8888             8 8888       8 8888         8 8888    `88.  .`8888:' `88.
 #   8 8888     `88  :88888.        8 8888     `88         :88888.               .`8888.   .`8888.        8 8888             8 8888       8 8888         8 8888     `88  8.`8888.   Y8
@@ -25,31 +30,31 @@ Description: This is Stack 01 of Cloud Engineering\Cloud Automation Concepts\Ass
 #   8 8888    .888888888. `88888.  8 8888   `8b.    .888888888. `88888.   ,8'       `8        `8.`8888.  8 8888             8 8888       8 8888         8 8888   `8b.  `8b.  ;8.`8888
 #   8 8888   .8'       `8. `88888. 8 8888     `88. .8'       `8. `88888. ,8'         `         `8.`8888. 8 888888888888     8 8888       8 888888888888 8 8888     `88. `Y8888P ,88P'
 Parameters:
-  # The IP address range to be used for this VPC
+  # The IP address range to be used for the VPC (CACAA1VPC)
   VPCCIDR:
     Description: Please enter the IP range (CIDR notation) for this VPC.
     Type: String
     Default: 10.0.0.0/16
   
-  # The IP address range to be used for the Public Subnet 1
+  # The IP address range to be used for the Public Subnet 1 (CACAA1SubnetPublic1)
   PublicSubnet1CIDR:
     Description: Please enter the IP range (CIDR notation) for the first public subnet
     Type: String
     Default: 10.0.1.0/24
 
-  # The IP address range to be used for the Public Subnet 2
+  # The IP address range to be used for the Public Subnet 2 (CACAA1SubnetPublic2)
   PublicSubnet2CIDR:
     Description: Please enter the IP range (CIDR notation) for the second public subnet
     Type: String
     Default: 10.0.2.0/24
 
-  # The IP address range to be used for the Private Subnet 1
+  # The IP address range to be used for the Private Subnet 1 (CACAA1SubnetPrivate1)
   PrivateSubnet1CIDR:
     Description: Please enter the IP range (CIDR notation) for the first private subnet
     Type: String
     Default: 10.0.51.0/24
 
-  # The IP address range to be used for the Private Subnet 2
+  # The IP address range to be used for the Private Subnet 2 (CACAA1SubnetPrivate2)
   PrivateSubnet2CIDR:
     Description: Please enter the IP range (CIDR notation) for the second private subnet
     Type: String
@@ -65,8 +70,10 @@ Parameters:
     Description: Please enter the name of the second Availability Zone
     Type: AWS::EC2::AvailabilityZone::Name
 
-#TODO: Add a condition to ensure usage of two different AZs
-#Conditions:
+
+
+
+
 
 
 
@@ -129,7 +136,7 @@ Resources:
     Properties:
       CidrBlock: !Ref PublicSubnet1CIDR                                   #Par: PublicSubnet1CIDR           (This is a IP range)
       MapPublicIpOnLaunch: 'true'
-      AvailabilityZone: !Ref AvailabilityZone1                            #Par: AvailabilityZone1           (This is a AvailabilityZone Name)
+      AvailabilityZone: !Ref AvailabilityZone1                            #Par: AvailabilityZone1           (This is the first of two AvailabilityZone Names used in the solution)
       VpcId: !Ref CACAA1VPC                                               #DO: CACAA1VPC                    (The VPC)
       Tags:
         - Key: Name
@@ -142,7 +149,7 @@ Resources:
     Properties:
       CidrBlock: !Ref PublicSubnet2CIDR                                   #Par: PublicSubnet2CIDR           (This is a IP range)
       MapPublicIpOnLaunch: 'true'
-      AvailabilityZone: !Ref AvailabilityZone2                            #Par: AvailabilityZone2           (This is a AvailabilityZone Name)
+      AvailabilityZone: !Ref AvailabilityZone2                            #Par: AvailabilityZone2           (This is the second of two AvailabilityZone Names used in the solution)
       VpcId: !Ref CACAA1VPC                                               #DO: CACAA1VPC                    (The VPC)
       Tags:
         - Key: Name
@@ -155,7 +162,7 @@ Resources:
     Properties:
       CidrBlock: !Ref PrivateSubnet1CIDR                                  #Par: PrivateSubnet1CIDR          (This is a IP range)
       MapPublicIpOnLaunch: 'false'
-      AvailabilityZone: !Ref AvailabilityZone1                            #Par: AvailabilityZone1           (This is a AvailabilityZone Name)
+      AvailabilityZone: !Ref AvailabilityZone1                            #Par: AvailabilityZone1           (This is the first of two AvailabilityZone Names used in the solution)
       VpcId: !Ref CACAA1VPC                                               #DO: CACAA1VPC                    (The VPC)
       Tags:
         - Key: Name
@@ -168,7 +175,7 @@ Resources:
     Properties:
       CidrBlock: !Ref PrivateSubnet2CIDR                                  #Par: PrivateSubnet2CIDR          (This is a IP range)
       MapPublicIpOnLaunch: 'false'
-      AvailabilityZone: !Ref AvailabilityZone2                            #Par: AvailabilityZone2           (This is a AvailabilityZone Name)
+      AvailabilityZone: !Ref AvailabilityZone2                            #Par: AvailabilityZone2           (This is the second of two AvailabilityZone Names used in the solution)
       VpcId: !Ref CACAA1VPC                                               #DO: CACAA1VPC                    (The VPC)
       Tags:
         - Key: Name
@@ -214,74 +221,30 @@ Resources:
 
 
 
-  # NAT Instance instead of NAT Gateway because of the limitations of AWS Educate account
-  # TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-  #O TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TOD
-  #DO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TO
-  #ODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO T
-  #TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
-  CACAA1NATSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
+  #Description: This is a Elastic IP, this is used within the vpc by the Nat gateway as an adress.
+  CACAA1NATElasticIP:
+    Type: AWS::EC2::EIP
+    DependsOn: CACAA1VPCGatewayAttachment                                 #DO: CACAA1VPCGatewayAttachment   (The atachment that connects the VPC and the Internet Gateway) IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED?
     Properties: 
-      GroupDescription: This security group is dedicated to the NAT instance
-      GroupName: NATSecurityGroup
-      SecurityGroupIngress: 
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: !Ref PrivateSubnet1CIDR
-        - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-          CidrIp: !Ref PrivateSubnet1CIDR
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: !Ref PrivateSubnet1CIDR
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: !Ref PrivateSubnet2CIDR
-        - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-          CidrIp: !Ref PrivateSubnet2CIDR
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: !Ref PrivateSubnet2CIDR
-      SecurityGroupEgress: 
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: 0.0.0.0/0
+      Domain: vpc
       Tags: 
         - Key: Name
-          Value: CACAA1NATSecurityGroup
-      VpcId: !Ref CACAA1VPC                                               #DO: CACAA1VPC                    (The VPC)
+          Value: CACAA1NATElasticIP
 
-  # TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-  #O TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TOD
-  #DO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TO
-  #ODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO T
-  #TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
-  CACAA1NATInstance:
-    Type: AWS::EC2::Instance
-    Properties:
-      InstanceType: t2.micro
-      ImageId: ami-01ef31f9f39c5aaed
-      SubnetId: !Ref CACAA1SubnetPublic1
-      SourceDestCheck: false
-      KeyName: CAC_Assignments
-      SecurityGroupIds: 
-        - !Ref CACAA1NATSecurityGroup
-      Tags:
+  #Description: This is a Nat Gateway, set up to function like a NAT gateway and works as an intermediary between the webservers in the public subnets and the 
+  #             databases in the private subnet.
+  CACAA1NATGateway:
+    Type: AWS::EC2::NatGateway
+    Properties: 
+      AllocationId: 
+        Fn::GetAtt:
+          - CACAA1NATElasticIP                                            #DO: CACAA1NATElasticIP           (The Elastic IP adress)
+          - AllocationId
+      SubnetId: !Ref CACAA1SubnetPublic1                                  #DO: CACAA1SubnetPublic1          (The first public subnet)
+      Tags: 
         - Key: Name
-          Value: CACAA1NATInstance
+          Value: CACAA1NATGateway
+
 
 
 
@@ -297,17 +260,12 @@ Resources:
           Value: CACAA1NATPrivateRouteTable
 
   #Description: This is a route, it is part of the public route table, it connects to the nat instance sending all traffic that is not meant for the VPC to there.
-  # TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-  #O TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TOD
-  #DO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TO
-  #ODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO T
-  #TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
   CACAA1PrivateDefaultRoute:
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
-      InstanceId: !Ref CACAA1NATInstance
-      RouteTableId: !Ref CACAA1NATPrivateRouteTable
+      NatGatewayId: !Ref CACAA1NATGateway                                 #DO: CACAA1NATGateway             (The nat gateway)
+      RouteTableId: !Ref CACAA1NATPrivateRouteTable                       #DO: CACAA1NATPrivateRouteTable   (The route table for private subnets)
 
   #Description: This is a SubnetRouteTableAssociation, it connects the first of the two private subnets to the private route table.
   CACAA1PrivateSubnet1RouteTableAssociation:
@@ -326,6 +284,11 @@ Resources:
 
 
 
+
+
+
+
+
                                                                                                               
 #       ,o888888o.     8 8888      88 8888888 8888888888 8 888888888o   8 8888      88 8888888 8888888888 d888888o.   
 #    . 8888     `88.   8 8888      88       8 8888       8 8888    `88. 8 8888      88       8 8888     .`8888:' `88. 
@@ -339,76 +302,133 @@ Resources:
 #       `8888888P'        `Y88888P'         8 8888       8 8888            `Y88888P'         8 8888     `Y8888P ,88P' 
 Outputs:
 
+  #Description: This outputs the VPC.
+  #This value is used in the stacks:
+  # - 
   VPCRef:
     Description: Reference to the VPC
-    Value: !Ref CACAA1VPC
+    Value: !Ref CACAA1VPC                                                 #DO: CACAA1VPC                    (The VPC)
     Export:
       Name: BaseStack:VPC
 
+
+
+
+
+  #Description: This outputs the internet gateway. 
+  #This value is used in the stacks:
+  # - 
   InternetGatewayRef:
     Description: Reference to the Internet Gateway
-    Value: !Ref CACAA1InternetGateway
+    Value: !Ref CACAA1InternetGateway                                     #DO: CACAA1InternetGateway        (The internet gateway)
     Export:
       Name: BaseStack:InternetGateway
-    
+  
+  #Description: This outputs the VPCGatewayAttachment. 
+  #This value is used in the stacks:
+  # - 
   VPCGatewayAttachmentRef:
-    Description: Reference to the VPC gateway attachment
+    Description: Reference to the VPC gateway attachment                  #DO: CACAA1VPCGatewayAttachment   (The atachment that connects the VPC and the Internet Gateway)
     Value: !Ref CACAA1VPCGatewayAttachment
     Export:
       Name: BaseStack:CACAA1VPCGatewayAttachment
 
+
+
+
+
+  #Description: This outputs the first of the four subnets and the first of the two public subnets.
+  #This value is used in the stacks:
+  # -
   PublicSubnet1Ref:
     Description: Reference to the first public subnet
-    Value: !Ref CACAA1SubnetPublic1
+    Value: !Ref CACAA1SubnetPublic1                                       #DO: CACAA1SubnetPublic1          (The first public subnet)
     Export:
       Name: BaseStack:PublicSubnet1
 
+  #Description: This outputs the second of the four subnets and the second of the two public subnets.
+  #This value is used in the stacks:
+  # -
   PublicSubnet2Ref:
     Description: Reference to the first public subnet
-    Value: !Ref CACAA1SubnetPublic2
+    Value: !Ref CACAA1SubnetPublic2                                       #DO: CACAA1SubnetPublic2          (The second public subnet)
     Export:
       Name: BaseStack:PublicSubnet2
 
+  #Description: This outputs the third of the four subnets and the first of the two private subnets.
+  #This value is used in the stacks:
+  # -
   PrivateSubnet1Ref:
     Description: Reference to the first private subnet
-    Value: !Ref CACAA1SubnetPrivate1
+    Value: !Ref CACAA1SubnetPrivate1                                      #DO: CACAA1SubnetPrivate1         (The first private subnet)
     Export:
       Name: BaseStack:PrivateSubnet1
 
+  #Description: This outputs the fourth of the four subnets and the second of the two private subnets.
+  #This value is used in the stacks:
+  # -
   PrivateSubnet2Ref:
     Description: Reference to the first private subnet
-    Value: !Ref CACAA1SubnetPrivate2
+    Value: !Ref CACAA1SubnetPrivate2                                      #DO: CACAA1SubnetPrivate2         (The second private subnet)
     Export:
       Name: BaseStack:PrivateSubnet2
 
+
+
+
+
+  #Description: This outputs the name of the first of the two Availability zones used in the solution.
+  #This value is used in the stacks:
+  # -
   # AvailabilityZone1Ref:
   #   Description: Reference to Availability Zone 1
-  #   Value: !Ref AvailabilityZone1
+  #   Value: !Ref AvailabilityZone1                                       #Par: AvailabilityZone1           (This is the first of two AvailabilityZone Names used in the solution)
   #   Export:
   #     Name: BaseStack:AvailabilityZone1
 
+  #Description: This outputs the name of the second of the two Availability zones used in the solution.
+  #This value is used in the stacks:
+  # -
   # AvailabilityZone2Ref:
   #   Description: Reference to Availability Zone 2
-  #   Value: !Ref AvailabilityZone2
+  #   Value: !Ref AvailabilityZone2                                       #Par: AvailabilityZone2           (This is the second of two AvailabilityZone Names used in the solution)
   #   Export:
   #     Name: BaseStack:AvailabilityZone2
 
+
+
+
+
+  #Description: This outputs the nat gateway that connects to the private subnets.
+  #This value is used in the stacks:
+  # -
+  NatGatewayRef:
+    Description: Reference to the NAT Gateway
+    Value: !Ref CACAA1NATGateway                                          #DO: CACAA1NATGateway             (The nat gateway)
+    Export:
+      Name: BaseStack:NatGateway
+
+
+
+
+
+  #Description: This outputs the first of two route tables and is used by the public subnets.
+  #This value is used in the stacks:
+  # -
   PublicRouteTableRef: 
     Description: Reference to the public route table
-    Value: !Ref CACAA1PublicRouteTable
+    Value: !Ref CACAA1PublicRouteTable                                    #DO: CACAA1PublicRouteTable       (The route table for public subnets)
     Export:
       Name: BaseStack:PublicRouteTable
 
-  NATInstanceRef:
-    Description: Reference to the NAT Instance
-    Value: !Ref CACAA1NATInstance
-    Export:
-      Name: BaseStack:NATInstance
+  #Description: This outputs the second of two route tables and is used by the private subnets.
+  #This value is used in the stacks:
+  # -
+  # PrivateRouteTableRef: 
+  #   Description: Reference to the private route table
+  #   Value: !Ref CACAA1PrivateRouteTable                                 #DO: CACAA1NATPrivateRouteTable   (The route table for private subnets)
+  #   Export:
+  #     Name: BaseStack:PrivateRouteTable
 
-  NATSecurityGroupRef:
-    Description: Reference to the NAT SecurityGroup
-    Value: !Ref CACAA1NATSecurityGroup
-    Export:
-      Name: BaseStack:NATSecurityGroup
 
 
