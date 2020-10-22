@@ -1,6 +1,5 @@
 Description: This CloudFormation stack deploys an Elastic File System and mount targets to facilitate daily logs storage. 
 
-
 Resources:
 
   #Define a security group for EFS

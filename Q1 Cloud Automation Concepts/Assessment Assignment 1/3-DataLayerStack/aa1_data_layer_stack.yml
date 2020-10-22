@@ -128,6 +128,23 @@ Resources:
             };
             return response;
           };
+
+  # Cannot deploy event rules in AWS Educate environment, but this will work for the actual environment
+  # CACAA1RefreshCovidDataEventRule:
+  #   Type: AWS::Events::Rule
+  #   Properties: 
+  #     Description: This event rule runs every 1 hour invoking the Lambda function that pushes updated covid data to MongoDB from git repo of Broad Institute
+  #     Name: CACAA1RefreshCovidDataEventRule
+  #     RoleArn: String
+  #     ScheduleExpression: rate(1 hour)
+  #     State: ENABLED
+  #     Targets: 
+  #       - 
+  #         Arn: 
+  #           Fn::GetAtt: 
+  #             - "CACAA1MongoDBDataRefresher"
+  #             - "Arn"
+  #         Id: "TargetFunctionV1"
       
   CACAA1MongoDBDataRetriever:
     Type: AWS::Lambda::Function
@@ -206,7 +223,7 @@ Resources:
   CACAA1APIGatewayStage:
     Type: AWS::ApiGateway::Stage
     Properties:
-      DeploymentId: !Ref ApiGatewayDeployment
+      DeploymentId: !Ref CACAA1APIGatewayDeployment
       Description: Lambda API Stage v0
       RestApiId: !Ref CACAA1CovidAPI
       StageName: 'v0'
@@ -268,3 +285,5 @@ Outputs:
   CovidDataAPIEndpointURL:
     Description: The URL of the API endpoint that allows to retrieve Covid data
     Value: !Sub "https://${CACAA1CovidAPI}.execute-api.${AWS::Region}.amazonaws.com/v0/CACAA1MongoDBDataRetriever"
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", CovidDataAPIEndpointURL ] ]

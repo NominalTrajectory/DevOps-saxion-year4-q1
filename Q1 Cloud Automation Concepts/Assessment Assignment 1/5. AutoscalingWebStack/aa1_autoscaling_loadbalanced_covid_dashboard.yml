@@ -8,7 +8,7 @@ Parameters:
     Type: String
 
   CovidDataEndpointURL:
-    Description: Please enter the url of the endpoint providing covid data (Lambda function)
+    Description: Please enter the url of the endpoint providing covid data (Lambda functiona)
     Type: String
 
 #TODO: Configure MongoDB connection
@@ -104,29 +104,32 @@ Resources:
         - !Ref CACAA1WebSecurityGroup
       UserData:
         Fn::Base64:
-          !Sub |
-            #!/bin/bash
-            sudo yum update -y
-            sudo yum install git -y
-            sudo amazon-linux-extras install nginx1 -y
-            sudo systemctl start nginx
-            git clone https://github.com/BFL-Psycho/cac-aa1-covid19-dashboard.git
-            cd cac-aa1-covid19-dashboard/
-            sed -i 's|let apiEndpoint = \"\";|let apiEndpoint = \"${CovidDataEndpointURL}\";|g' ./index.html
-            sudo cp -r ./* /usr/share/nginx/html/
-            sudo systemctl restart nginx
-            sudo systemctl enable nginx
-            mkdir ~/efs-mount-nginx-logs
-            sudo yum install -y amazon-efs-utils
-            sudo mount -t efs ${EFSFileSystemID}.efs.us-east-1.amazonaws.com:/ ~/efs-mount-nginx-logs
-            cd ~/efs-mount-nginx-logs
-            sudo chmod go+rw .
-            mkdir `hostname -I`
-            sudo touch /etc/cron.d/dailynginxlogsync
-            sudo cd /etc/cron.d 
-            sudo su
-            sudo echo "0 0 * * * root /usr/bin/rsync -a /var/log/nginx /home/ec2-user/efs-mount-nginx-logs/`hostname -I`" >> dailynginxlogsync
-
+          !Sub 
+          - |
+              #!/bin/bash
+              sudo yum update -y
+              sudo yum install git -y
+              sudo amazon-linux-extras install nginx1 -y
+              sudo systemctl start nginx
+              git clone https://github.com/BFL-Psycho/cac-aa1-covid19-dashboard.git
+              cd cac-aa1-covid19-dashboard/
+              sed -i 's|let apiEndpoint = \"\";|let apiEndpoint = \"${CovidDataEndpointURL}\";|g' ./index.html
+              sudo cp -r ./* /usr/share/nginx/html/
+              sudo systemctl restart nginx
+              sudo systemctl enable nginx
+              mkdir ~/efs-mount-nginx-logs
+              sudo yum install -y amazon-efs-utils
+              sudo mount -t efs ${EFSFileSystemID}.efs.us-east-1.amazonaws.com:/ ~/efs-mount-nginx-logs
+              cd ~/efs-mount-nginx-logs
+              sudo chmod go+rw .
+              mkdir `hostname -I`
+              sudo touch /etc/cron.d/dailynginxlogsync
+              sudo cd /etc/cron.d 
+              sudo su
+              sudo echo "0 0 * * * root /usr/bin/rsync -a /var/log/nginx /home/ec2-user/efs-mount-nginx-logs/`hostname -I`" >> dailynginxlogsync
+          - EFSFileSystemID: !ImportValue EFSStack:EFSFileSystem
+          - CovidDataEndpointURL: !ImportValue DataLayerStack:CovidDataAPIEndpointURL
+           
                
   
   #Step 6. Create an autoscaling group

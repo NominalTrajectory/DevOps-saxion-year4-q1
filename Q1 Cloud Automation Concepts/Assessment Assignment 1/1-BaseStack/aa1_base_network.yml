@@ -36,11 +36,13 @@ Parameters:
   AvailabilityZone1:
     Description: Please enter the name of the first Availability Zone
     Type: AWS::EC2::AvailabilityZone::Name
+    Default: us-east-1a
     
   # The name of the second availability zone to be used. By default picks the second from the array of available zones
   AvailabilityZone2:
     Description: Please enter the name of the second Availability Zone
     Type: AWS::EC2::AvailabilityZone::Name
+    Default: us-east-1b
 
 #TODO: Add a condition to ensure usage of two different AZs
 #Conditions:
@@ -142,64 +144,85 @@ Resources:
       RouteTableId: !Ref CACAA1PublicRouteTable
       SubnetId: !Ref CACAA1SubnetPublic2
 
-  # NAT Instance instead of NAT Gateway because of the limitations of AWS Educate account
-  CACAA1NATSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
+  CACAA1NATElasticIP:
+    Type: AWS::EC2::EIP
+    DependsOn: CACAA1VPCGatewayAttachment
     Properties: 
-      GroupDescription: This security group is dedicated to the NAT instance
-      GroupName: NATSecurityGroup
-      SecurityGroupIngress: 
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: !Ref PrivateSubnet1CIDR
-        - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-          CidrIp: !Ref PrivateSubnet1CIDR
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: !Ref PrivateSubnet1CIDR
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: !Ref PrivateSubnet2CIDR
-        - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-          CidrIp: !Ref PrivateSubnet2CIDR
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: !Ref PrivateSubnet2CIDR
-      SecurityGroupEgress: 
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: 0.0.0.0/0
+      Domain: vpc
       Tags: 
         - Key: Name
-          Value: CACAA1NATSecurityGroup
-      VpcId: !Ref CACAA1VPC
+          Value: CACAA1NATElasticIP
 
-  CACAA1NATInstance:
-    Type: AWS::EC2::Instance
-    Properties:
-      InstanceType: t2.micro
-      ImageId: ami-01ef31f9f39c5aaed
+  CACAA1NATGateway:
+    Type: AWS::EC2::NatGateway
+    Properties: 
+      AllocationId: 
+        Fn::GetAtt:
+          - CACAA1NATElasticIP
+          - AllocationId
       SubnetId: !Ref CACAA1SubnetPublic1
-      SourceDestCheck: false
-      KeyName: CAC_Assignments
-      SecurityGroupIds: 
-        - !Ref CACAA1NATSecurityGroup
-      Tags:
+      Tags: 
         - Key: Name
-          Value: CACAA1NATInstance
+          Value: CACAA1NATGateway
+
+  # NAT Instance instead of NAT Gateway because of the limitations of AWS Educate account
+  # CACAA1NATSecurityGroup:
+  #   Type: AWS::EC2::SecurityGroup
+  #   Properties: 
+  #     GroupDescription: This security group is dedicated to the NAT instance
+  #     GroupName: NATSecurityGroup
+  #     SecurityGroupIngress: 
+  #       - IpProtocol: tcp
+  #         FromPort: 80
+  #         ToPort: 80
+  #         CidrIp: !Ref PrivateSubnet1CIDR
+  #       - IpProtocol: tcp
+  #         FromPort: 22
+  #         ToPort: 22
+  #         CidrIp: !Ref PrivateSubnet1CIDR
+  #       - IpProtocol: tcp
+  #         FromPort: 443
+  #         ToPort: 443
+  #         CidrIp: !Ref PrivateSubnet1CIDR
+  #       - IpProtocol: tcp
+  #         FromPort: 80
+  #         ToPort: 80
+  #         CidrIp: !Ref PrivateSubnet2CIDR
+  #       - IpProtocol: tcp
+  #         FromPort: 22
+  #         ToPort: 22
+  #         CidrIp: !Ref PrivateSubnet2CIDR
+  #       - IpProtocol: tcp
+  #         FromPort: 443
+  #         ToPort: 443
+  #         CidrIp: !Ref PrivateSubnet2CIDR
+  #     SecurityGroupEgress: 
+  #       - IpProtocol: tcp
+  #         FromPort: 80
+  #         ToPort: 80
+  #         CidrIp: 0.0.0.0/0
+  #       - IpProtocol: tcp
+  #         FromPort: 443
+  #         ToPort: 443
+  #         CidrIp: 0.0.0.0/0
+  #     Tags: 
+  #       - Key: Name
+  #         Value: CACAA1NATSecurityGroup
+  #     VpcId: !Ref CACAA1VPC
+
+  # CACAA1NATInstance:
+  #   Type: AWS::EC2::Instance
+  #   Properties:
+  #     InstanceType: t2.micro
+  #     ImageId: ami-01ef31f9f39c5aaed
+  #     SubnetId: !Ref CACAA1SubnetPublic1
+  #     SourceDestCheck: false
+  #     KeyName: CAC_Assignments
+  #     SecurityGroupIds: 
+  #       - !Ref CACAA1NATSecurityGroup
+  #     Tags:
+  #       - Key: Name
+  #         Value: CACAA1NATInstance
 
   CACAA1NATPrivateRouteTable:
     Type: AWS::EC2::RouteTable
@@ -213,7 +236,8 @@ Resources:
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
-      InstanceId: !Ref CACAA1NATInstance
+      # InstanceId: !Ref CACAA1NATInstance
+      NatGatewayId: !Ref CACAA1NATGateway
       RouteTableId: !Ref CACAA1NATPrivateRouteTable
 
   CACAA1PrivateSubnet1RouteTableAssociation:
@@ -290,16 +314,22 @@ Outputs:
     Export:
       Name: !Join [ ":", [ !Ref "AWS::StackName", PublicRouteTable ] ]
 
-  NATInstanceRef:
-    Description: Reference to the NAT Instance
-    Value: !Ref CACAA1NATInstance
+  NatGatewayRef:
+    Description: Reference to the NAT Gateway
+    Value: !Ref CACAA1NATGateway
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", NATInstance ] ]
+      Name: !Join [ ":", [ !Ref "AWS::StackName", NatGateway ] ]
 
-  NATSecurityGroupRef:
-    Description: Reference to the NAT SecurityGroup
-    Value: !Ref CACAA1NATSecurityGroup
-    Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", NATSecurityGroup ] ]
+  # NATInstanceRef:
+  #   Description: Reference to the NAT Instance
+  #   Value: !Ref CACAA1NATInstance
+  #   Export:
+  #     Name: !Join [ ":", [ !Ref "AWS::StackName", NATInstance ] ]
+
+  # NATSecurityGroupRef:
+  #   Description: Reference to the NAT SecurityGroup
+  #   Value: !Ref CACAA1NATSecurityGroup
+  #   Export:
+  #     Name: !Join [ ":", [ !Ref "AWS::StackName", NATSecurityGroup ] ]
 
 
