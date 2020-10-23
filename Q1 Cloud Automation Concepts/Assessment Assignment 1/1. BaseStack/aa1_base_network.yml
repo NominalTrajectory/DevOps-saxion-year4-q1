@@ -93,6 +93,7 @@ Resources:
 
   #DO = Dependent on
   #Par = Parameter
+  #Imp = Imported parameter
 
   #Description: This is the VPC, within this VPC the solution is build.
   CACAA1VPC:
@@ -224,7 +225,7 @@ Resources:
   #Description: This is a Elastic IP, this is used within the vpc by the Nat gateway as an adress.
   CACAA1NATElasticIP:
     Type: AWS::EC2::EIP
-    DependsOn: CACAA1VPCGatewayAttachment                                 #DO: CACAA1VPCGatewayAttachment   (The atachment that connects the VPC and the Internet Gateway) IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED? IS THIS REQUIRED?
+    DependsOn: CACAA1VPCGatewayAttachment                                 #DO: CACAA1VPCGatewayAttachment   (The atachment that connects the VPC and the Internet Gateway)
     Properties: 
       Domain: vpc
       Tags: 

@@ -1,9 +1,41 @@
+#   8 888888888o.      8 8888888888     d888888o.       ,o888888o.    8 888888888o.    8 8888 8 888888888o 8888888 8888888888  8 8888     ,o888888o.     b.             8
+#   8 8888    `^888.   8 8888         .`8888:' `88.    8888     `88.  8 8888    `88.   8 8888 8 8888    `88.     8 8888        8 8888  . 8888     `88.   888o.          8
+#   8 8888        `88. 8 8888         8.`8888.   Y8 ,8 8888       `8. 8 8888     `88   8 8888 8 8888     `88     8 8888        8 8888 ,8 8888       `8b  Y88888o.       8
+#   8 8888         `88 8 8888         `8.`8888.     88 8888           8 8888     ,88   8 8888 8 8888     ,88     8 8888        8 8888 88 8888        `8b .`Y888888o.    8
+#   8 8888          88 8 888888888888  `8.`8888.    88 8888           8 8888.   ,88'   8 8888 8 8888.   ,88'     8 8888        8 8888 88 8888         88 8o. `Y888888o. 8
+#   8 8888          88 8 8888           `8.`8888.   88 8888           8 888888888P'    8 8888 8 888888888P'      8 8888        8 8888 88 8888         88 8`Y8o. `Y88888o8
+#   8 8888         ,88 8 8888            `8.`8888.  88 8888           8 8888`8b        8 8888 8 8888             8 8888        8 8888 88 8888        ,8P 8   `Y8o. `Y8888
+#   8 8888        ,88' 8 8888        8b   `8.`8888. `8 8888       .8' 8 8888 `8b.      8 8888 8 8888             8 8888        8 8888 `8 8888       ,8P  8      `Y8o. `Y8
+#   8 8888    ,o88P'   8 8888        `8b.  ;8.`8888    8888     ,88'  8 8888   `8b.    8 8888 8 8888             8 8888        8 8888  ` 8888     ,88'   8         `Y8o.`
+#   8 888888888P'      8 888888888888 `Y8888P ,88P'     `8888888P'    8 8888     `88.  8 8888 8 8888             8 8888        8 8888     `8888888P'     8            `Yo
 Description: This CloudFormation stack deploys an Elastic File System and mount targets to facilitate daily logs storage. 
 
 
+
+
+
+
+
+
+
+
+#   8 888888888o.   8 8888888888     d888888o.       ,o888888o.     8 8888      88 8 888888888o.      ,o888888o.    8 8888888888     d888888o.
+#   8 8888    `88.  8 8888         .`8888:' `88.  . 8888     `88.   8 8888      88 8 8888    `88.    8888     `88.  8 8888         .`8888:' `88.
+#   8 8888     `88  8 8888         8.`8888.   Y8 ,8 8888       `8b  8 8888      88 8 8888     `88 ,8 8888       `8. 8 8888         8.`8888.   Y8
+#   8 8888     ,88  8 8888         `8.`8888.     88 8888        `8b 8 8888      88 8 8888     ,88 88 8888           8 8888         `8.`8888.
+#   8 8888.   ,88'  8 888888888888  `8.`8888.    88 8888         88 8 8888      88 8 8888.   ,88' 88 8888           8 888888888888  `8.`8888.
+#   8 888888888P'   8 8888           `8.`8888.   88 8888         88 8 8888      88 8 888888888P'  88 8888           8 8888           `8.`8888.
+#   8 8888`8b       8 8888            `8.`8888.  88 8888        ,8P 8 8888      88 8 8888`8b      88 8888           8 8888            `8.`8888.
+#   8 8888 `8b.     8 8888        8b   `8.`8888. `8 8888       ,8P  ` 8888     ,8P 8 8888 `8b.    `8 8888       .8' 8 8888        8b   `8.`8888.
+#   8 8888   `8b.   8 8888        `8b.  ;8.`8888  ` 8888     ,88'     8888   ,d8P  8 8888   `8b.     8888     ,88'  8 8888        `8b.  ;8.`8888
+#   8 8888     `88. 8 888888888888 `Y8888P ,88P'     `8888888P'        `Y88888P'   8 8888     `88.    `8888888P'    8 888888888888 `Y8888P ,88P'
 Resources:
 
-  #Define a security group for EFS
+  #DO = Dependent on
+  #Par = Parameter
+  #Imp = Imported parameter
+
+  #Description: This is a Security Group, this is used by the EFS file system and allows all incomming tcp packets from port 2049 (Used for what?) and allows all outgoing packets from all ports.
   CACAA1EFSSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -17,51 +49,75 @@ Resources:
       Tags: 
         - Key: Name
           Value: CACAA1EFSSecurityGroup
-      VpcId: !ImportValue BaseStack:VPC
+      VpcId: !ImportValue BaseStack:VPC                                   #Imp: BaseStack:VPC               (The VPC imported from the BaseStack)
 
-  #Elastic File System with bursting throughput
+  #Description: This is the EFS File System, this is configgered to use bursting throughput which means (what does this mean?)
   CACAA1EFSFileSystem:
     Type: AWS::EFS::FileSystem
     Properties:
       ThroughputMode: bursting
   
   #A mount target for the first public subnet
+  #Description: This is a EFS Mount Tagret, this is used to connect the EFS file system to the first of the two public subnets to (do what?)
   CACAA1EFSMountTarget1:
     Type: AWS::EFS::MountTarget
     Properties:
-      FileSystemId: !Ref CACAA1EFSFileSystem
+      FileSystemId: !Ref CACAA1EFSFileSystem                              #DO: CACAA1EFSFileSystem          (The EFS File System)
       SecurityGroups: 
-        - !Ref CACAA1EFSSecurityGroup
-      SubnetId: !ImportValue BaseStack:PublicSubnet1
+        - !Ref CACAA1EFSSecurityGroup                                     #DO: CACAA1EFSSecurityGroup       (The security group for the Elastic File System)
+      SubnetId: !ImportValue BaseStack:PublicSubnet1                      #Imp: BaseStack:PublicSubnet1     (The first public subnet imported from the BaseStack)
 
   #A mount target for the second public subnet
+  #Description: This is a EFS Mount Tagret, this is used to connect the EFS file system to the first of the second public subnets to (do what?)
   CACAA1EFSMountTarget2:
     Type: AWS::EFS::MountTarget
     Properties:
-      FileSystemId: !Ref CACAA1EFSFileSystem
+      FileSystemId: !Ref CACAA1EFSFileSystem                              #DO: CACAA1EFSFileSystem          (The EFS File System)
       SecurityGroups: 
-        - !Ref CACAA1EFSSecurityGroup
-      SubnetId: !ImportValue BaseStack:PublicSubnet2
+        - !Ref CACAA1EFSSecurityGroup                                     #DO: CACAA1EFSSecurityGroup       (The security group for the Elastic File System)
+      SubnetId: !ImportValue BaseStack:PublicSubnet2                      #Imp: BaseStack:PublicSubnet2     (The second public subnet imported from the BaseStack)
 
+
+
+
+
+
+
+
+
+                                                                                                              
+#       ,o888888o.     8 8888      88 8888888 8888888888 8 888888888o   8 8888      88 8888888 8888888888 d888888o.   
+#    . 8888     `88.   8 8888      88       8 8888       8 8888    `88. 8 8888      88       8 8888     .`8888:' `88. 
+#   ,8 8888       `8b  8 8888      88       8 8888       8 8888     `88 8 8888      88       8 8888     8.`8888.   Y8 
+#   88 8888        `8b 8 8888      88       8 8888       8 8888     ,88 8 8888      88       8 8888     `8.`8888.     
+#   88 8888         88 8 8888      88       8 8888       8 8888.   ,88' 8 8888      88       8 8888      `8.`8888.    
+#   88 8888         88 8 8888      88       8 8888       8 888888888P'  8 8888      88       8 8888       `8.`8888.   
+#   88 8888        ,8P 8 8888      88       8 8888       8 8888         8 8888      88       8 8888        `8.`8888.  
+#   `8 8888       ,8P  ` 8888     ,8P       8 8888       8 8888         ` 8888     ,8P       8 8888    8b   `8.`8888. 
+#    ` 8888     ,88'     8888   ,d8P        8 8888       8 8888           8888   ,d8P        8 8888    `8b.  ;8.`8888 
+#       `8888888P'        `Y88888P'         8 8888       8 8888            `Y88888P'         8 8888     `Y8888P ,88P' 
 Outputs:
   
   EFSSecurityGroupRef:
     Description: Reference to the security group for EFS
     Value: !Ref CACAA1EFSSecurityGroup
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", EFSSecurityGroup ] ]
+      Name: EfsStack:EFSSecurityGroup
+      
   EFSFileSystemRef:
     Description: Reference to the elastic file system 
     Value: !Ref CACAA1EFSFileSystem
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", EFSFileSystem ] ]
+      Name: EfsStack:EFSFileSystem
+
   EFSMountTarget1Ref:
     Description: Reference to the first mount target public subnet 1
     Value: !Ref CACAA1EFSMountTarget1
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", EFSMountTarget1 ] ]
+      Name: EfsStack:EFSMountTarget1
+
   EFSMountTarget2Ref:
     Description: Reference to the second mount target public subnet 2
     Value: !Ref CACAA1EFSMountTarget2
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", EFSMountTarget2 ] ]
+      Name: EfsStack:EFSMountTarget2
