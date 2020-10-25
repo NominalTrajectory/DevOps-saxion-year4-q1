@@ -117,7 +117,7 @@ Resources:
   CACAA1MongoDBInstancePrimary:
     Type: AWS::EC2::Instance
     Properties:
-      InstanceType: t2.small #TODO: change to m4.large
+      InstanceType: m4.large
       ImageId: ami-06b263d6ceff0b3dd
       SubnetId: !ImportValue BaseStack:PrivateSubnet1                     #Imp: BaseStack:PrivateSubnet1            (The first private subnet, imported from the BaseStack)
       KeyName: CAC_Assignments
@@ -381,3 +381,5 @@ Outputs:
   CovidDataAPIEndpointURL:
     Description: The URL of the API endpoint that allows to retrieve Covid data
     Value: !Sub "https://${CACAA1CovidAPI}.execute-api.${AWS::Region}.amazonaws.com/v0/CACAA1MongoDBDataRetriever"
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", CovidDataAPIEndpointURL ] ]

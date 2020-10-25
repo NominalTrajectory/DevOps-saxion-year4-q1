@@ -1,0 +1,63 @@
+# Ivan Shishkalov | Cloud Automation Concepts | Assessment Assignment 1
+Description: This stack deploys a load-balanced autoscaling high-available web environment serving the Broad COVID-19 dashboard 
+
+Resources: 
+
+  #Step 1. Create a security group for the webservers
+  CACAA1WebSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: This security groups allows incoming connections to ports 80 (HTTP), 443 (HTTPS), 22 (SSH)
+      GroupName: CACAA1WebSecurityGroup
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      Tags: 
+        - Key: Name
+          Value: CACAA1WebSecurityGroup
+      VpcId: !ImportValue BaseStack:VPC
+    
+
+  CACAA1TestInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-06b263d6ceff0b3dd
+      SubnetId: !ImportValue BaseStack:PublicSubnet1
+      KeyName: CAC_Assignments
+      SecurityGroupIds: 
+        - !Ref CACAA1WebSecurityGroup
+      UserData:
+        Fn::Base64:
+          !Sub 
+          - |
+              #!/bin/bash
+              sudo touch test.txt
+              sudo echo ${EFSFileSystemID} >> test.txt
+              sudo echo ${CovidDataEndpointURL} >> test.txt
+          - EFSFileSystemID: 
+              Fn::ImportValue:
+                EFSStack:EFSFileSystem
+            CovidDataEndpointURL:
+              Fn::ImportValue:
+                DataLayerStack:CovidDataAPIEndpointURL 
+                    
+      Tags:
+        - Key: Name
+          Value: CACAA1TestInstance
+
+
+  
+  
+
+  

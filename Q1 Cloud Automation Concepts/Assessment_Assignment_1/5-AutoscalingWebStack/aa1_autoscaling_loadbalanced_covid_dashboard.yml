@@ -1,18 +1,6 @@
 # Ivan Shishkalov | Cloud Automation Concepts | Assessment Assignment 1
 Description: This stack deploys a load-balanced autoscaling high-available web environment serving the Broad COVID-19 dashboard 
 
-Parameters:
-
-  EFSFileSystemID:
-    Description: Please enter the ID of the EFS File system that will be used for storing webserver logs
-    Type: String
-
-  CovidDataEndpointURL:
-    Description: Please enter the url of the endpoint providing covid data (Lambda function)
-    Type: String
-
-#TODO: Configure MongoDB connection
-#TODO: Configure autoscaling between 6pm and 8pm (Eastern time)
 
 Resources: 
 
@@ -87,11 +75,9 @@ Resources:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
       AssociatePublicIpAddress: true
-      ClassicLinkVPCId: !ImportValue BaseStack:VPC
-      ClassicLinkVPCSecurityGroups: !Ref CACAA1WebSecurityGroup
       ImageId: ami-0947d2ba12ee1ff75 # Amazon Linux 2
       InstanceMonitoring: false # basic monitoring enabled
-      InstanceType: t3.large 
+      InstanceType: t2.micro # For production change this to t3.large
       KeyName: CAC_Assignments
       LaunchConfigurationName: CACAA1WebserverLaunchConfiguration
       PlacementTenancy: default
@@ -104,31 +90,36 @@ Resources:
         - !Ref CACAA1WebSecurityGroup
       UserData:
         Fn::Base64:
-          !Sub |
-            #!/bin/bash
-            sudo yum update -y
-            sudo yum install git -y
-            sudo amazon-linux-extras install nginx1 -y
-            sudo systemctl start nginx
-            git clone https://github.com/BFL-Psycho/cac-aa1-covid19-dashboard.git
-            cd cac-aa1-covid19-dashboard/
-            sed -i 's|let apiEndpoint = \"\";|let apiEndpoint = \"${CovidDataEndpointURL}\";|g' ./index.html
-            sudo cp -r ./* /usr/share/nginx/html/
-            sudo systemctl restart nginx
-            sudo systemctl enable nginx
-            mkdir ~/efs-mount-nginx-logs
-            sudo yum install -y amazon-efs-utils
-            sudo mount -t efs ${EFSFileSystemID}.efs.us-east-1.amazonaws.com:/ ~/efs-mount-nginx-logs
-            cd ~/efs-mount-nginx-logs
-            sudo chmod go+rw .
-            mkdir `hostname -I`
-            sudo touch /etc/cron.d/dailynginxlogsync
-            sudo cd /etc/cron.d 
-            sudo su
-            sudo echo "0 0 * * * root /usr/bin/rsync -a /var/log/nginx /home/ec2-user/efs-mount-nginx-logs/`hostname -I`" >> dailynginxlogsync
-
-               
-  
+          !Sub 
+          - |
+              #!/bin/bash
+              sudo yum update -y
+              sudo yum install git -y
+              sudo amazon-linux-extras install nginx1 -y
+              sudo systemctl start nginx
+              git clone https://github.com/BFL-Psycho/cac-aa1-covid19-dashboard.git
+              cd cac-aa1-covid19-dashboard/
+              sed -i 's|let apiEndpoint = \"\";|let apiEndpoint = \"${CovidDataEndpointURL}\";|g' ./index.html
+              sudo cp -r ./* /usr/share/nginx/html/
+              sudo systemctl restart nginx
+              sudo systemctl enable nginx
+              mkdir ~/efs-mount-nginx-logs
+              sudo yum install -y amazon-efs-utils
+              sudo mount -t efs ${EFSFileSystemID}.efs.us-east-1.amazonaws.com:/ ~/efs-mount-nginx-logs
+              cd ~/efs-mount-nginx-logs
+              sudo chmod go+rw .
+              mkdir `hostname -I`
+              sudo touch /etc/cron.d/dailynginxlogsync
+              sudo cd /etc/cron.d 
+              sudo su
+              sudo echo "0 0 * * * root /usr/bin/rsync -a /var/log/nginx /home/ec2-user/efs-mount-nginx-logs/`hostname -I`" >> dailynginxlogsync
+          - EFSFileSystemID: 
+              Fn::ImportValue:
+                EFSStack:EFSFileSystem
+            CovidDataEndpointURL:
+              Fn::ImportValue:
+                DataLayerStack:CovidDataAPIEndpointURL
+           
   #Step 6. Create an autoscaling group
   CACAA1AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -141,9 +132,11 @@ Resources:
       VPCZoneIdentifier:
         - !ImportValue BaseStack:PublicSubnet1
         - !ImportValue BaseStack:PublicSubnet2
-      Tags: 
-        - Key: Name
-          Value: CACAA1AutoScalingGroup
+    Tags:
+      - Key: Name
+        Value: AutoscaleWebserverCovidDashboard
+        PropagateAtLaunch: true 
+
 
   #Step 7. Create scheduled actions to scale out between 6pm and 8pm Amsterdam time and scale back in after that with daily recurrance
   CACAA1AutoscalingScheduledActionOut:

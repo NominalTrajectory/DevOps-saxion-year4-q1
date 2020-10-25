@@ -65,11 +65,13 @@ Parameters:
   AvailabilityZone1:
     Description: Please enter the name of the first Availability Zone
     Type: AWS::EC2::AvailabilityZone::Name
+    Default: us-east-1a
     
   #The name of the second availability zone to be used. By default picks the second from the array of available zones
   AvailabilityZone2:
     Description: Please enter the name of the second Availability Zone
     Type: AWS::EC2::AvailabilityZone::Name
+    Default: us-east-1b
 
 
 

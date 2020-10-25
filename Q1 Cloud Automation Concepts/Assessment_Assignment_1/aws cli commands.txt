@@ -1,0 +1,23 @@
+TODO
+Allow cors on API and Lambda
+
+
+1. Deploying the BaseStack (Network)
+*deploy with default parameters
+aws cloudformation create-stack --template-body file://./1-BaseStack/aa1_base_network.yml --stack-name BaseStack
+
+
+2. Deploying the EFSStack (For storing webserver logs)
+aws cloudformation create-stack --template-body file://./2-EFSStack/cac_aa1_efs.yml --stack-name EFSStack
+
+3. Deploying the DataLayerStack (For MongoDB and REST API, for retrieving covid data)
+aws cloudformation create-stack --template-body file://./3-DataLayerStack/aa1_data_layer_stack.yml --stack-name DataLayerStack --capabilities CAPABILITY_NAMED_IAM
+
+4. Uploading Lambda functions proper code and packages from Zip files.
+*function that sends covid data update to MongoDB every hour
+aws lambda update-function-code --function-name CACAA1MongoDBDataRefresher --zip-file fileb://./4-Lambdas/MongoDBDataRefresher/MongoDBDataRefresher.zip
+*function that allows to retrieve covid data from MongoDB
+aws lambda update-function-code --function-name CACAA1MongoDBDataRetriever --zip-file fileb://./4-Lambdas/MongoDBDataRetriever/MongoDBDataRetriever.zip
+
+5. Deploying the AutoscalingWebStack 
+aws cloudformation create-stack --template-body file://./5-AutoscalingWebStack/aa1_autoscaling_loadbalanced_covid_dashboard.yml --stack-name AutoscalingWebStack --capabilities CAPABILITY_NAMED_IAM
