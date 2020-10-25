@@ -8,7 +8,7 @@
 #   8 8888        ,88' 8 8888        8b   `8.`8888. `8 8888       .8' 8 8888 `8b.      8 8888 8 8888             8 8888        8 8888 `8 8888       ,8P  8      `Y8o. `Y8
 #   8 8888    ,o88P'   8 8888        `8b.  ;8.`8888    8888     ,88'  8 8888   `8b.    8 8888 8 8888             8 8888        8 8888  ` 8888     ,88'   8         `Y8o.`
 #   8 888888888P'      8 888888888888 `Y8888P ,88P'     `8888888P'    8 8888     `88.  8 8888 8 8888             8 8888        8 8888     `8888888P'     8            `Yo
-Description: This CFN stack deploys an EC2 instance based MongoDB replicated over two availability zones, Lambda functions and REST API to interact with Covid data
+Description: This is Stack 03 of Cloud Engineering\Cloud Automation Concepts\Assessment 01 | DataLayerStack | This CFN stack deploys an EC2 instance based MongoDB replicated over two availability zones, Lambda functions and REST API to interact with Covid data
 
 
 
@@ -167,8 +167,7 @@ Resources:
 
 
 
-  #Description: This is a Lambda function, the prupouse of this function is to update the MongoDB database every hour by pulling data from the covid bord on GitHub 
-  #             (HERE!: Is this entierly the case?)
+  #Description: This is a Lambda function, the prupouse of this function is to update the MongoDB database every hour by pulling data from the covid bord on GitHub.
   CACAA1MongoDBDataRefresher:
     Type: AWS::Lambda::Function
     DependsOn: CACAA1MongoDBInstancePrimary                               #DO: CACAA1MongoDBInstancePrimary         (The EC2 instance that hosts the primary MongoDB database) (TODO: Replace with replica set) 
@@ -204,25 +203,6 @@ Resources:
             return response;
           };
   
-
-  # Cannot deploy event rules in AWS Educate environment, but this will work for the actual environment
-  # CACAA1RefreshCovidDataEventRule:
-  #   Type: AWS::Events::Rule
-  #   Properties: 
-  #     Description: This event rule runs every 1 hour invoking the Lambda function that pushes updated covid data to MongoDB from git repo of Broad Institute
-  #     Name: CACAA1RefreshCovidDataEventRule
-  #     RoleArn: String
-  #     ScheduleExpression: rate(1 hour)
-  #     State: ENABLED
-  #     Targets: 
-  #       - 
-  #         Arn: 
-  #           Fn::GetAtt: 
-  #             - "CACAA1MongoDBDataRefresher"
-  #             - "Arn"
-  #         Id: "TargetFunctionV1"
-
-
   #Description: This is a Lambda function, the prupouse of this function is to retrieve data from the MongoDB database, this function is used by CACAA1CovidAPI ApiGateway RestApi, 
   #             to ptovide data to (HERE!: Is this entierly the case?)
   CACAA1MongoDBDataRetriever:
@@ -262,6 +242,28 @@ Resources:
 
 
 
+# Cannot deploy event rules in AWS Educate environment, but this will work for the actual environment
+# #Description: This is a Event Rule, this is used to trigger the CACAA1MongoDBDataRetriever function once per hour.
+# CACAA1RefreshCovidDataEventRule:
+#   Type: AWS::Events::Rule
+#   Properties: 
+#     Description: This event rule runs every 1 hour invoking the Lambda function that pushes updated covid data to MongoDB from git repo of Broad Institute
+#     Name: CACAA1RefreshCovidDataEventRule
+#     RoleArn: String
+#     ScheduleExpression: rate(1 hour)
+#     State: ENABLED
+#     Targets: 
+#       - 
+#         Arn: 
+#           Fn::GetAtt: 
+#             - "CACAA1MongoDBDataRefresher"
+#             - "Arn"
+#         Id: "TargetFunctionV1"
+
+
+
+
+
   #Description: This is ApiGateway RestApi, this APi gatway's main purpouse together with the other related components is to allow users and servcies with the corect credentails
   #             to retrive data from the MongoDB database using the CACAA1MongoDBDataRetriever Lambda function.
   CACAA1CovidAPI:
@@ -284,7 +286,7 @@ Resources:
       PathPart: 'CACAA1MongoDBDataRetriever'
       RestApiId: !Ref CACAA1CovidAPI                                      #DO: CACAA1CovidAPI                       (This is the CACAA1CovidAPI ApiGateway RestApi)
 
-  #Description: This is the ApiGateway Method, this defines how the ApiGateway Resource can be interacted with / accessed, in this case the Api can be interacted with over 
+  #Description: This is a ApiGateway Method, this defines how the ApiGateway Resource can be interacted with / accessed, in this case the Api can be interacted with over 
   #             a HTTP POST request.
   CACAA1APIGatewayMethod:
     Type: AWS::ApiGateway::Method
@@ -302,12 +304,14 @@ Resources:
       ResourceId: !Ref CACAA1APIResource                                  #DO: CACAA1APIResource                    (This is the CACAA1APIResource ApiGateway Resoruce)
       RestApiId: !Ref CACAA1CovidAPI                                      #DO: CACAA1CovidAPI                       (This is the CACAA1CovidAPI ApiGateway RestApi)
 
+  #Description: This is a ApiGateway Method, this defines how the ApiGateway Resource can be interacted with / accessed, in this case the Api can be interacted with over 
+  #             a HTTP Options request.
   CACAA1CORSOptionsMethod:
     Type: AWS::ApiGateway::Method
     Properties:
       AuthorizationType: NONE
-      RestApiId: !Ref CACAA1CovidAPI
-      ResourceId: !Ref CACAA1APIResource
+      RestApiId: !Ref CACAA1CovidAPI                                      #DO: CACAA1CovidAPI                       (This is the CACAA1CovidAPI ApiGateway RestApi)
+      ResourceId: !Ref CACAA1APIResource                                  #DO: CACAA1APIResource                    (This is the CACAA1APIResource ApiGateway Resoruce)
       HttpMethod: OPTIONS
       Integration:
         IntegrationResponses:
@@ -331,7 +335,7 @@ Resources:
             method.response.header.Access-Control-Allow-Methods: false
             method.response.header.Access-Control-Allow-Origin: false
 
-  #Description: 
+  #Description: This is the ApiGateway Method, this defines the structure of requests that the ApiGateway will accept.
   CACAA1APIGatewayModel:
     Type: AWS::ApiGateway::Model
     Properties:
@@ -339,7 +343,7 @@ Resources:
       RestApiId: !Ref CACAA1CovidAPI                                      #DO: CACAA1CovidAPI                       (This is the CACAA1CovidAPI ApiGateway RestApi)
       Schema: {}
 
-  #Description: 
+  #Description: This is the ApiGateway Deployment, this deploys the ApiGateway to a stage and makes it so that API requests can be made over the internet. 
   CACAA1APIGatewayDeployment:
     Type: AWS::ApiGateway::Deployment
     DependsOn: CACAA1APIGatewayMethod
@@ -347,7 +351,7 @@ Resources:
       Description: Lambda API Deployment
       RestApiId: !Ref CACAA1CovidAPI                                      #DO: CACAA1CovidAPI                       (This is the CACAA1CovidAPI ApiGateway RestApi)
 
-  #Description: 
+  #Description: This is the ApiGateway Stage, this creates a stage where the ApiGateway can be deployed to
   CACAA1APIGatewayStage:
     Type: AWS::ApiGateway::Stage
     Properties:
@@ -360,14 +364,14 @@ Resources:
 
 
 
-  #Description: 
+  #Description: This is a Lambda Premission, this is used to give the apigateway the primission to use the CACAA1MongoDBDataRetriever function.
   CACAA1APIConfigLambdaPermission:
     Type: "AWS::Lambda::Permission"
     DependsOn:
-    - CACAA1CovidAPI
+    - CACAA1CovidAPI                                                      #DO: CACAA1CovidAPI                       (This is the CACAA1CovidAPI ApiGateway RestApi)
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: CACAA1MongoDBDataRetriever
+      FunctionName: CACAA1MongoDBDataRetriever                            #DO: CACAA1MongoDBDataRetriever           (This is a Lambda function used by the ApiGateway RestApi)
       Principal: apigateway.amazonaws.com
 
 
@@ -391,44 +395,78 @@ Resources:
 #       `8888888P'        `Y88888P'         8 8888       8 8888            `Y88888P'         8 8888     `Y8888P ,88P' 
 Outputs:
 
+  #Description: This outputs a reference to the SecurityGroup used for the MongoDB database.
+  #This value is used in the stacks:
+  # -
   MongoDBSecurityGroupRef:
     Description: Reference to the security group for MongoDB
-    Value: !Ref CACAA1MongoDBSecurityGroup
+    Value: !Ref CACAA1MongoDBSecurityGroup                                #DO: CACAA1MongoDBSecurityGroup           (The Security group used EC2 Instance that hosts MongoDB)
     Export:
       Name: DataLayerStack:MongoDBSecurityGroup
 
+  #Description: This outputs a reference to the SecurityGroup used for the VPC connected Lambdas.
+  #This value is used in the stacks:
+  # -
   LambdaVPCSecurityGroupRef:
     Description: Reference to the security group for VPC connected Lambdas
-    Value: !Ref CACAA1LambdaVPCSecurityGroup
+    Value: !Ref CACAA1LambdaVPCSecurityGroup                              #DO: CACAA1LambdaVPCSecurityGroup         (The Security group used by the Lambda functions)
     Export:
       Name: DataLayerStack:LambdaVPCSecurityGroup
 
+
+
+
+
+  #Description: This outputs a reference to the EC2 instance that is hosting the primary MongoDB database.
+  #This value is used in the stacks:
+  # -
   MongoDBPrimaryInstanceRef:
     Description: Reference to the primary MongoDB instance
-    Value: !Ref CACAA1MongoDBInstancePrimary
+    Value: !Ref CACAA1MongoDBInstancePrimary                              #DO: CACAA1MongoDBInstancePrimary         (The EC2 instance that hosts the primary MongoDB database)
     Export:
       Name: DataLayerStack:MongoDBPrimaryInstance
 
+
+
+
+
+  #Description: This outputs a reference to the IAM role that alows the holder to execute the Lambda functions: CACAA1MongoDBDataRefresher & CACAA1MongoDBDataRetriever.
+  #This value is used in the stacks:
+  # -
   LambdaExecutionRoleRef:
     Description: Reference to the execution role used by Lambdas
-    Value: !Ref CACAA1LambdaBasicRole
+    Value: !Ref CACAA1LambdaBasicRole                                     #DO: CACAA1LambdaBasicRole                (Get Amazon Resource Name of the CACAA1LambdaBasicRole IAM Role)
     Export:
       Name: DataLayerStack:LambdaExecutionRole
 
+  #Description: This outputs a reference to the Lambda function that us used to refresh the covid data in the MongoDB database by pulling up to date data from github.
+  #This value is used in the stacks:
+  # -
   LambdaDataRefresherFunctionRef:
     Description: Reference to the Lambda function resposible for refreshing the covid data in MongoDB
-    Value: !Ref CACAA1MongoDBDataRefresher
+    Value: !Ref CACAA1MongoDBDataRefresher                                #DO: CACAA1MongoDBDataRefresher           (The Lambda function that updates the MongoDB database from the covid bord on GitHub)
     Export:
       Name: DataLayerStack:LambdaDataRefresherFunction
 
+  #Description: This outputs a reference to the Lambda function that us used to retrive the covid data from the MongoDB database, this is used trough the API.
+  #This value is used in the stacks:
+  # -
   LambdaDataRetrieverFunctionRef:
     Description: Reference to the Lambda function resposible for retrieving the covid data from MongoDB
-    Value: !Ref CACAA1MongoDBDataRetriever
+    Value: !Ref CACAA1MongoDBDataRetriever                                #DO: CACAA1MongoDBDataRetriever           (The Lambda function that retrives data from the MongoDB database)
     Export:
       Name: DataLayerStack:LambdaDataRetrieverFunction
 
+
+
+
+
+  #Description: This outputs the URL of the API endpoint that allows the user to retrieve the covid data from the MongoDB database.
+  #This value is used in the stacks:
+  # -WebStack
+  # -
   CovidDataAPIEndpointURL:
     Description: The URL of the API endpoint that allows to retrieve Covid data
     Value: !Sub "https://${CACAA1CovidAPI}.execute-api.${AWS::Region}.amazonaws.com/v0/CACAA1MongoDBDataRetriever"
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", CovidDataAPIEndpointURL ] ]
+      Name: DataLayerStack:CovidDataAPIEndpointURL

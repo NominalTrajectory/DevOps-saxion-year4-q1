@@ -100,7 +100,7 @@ Resources:
 #       `8888888P'        `Y88888P'         8 8888       8 8888            `Y88888P'         8 8888     `Y8888P ,88P' 
 Outputs:
   
-  #Description: This outputs a reffernce to the SecurityGroup used by the EFS.
+  #Description: This outputs a reference to the SecurityGroup used by the EFS.
   #This value is used in the stacks:
   # -
   EFSSecurityGroupRef:
@@ -109,8 +109,9 @@ Outputs:
     Export:
       Name: EFSStack:EFSSecurityGroup
   
-  #Description: This outputs a reffernce to the Elastic File System.
+  #Description: This outputs a reference to the Elastic File System.
   #This value is used in the stacks:
+  # -WebStack
   # -
   EFSFileSystemRef:
     Description: Reference to the elastic file system 
@@ -118,7 +119,7 @@ Outputs:
     Export:
       Name: EFSStack:EFSFileSystem
 
-  #Description: This outputs a reffernce to the EFS Mount Target in the first of the four subnets and the first of the two public subnets.
+  #Description: This outputs a reference to the EFS Mount Target in the first of the four subnets and the first of the two public subnets.
   #This value is used in the stacks:
   # -
   EFSMountTarget1Ref:
@@ -127,7 +128,7 @@ Outputs:
     Export:
       Name: EFSStack:EFSMountTarget1
   
-  #Description: This outputs a reffernce to the EFS Mount Target in the second of the four subnets and the second of the two public subnets.
+  #Description: This outputs a reference to the EFS Mount Target in the second of the four subnets and the second of the two public subnets.
   #This value is used in the stacks:
   # -
   EFSMountTarget2Ref:

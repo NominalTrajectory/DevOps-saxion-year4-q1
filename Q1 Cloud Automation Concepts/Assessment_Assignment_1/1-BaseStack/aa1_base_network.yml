@@ -306,9 +306,10 @@ Resources:
 #       `8888888P'        `Y88888P'         8 8888       8 8888            `Y88888P'         8 8888     `Y8888P ,88P' 
 Outputs:
 
-  #Description: This outputs a reffernce to the VPC.
+  #Description: This outputs a reference to the VPC.
   #This value is used in the stacks:
   # -EfsStack
+  # -WebStack
   # -
   VPCRef:
     Description: Reference to the VPC
@@ -320,7 +321,7 @@ Outputs:
 
 
 
-  #Description: This outputs a reffernce to the internet gateway. 
+  #Description: This outputs a reference to the internet gateway. 
   #This value is used in the stacks:
   # - 
   InternetGatewayRef:
@@ -329,7 +330,7 @@ Outputs:
     Export:
       Name: BaseStack:InternetGateway
   
-  #Description: This outputs a reffernce to the VPCGatewayAttachment. 
+  #Description: This outputs a reference to the VPCGatewayAttachment. 
   #This value is used in the stacks:
   # - 
   VPCGatewayAttachmentRef:
@@ -342,9 +343,10 @@ Outputs:
 
 
 
-  #Description: This outputs a reffernce to the first of the four subnets and the first of the two public subnets.
+  #Description: This outputs a reference to the first of the four subnets and the first of the two public subnets.
   #This value is used in the stacks:
   # -EfsStack
+  # -WebStack
   # -
   PublicSubnet1Ref:
     Description: Reference to the first public subnet
@@ -352,9 +354,10 @@ Outputs:
     Export:
       Name: BaseStack:PublicSubnet1
 
-  #Description: This outputs a reffernce to the second of the four subnets and the second of the two public subnets.
+  #Description: This outputs a reference to the second of the four subnets and the second of the two public subnets.
   #This value is used in the stacks:
   # -EfsStack
+  # -WebStack
   # -
   PublicSubnet2Ref:
     Description: Reference to the first public subnet
@@ -362,7 +365,7 @@ Outputs:
     Export:
       Name: BaseStack:PublicSubnet2
 
-  #Description: This outputs a reffernce to the third of the four subnets and the first of the two private subnets.
+  #Description: This outputs a reference to the third of the four subnets and the first of the two private subnets.
   #This value is used in the stacks:
   # -
   PrivateSubnet1Ref:
@@ -371,7 +374,7 @@ Outputs:
     Export:
       Name: BaseStack:PrivateSubnet1
 
-  #Description: This outputs a reffernce to the fourth of the four subnets and the second of the two private subnets.
+  #Description: This outputs a reference to the fourth of the four subnets and the second of the two private subnets.
   #This value is used in the stacks:
   # -
   PrivateSubnet2Ref:
@@ -406,7 +409,7 @@ Outputs:
 
 
 
-  #Description: This outputs a reffernce to the nat gateway that connects to the private subnets.
+  #Description: This outputs a reference to the nat gateway that connects to the private subnets.
   #This value is used in the stacks:
   # -
   NatGatewayRef:
@@ -419,7 +422,7 @@ Outputs:
 
 
 
-  #Description: This outputs a reffernce to the first of two route tables and is used by the public subnets.
+  #Description: This outputs a reference to the first of two route tables and is used by the public subnets.
   #This value is used in the stacks:
   # -
   PublicRouteTableRef: 
@@ -428,7 +431,7 @@ Outputs:
     Export:
       Name: BaseStack:PublicRouteTable
 
-  #Description: This outputs a reffernce to the second of two route tables and is used by the private subnets.
+  #Description: This outputs a reference to the second of two route tables and is used by the private subnets.
   #This value is used in the stacks:
   # -
   # PrivateRouteTableRef: 
