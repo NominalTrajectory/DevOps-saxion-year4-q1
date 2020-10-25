@@ -91,7 +91,7 @@ Resources:
         - Key: Name
           Value: CACAA1TargetGroup
 
-   #Description: This is a Load Balancer listener, this receives the HTTP requests sent to the webservers via the load balancers DNS name and gives it to the Load balancer.
+  #Description: This is a Load Balancer listener, this receives the HTTP requests sent to the webservers via the load balancers DNS name and gives it to the Load balancer.
   CACAA1Listener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties: 
@@ -106,10 +106,9 @@ Resources:
 
 
 
-  #Step 5. Create a launch configuration for the EC2 instances for autoscaling group
   #TODO: Change api endpoint substitution
-  #We mount the EFS and create a directory named as the private IP of the server
-  #Then we create a cron job that automatically synchronizes nginx log directory with the directory we created in EFS, it runs every day at midnight
+  #Description: This is the autoscaler launch configuration, that is used by the Autoscaler to set up the webservers in the two public subnets which will host the website, 
+  #             will be accessed through the load balancer and will be supported by the database.
   CACAA1WebserverLaunchConfiguration: 
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
@@ -127,6 +126,10 @@ Resources:
             VolumeType: "gp2"
       SecurityGroups: 
         - !Ref CACAA1WebSecurityGroup                                     #DO: CACAA1WebSecurityGroup               (The security group for the Webservers)
+      
+      #This folwing notes are regarding the UserData:
+      # -We mount the EFS and create a directory named as the private IP of the server.
+      # -We create a cron job that automatically synchronizes nginx log directory with the directory we created in EFS, it runs every day at midnight.
       UserData:
         Fn::Base64:
           !Sub 
@@ -163,7 +166,8 @@ Resources:
 
 
 
-  #Step 6. Create an autoscaling group
+  #Description: This is the autoscaler that is in the end responsible for the setting up of the webservers in two availability zones and scaling, the amount of webservers 
+  #             scaled will depend on expected demand, with two AutoScaling ScheduledActions responsible for the scaling.
   CACAA1AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
@@ -184,7 +188,7 @@ Resources:
 
 
 
-  #Step 7. Create scheduled actions to scale out between 6pm and 8pm Amsterdam time and scale back in after that with daily recurrance
+  #Description: This is a AutoScaling ScheduledAction, this is used to make the autoscaler scale out (expand capacity) from 6pm Eastern time following expected demand.
   CACAA1AutoscalingScheduledActionOut:
     Type: AWS::AutoScaling::ScheduledAction
     Properties: 
@@ -194,6 +198,7 @@ Resources:
       MinSize: 2
       Recurrence: "0 22 * * *" # AWS uses UTC time, 18:00 Eastern time -> 22:00 UTC | Everyday scale out from 18:00
 
+  #Description: This is a AutoScaling ScheduledAction, this is used to make the autoscaler scale in (decrease capacity) from 8pm Eastern time following expected demand.
   CACAA1AutoscalingScheduledActionIn:
     Type: AWS::AutoScaling::ScheduledAction
     Properties: 
@@ -224,48 +229,87 @@ Resources:
 #       `8888888P'        `Y88888P'         8 8888       8 8888            `Y88888P'         8 8888     `Y8888P ,88P' 
 Outputs:
 
+  #Description: This outputs a reference to the security group for the Webservers.
+  #This value is used in the stacks:
+  # -
   WebSecurityGroupRef:
     Description: Reference to the webservers' security group
     Value: !Ref CACAA1WebSecurityGroup                                    #DO: CACAA1WebSecurityGroup               (The security group for the Webservers)
     Export:
       Name: WebStack:WebSecurityGroup
 
+
+
+
+  #Description: This outputs a reference to the Load balancer.
+  #This value is used in the stacks:
+  # -
   ELBRef:
     Description: Reference to the application load balancer
     Value: !Ref CACAA1ELB                                                 #DO: CACAA1ELB                            (The Load balancer)
     Export:
       Name: WebStack:ELB
 
+  #Description: This outputs a reference to the Load balancer Target group.
+  #This value is used in the stacks:
+  # -
   TargetGroupRef:
     Description: Reference to the target group
     Value: !Ref CACAA1TargetGroup                                         #DO: CACAA1TargetGroup                    (The Load balancer Target group)
     Export:
       Name: WebStack:TargetGroup
 
+  #Description: This outputs a reference to the Load balancer listner.
+  #This value is used in the stacks:
+  # -
   ListenerRef:
     Description: Reference to the listener
     Value: !Ref CACAA1Listener                                            #DO: CACAA1ELB                            (The Load balancer listner)
     Export:
       Name: WebStack:Listener
 
+
+
+
+
+  #Description: This outputs a reference to the Launch Configuration for the AutoScaler group to settup the webservers.
+  #This value is used in the stacks:
+  # -
   WebserverLaunchConfigurationRef:
     Description: Reference to the launch configuration for webservers
     Value: !Ref CACAA1WebserverLaunchConfiguration                        #DO: CACAA1WebserverLaunchConfiguration   (The Launch Configuration for the AutoScaler group to settup the webservers)
     Export:
       Name: WebStack:WebserverLaunchConfiguration
 
+
+
+
+
+  #Description: This outputs a reference to the AutoScalingGroup responsible for scaling the webserver.
+  #This value is used in the stacks:
+  # -
   AutoScalingGroupRef:
     Description: Reference to the autoscaling group for webservers
     Value: !Ref CACAA1AutoScalingGroup                                    #DO: CACAA1AutoScalingGroup               (The AutoScalingGroup responsible for scaling the webserver)
     Export:
       Name: WebStack:AutoScalingGroup
 
+
+
+
+
+  #Description: This outputs a reference to the AutoScaling schedualed action that makes the webservers scale out at the set time.
+  #This value is used in the stacks:
+  # -
   AutoscalingScheduledActionOutRef:
     Description: Reference to the scaling out action
     Value: !Ref CACAA1AutoscalingScheduledActionOut                       #DO: CACAA1AutoscalingScheduledActionOut  (The AutoScaling schedualed action that makes the webservers scale out at the set time)
     Export:
       Name: WebStack:AutoscalingScheduledActionOut
 
+  #Description: This outputs a reference to the AutoScaling schedualed action that makes the webservers scale in at the set time.
+  #This value is used in the stacks:
+  # -
   AutoscalingScheduledActionInRef:
     Description: Reference to the scaling in action
     Value: !Ref CACAA1AutoscalingScheduledActionIn                        #DO: CACAA1AutoscalingScheduledActionIn   (The AutoScaling schedualed action that makes the webservers scale in at the set time)
