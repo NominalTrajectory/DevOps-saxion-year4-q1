@@ -132,10 +132,10 @@ Resources:
       VPCZoneIdentifier:
         - !ImportValue BaseStack:PublicSubnet1
         - !ImportValue BaseStack:PublicSubnet2
-    Tags:
-      - Key: Name
-        Value: AutoscaleWebserverCovidDashboard
-        PropagateAtLaunch: true 
+      Tags:
+        - Key: Name
+          Value: AutoscaleWebserverCovidDashboard
+          PropagateAtLaunch: true 
 
 
   #Step 7. Create scheduled actions to scale out between 6pm and 8pm Amsterdam time and scale back in after that with daily recurrance
