@@ -53,7 +53,7 @@ Resources:
   CACAA1MongoDBInstancePrimary:
     Type: AWS::EC2::Instance
     Properties:
-      InstanceType: t2.small #TODO: change to m4.large
+      InstanceType: m4.large
       ImageId: ami-06b263d6ceff0b3dd
       SubnetId: !ImportValue BaseStack:PrivateSubnet1
       KeyName: CAC_Assignments
@@ -212,6 +212,35 @@ Resources:
       OperationName: 'lambda'
       ResourceId: !Ref CACAA1APIResource
       RestApiId: !Ref CACAA1CovidAPI
+
+  CACAA1CORSOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      RestApiId: !Ref CACAA1CovidAPI
+      ResourceId: !Ref CACAA1APIResource
+      HttpMethod: OPTIONS
+      Integration:
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+            method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS,GET'"
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+          ResponseTemplates:
+            application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        Type: MOCK
+      MethodResponses:
+      - StatusCode: 200
+        ResponseModels:
+          application/json: 'Empty'
+        ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
 
   CACAA1APIGatewayModel:
     Type: AWS::ApiGateway::Model

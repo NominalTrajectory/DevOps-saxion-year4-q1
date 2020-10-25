@@ -1,18 +1,6 @@
 # Ivan Shishkalov | Cloud Automation Concepts | Assessment Assignment 1
 Description: This stack deploys a load-balanced autoscaling high-available web environment serving the Broad COVID-19 dashboard 
 
-Parameters:
-
-  EFSFileSystemID:
-    Description: Please enter the ID of the EFS File system that will be used for storing webserver logs
-    Type: String
-
-  CovidDataEndpointURL:
-    Description: Please enter the url of the endpoint providing covid data (Lambda functiona)
-    Type: String
-
-#TODO: Configure MongoDB connection
-#TODO: Configure autoscaling between 6pm and 8pm (Eastern time)
 
 Resources: 
 
@@ -87,11 +75,9 @@ Resources:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
       AssociatePublicIpAddress: true
-      ClassicLinkVPCId: !ImportValue BaseStack:VPC
-      ClassicLinkVPCSecurityGroups: !Ref CACAA1WebSecurityGroup
       ImageId: ami-0947d2ba12ee1ff75 # Amazon Linux 2
       InstanceMonitoring: false # basic monitoring enabled
-      InstanceType: t3.large 
+      InstanceType: t2.micro # For production change this to t3.large
       KeyName: CAC_Assignments
       LaunchConfigurationName: CACAA1WebserverLaunchConfiguration
       PlacementTenancy: default
@@ -127,11 +113,13 @@ Resources:
               sudo cd /etc/cron.d 
               sudo su
               sudo echo "0 0 * * * root /usr/bin/rsync -a /var/log/nginx /home/ec2-user/efs-mount-nginx-logs/`hostname -I`" >> dailynginxlogsync
-          - EFSFileSystemID: !ImportValue EFSStack:EFSFileSystem
-          - CovidDataEndpointURL: !ImportValue DataLayerStack:CovidDataAPIEndpointURL
+          - EFSFileSystemID: 
+              Fn::ImportValue:
+                EFSStack:EFSFileSystem
+            CovidDataEndpointURL:
+              Fn::ImportValue:
+                DataLayerStack:CovidDataAPIEndpointURL
            
-               
-  
   #Step 6. Create an autoscaling group
   CACAA1AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -144,9 +132,11 @@ Resources:
       VPCZoneIdentifier:
         - !ImportValue BaseStack:PublicSubnet1
         - !ImportValue BaseStack:PublicSubnet2
-      Tags: 
-        - Key: Name
-          Value: CACAA1AutoScalingGroup
+    Tags:
+      - Key: Name
+        Value: AutoscaleWebserverCovidDashboard
+        PropagateAtLaunch: true 
+
 
   #Step 7. Create scheduled actions to scale out between 6pm and 8pm Amsterdam time and scale back in after that with daily recurrance
   CACAA1AutoscalingScheduledActionOut:

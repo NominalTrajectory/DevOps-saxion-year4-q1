@@ -19,5 +19,5 @@ aws lambda update-function-code --function-name CACAA1MongoDBDataRefresher --zip
 *function that allows to retrieve covid data from MongoDB
 aws lambda update-function-code --function-name CACAA1MongoDBDataRetriever --zip-file fileb://./4-Lambdas/MongoDBDataRetriever/MongoDBDataRetriever.zip
 
-
-aws events put-rule --name invoke-refresher-lambda --schedule-expression 'rate(1 hour)'
+5. Deploying the AutoscalingWebStack 
+aws cloudformation create-stack --template-body file://./5-AutoscalingWebStack/aa1_autoscaling_loadbalanced_covid_dashboard.yml --stack-name AutoscalingWebStack --capabilities CAPABILITY_NAMED_IAM
