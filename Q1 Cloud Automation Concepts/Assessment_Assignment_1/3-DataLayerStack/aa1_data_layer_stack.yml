@@ -1,21 +1,77 @@
-# Ivan Shishkalov | Cloud Automation Concepts | Assessment Assignment 1
+#   8 888888888o.      8 8888888888     d888888o.       ,o888888o.    8 888888888o.    8 8888 8 888888888o 8888888 8888888888  8 8888     ,o888888o.     b.             8
+#   8 8888    `^888.   8 8888         .`8888:' `88.    8888     `88.  8 8888    `88.   8 8888 8 8888    `88.     8 8888        8 8888  . 8888     `88.   888o.          8
+#   8 8888        `88. 8 8888         8.`8888.   Y8 ,8 8888       `8. 8 8888     `88   8 8888 8 8888     `88     8 8888        8 8888 ,8 8888       `8b  Y88888o.       8
+#   8 8888         `88 8 8888         `8.`8888.     88 8888           8 8888     ,88   8 8888 8 8888     ,88     8 8888        8 8888 88 8888        `8b .`Y888888o.    8
+#   8 8888          88 8 888888888888  `8.`8888.    88 8888           8 8888.   ,88'   8 8888 8 8888.   ,88'     8 8888        8 8888 88 8888         88 8o. `Y888888o. 8
+#   8 8888          88 8 8888           `8.`8888.   88 8888           8 888888888P'    8 8888 8 888888888P'      8 8888        8 8888 88 8888         88 8`Y8o. `Y88888o8
+#   8 8888         ,88 8 8888            `8.`8888.  88 8888           8 8888`8b        8 8888 8 8888             8 8888        8 8888 88 8888        ,8P 8   `Y8o. `Y8888
+#   8 8888        ,88' 8 8888        8b   `8.`8888. `8 8888       .8' 8 8888 `8b.      8 8888 8 8888             8 8888        8 8888 `8 8888       ,8P  8      `Y8o. `Y8
+#   8 8888    ,o88P'   8 8888        `8b.  ;8.`8888    8888     ,88'  8 8888   `8b.    8 8888 8 8888             8 8888        8 8888  ` 8888     ,88'   8         `Y8o.`
+#   8 888888888P'      8 888888888888 `Y8888P ,88P'     `8888888P'    8 8888     `88.  8 8888 8 8888             8 8888        8 8888     `8888888P'     8            `Yo
 Description: This CFN stack deploys an EC2 instance based MongoDB replicated over two availability zones, Lambda functions and REST API to interact with Covid data
 
+
+
+
+
+
+
+
+
+
+#   8 888888888o      .8.          8 888888888o.            .8.                   ,8.       ,8.          8 8888888888 8888888 8888888888 8 8888888888   8 888888888o.     d888888o.
+#   8 8888    `88.   .888.         8 8888    `88.          .888.                 ,888.     ,888.         8 8888             8 8888       8 8888         8 8888    `88.  .`8888:' `88.
+#   8 8888     `88  :88888.        8 8888     `88         :88888.               .`8888.   .`8888.        8 8888             8 8888       8 8888         8 8888     `88  8.`8888.   Y8
+#   8 8888     ,88 . `88888.       8 8888     ,88        . `88888.             ,8.`8888. ,8.`8888.       8 8888             8 8888       8 8888         8 8888     ,88  `8.`8888.
+#   8 8888.   ,88'.8. `88888.      8 8888.   ,88'       .8. `88888.           ,8'8.`8888,8^8.`8888.      8 888888888888     8 8888       8 888888888888 8 8888.   ,88'   `8.`8888.
+#   8 888888888P'.8`8. `88888.     8 888888888P'       .8`8. `88888.         ,8' `8.`8888' `8.`8888.     8 8888             8 8888       8 8888         8 888888888P'     `8.`8888.
+#   8 8888      .8' `8. `88888.    8 8888`8b          .8' `8. `88888.       ,8'   `8.`88'   `8.`8888.    8 8888             8 8888       8 8888         8 8888`8b          `8.`8888.
+#   8 8888     .8'   `8. `88888.   8 8888 `8b.       .8'   `8. `88888.     ,8'     `8.`'     `8.`8888.   8 8888             8 8888       8 8888         8 8888 `8b.    8b   `8.`8888.
+#   8 8888    .888888888. `88888.  8 8888   `8b.    .888888888. `88888.   ,8'       `8        `8.`8888.  8 8888             8 8888       8 8888         8 8888   `8b.  `8b.  ;8.`8888
+#   8 8888   .8'       `8. `88888. 8 8888     `88. .8'       `8. `88888. ,8'         `         `8.`8888. 8 888888888888     8 8888       8 888888888888 8 8888     `88. `Y8888P ,88P'
 Parameters:
 
+  #The user name  to be used for the MongoDB Database on the Instance (TODO)
   MongoDBUsername:
     Description: Please enter the username to be created in MongoDB
     Type: String
     Default: covid
+
+  #The password  to be used for the MongoDB Database on the Instance (TODO)
   MongoDBPassword:
     Description: Please enter the password to be created in MongoDB
     Type: String
     Default: covid
 
-#TODO: Configure Replica Set replication between MongoDB instances
 
+
+
+
+
+
+
+
+
+#   8 888888888o.   8 8888888888     d888888o.       ,o888888o.     8 8888      88 8 888888888o.      ,o888888o.    8 8888888888     d888888o.
+#   8 8888    `88.  8 8888         .`8888:' `88.  . 8888     `88.   8 8888      88 8 8888    `88.    8888     `88.  8 8888         .`8888:' `88.
+#   8 8888     `88  8 8888         8.`8888.   Y8 ,8 8888       `8b  8 8888      88 8 8888     `88 ,8 8888       `8. 8 8888         8.`8888.   Y8
+#   8 8888     ,88  8 8888         `8.`8888.     88 8888        `8b 8 8888      88 8 8888     ,88 88 8888           8 8888         `8.`8888.
+#   8 8888.   ,88'  8 888888888888  `8.`8888.    88 8888         88 8 8888      88 8 8888.   ,88' 88 8888           8 888888888888  `8.`8888.
+#   8 888888888P'   8 8888           `8.`8888.   88 8888         88 8 8888      88 8 888888888P'  88 8888           8 8888           `8.`8888.
+#   8 8888`8b       8 8888            `8.`8888.  88 8888        ,8P 8 8888      88 8 8888`8b      88 8888           8 8888            `8.`8888.
+#   8 8888 `8b.     8 8888        8b   `8.`8888. `8 8888       ,8P  ` 8888     ,8P 8 8888 `8b.    `8 8888       .8' 8 8888        8b   `8.`8888.
+#   8 8888   `8b.   8 8888        `8b.  ;8.`8888  ` 8888     ,88'     8888   ,d8P  8 8888   `8b.     8888     ,88'  8 8888        `8b.  ;8.`8888
+#   8 8888     `88. 8 888888888888 `Y8888P ,88P'     `8888888P'        `Y88888P'   8 8888     `88.    `8888888P'    8 888888888888 `Y8888P ,88P'
 Resources: 
 
+  #TODO: Configure Replica Set replication between MongoDB instances
+
+  #DO = Dependent on
+  #Par = Parameter
+  #Imp = Imported parameter
+
+  #Description: This is a Security Group, this is used by the EC2 instance that hosts the MongoDB database and allows all incomming tcp packets from port 27017  
+  #             (Used comunication with the MongoDB database). Also allows all outgoing packets from all ports.
   CACAA1MongoDBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties: 
@@ -26,11 +82,13 @@ Resources:
           FromPort: 27017
           ToPort: 27017
           CidrIp: 0.0.0.0/0
+      VpcId: !ImportValue BaseStack:VPC                                   #Imp: BaseStack:VPC                       (The VPC, imported from the BaseStack)
       Tags: 
         - Key: Name
           Value: CACAA1MongoDBSecurityGroup
-      VpcId: !ImportValue BaseStack:VPC
-
+  
+  #Description: This is a Security Group, this is used by the Lambda functions for interacting with the API for the MongoDB database instance and allows all incomming tcp   
+  #             packets from port 80 (Used for what? HTTP?) and port 443 (Used for what? HTTPS?). Also allows all outgoing packets from all ports.
   CACAA1LambdaVPCSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties: 
@@ -45,17 +103,23 @@ Resources:
           FromPort: 443
           ToPort: 443
           CidrIp: 0.0.0.0/0
+      VpcId: !ImportValue BaseStack:VPC                                   #Imp: BaseStack:VPC                       (The VPC, imported from the BaseStack)
       Tags: 
         - Key: Name
           Value: CACAA1LambdaVPCSecurityGroup
-      VpcId: !ImportValue BaseStack:VPC
 
+
+
+
+
+  #Description: This is a EC2 Instance, this is used to host the MongoDB database and interacts with the lambda functions and the API to be able to reciever and supply data.
+  #             In this solution the database is meant to store the collected covid data that the solution receives from users.
   CACAA1MongoDBInstancePrimary:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: m4.large
       ImageId: ami-06b263d6ceff0b3dd
-      SubnetId: !ImportValue BaseStack:PrivateSubnet1
+      SubnetId: !ImportValue BaseStack:PrivateSubnet1                     #Imp: BaseStack:PrivateSubnet1            (The first private subnet, imported from the BaseStack)
       KeyName: CAC_Assignments
       UserData: 
         Fn::Base64:
@@ -71,11 +135,16 @@ Resources:
             sudo systemctl enable mongod 
                           
       SecurityGroupIds: 
-        - !Ref CACAA1MongoDBSecurityGroup
+        - !Ref CACAA1MongoDBSecurityGroup                                 #DO: CACAA1MongoDBSecurityGroup           (The Security group used EC2 Instance that hosts MongoDB)
       Tags:
         - Key: Name
           Value: CACAA1MongoDBInstancePrimary
 
+
+
+
+
+  #Description: This is a IAM role, this is used by the Lambda functions to say that eanyone with this role gets to use that Lambda function.
   CACAA1LambdaBasicRole:
     Type: AWS::IAM::Role
     Properties:
@@ -94,14 +163,20 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonVPCCrossAccountNetworkInterfaceOperations #To be able to create a network interface for a VPC
       RoleName: CACAA1LambdaBasicRole
 
+
+
+
+
+  #Description: This is a Lambda function, the prupouse of this function is to update the MongoDB database every hour by pulling data from the covid bord on GitHub 
+  #             (HERE!: Is this entierly the case?)
   CACAA1MongoDBDataRefresher:
     Type: AWS::Lambda::Function
-    DependsOn: CACAA1MongoDBInstancePrimary #Replace with replica set 
+    DependsOn: CACAA1MongoDBInstancePrimary                               #DO: CACAA1MongoDBInstancePrimary         (The EC2 instance that hosts the primary MongoDB database) (TODO: Replace with replica set) 
     Properties:
       FunctionName: CACAA1MongoDBDataRefresher
       Description: Pull data from covid board github and save it in the MongoDB, refreshes every 1 hour
       Role:
-        Fn::GetAtt: [ CACAA1LambdaBasicRole, "Arn" ]
+        Fn::GetAtt: [ CACAA1LambdaBasicRole, "Arn" ]                      #DO: CACAA1LambdaBasicRole                (Get Amazon Resource Name of the CACAA1LambdaBasicRole IAM Role)
       Runtime: nodejs12.x
       Timeout: 120
       Environment:
@@ -114,10 +189,10 @@ Resources:
         - arn:aws:lambda:us-east-1:553035198032:layer:git-lambda2:7 # Git layer
       VpcConfig:
         SecurityGroupIds: 
-          - !Ref CACAA1LambdaVPCSecurityGroup
+          - !Ref CACAA1LambdaVPCSecurityGroup                             #DO: CACAA1LambdaVPCSecurityGroup         (The Security group used by the Lambda functions)
         SubnetIds:
-          - !ImportValue BaseStack:PrivateSubnet1
-          - !ImportValue BaseStack:PrivateSubnet2
+          - !ImportValue BaseStack:PrivateSubnet1                         #Imp: BaseStack:PrivateSubnet1            (The first private subnet, imported from the BaseStack)
+          - !ImportValue BaseStack:PrivateSubnet2                         #Imp: BaseStack:PrivateSubnet2            (The second private subnet, imported from the BaseStack)
       Code: #Dummy code below, Function code should be updated from awc cli to contain npm modules Function Zip
         ZipFile: |
           exports.handler = async (event) => {
@@ -128,32 +203,17 @@ Resources:
             };
             return response;
           };
-
-  # Cannot deploy event rules in AWS Educate environment, but this will work for the actual environment
-  # CACAA1RefreshCovidDataEventRule:
-  #   Type: AWS::Events::Rule
-  #   Properties: 
-  #     Description: This event rule runs every 1 hour invoking the Lambda function that pushes updated covid data to MongoDB from git repo of Broad Institute
-  #     Name: CACAA1RefreshCovidDataEventRule
-  #     RoleArn: String
-  #     ScheduleExpression: rate(1 hour)
-  #     State: ENABLED
-  #     Targets: 
-  #       - 
-  #         Arn: 
-  #           Fn::GetAtt: 
-  #             - "CACAA1MongoDBDataRefresher"
-  #             - "Arn"
-  #         Id: "TargetFunctionV1"
-      
+  
+  #Description: This is a Lambda function, the prupouse of this function is to retrieve data from the MongoDB database, this function is used by CACAA1CovidAPI ApiGateway RestApi, 
+  #             to ptovide data to (HERE!: Is this entierly the case?)
   CACAA1MongoDBDataRetriever:
     Type: AWS::Lambda::Function
-    DependsOn: CACAA1MongoDBInstancePrimary #Replace with replica set 
+    DependsOn: CACAA1MongoDBInstancePrimary                               #DO: CACAA1MongoDBInstancePrimary         (The EC2 instance that hosts the primary MongoDB database) (TODO: Replace with replica set) 
     Properties:
       FunctionName: CACAA1MongoDBDataRetriever
       Description: Retrieve covid tests data from MongoDB
       Role:
-        Fn::GetAtt: [ CACAA1LambdaBasicRole, "Arn" ]
+        Fn::GetAtt: [ CACAA1LambdaBasicRole, "Arn" ]                      #DO: CACAA1LambdaBasicRole                (Get Amazon Resource Name of the CACAA1LambdaBasicRole IAM Role)
       Runtime: nodejs12.x
       Timeout: 120
       Environment:
@@ -164,10 +224,10 @@ Resources:
       Handler: index.handler
       VpcConfig:
         SecurityGroupIds: 
-          - !Ref CACAA1LambdaVPCSecurityGroup
+          - !Ref CACAA1LambdaVPCSecurityGroup                             #DO: CACAA1LambdaVPCSecurityGroup         (The Security group used by the Lambda functions)
         SubnetIds:
-          - !ImportValue BaseStack:PrivateSubnet1
-          - !ImportValue BaseStack:PrivateSubnet2
+          - !ImportValue BaseStack:PrivateSubnet1                         #Imp: BaseStack:PrivateSubnet1            (The first private subnet, imported from the BaseStack)
+          - !ImportValue BaseStack:PrivateSubnet2                         #Imp: BaseStack:PrivateSubnet2            (The second private subnet, imported from the BaseStack)
       Code: #Dummy code below, Function code should be updated from awc cli to contain npm modules Function Zip
         ZipFile: |
           exports.handler = async (event) => {
@@ -179,10 +239,16 @@ Resources:
             return response;
           }; 
 
+
+
+
+
+  #Description: This is ApiGateway RestApi, this APi gatway's main purpouse together with the other related components is to allow users and servcies with the corect credentails
+  #             to retrive data from the MongoDB database using the CACAA1MongoDBDataRetriever Lambda function.
   CACAA1CovidAPI:
     Type: AWS::ApiGateway::RestApi
     DependsOn:
-      - CACAA1MongoDBDataRetriever
+      - CACAA1MongoDBDataRetriever                                        #DO: CACAA1MongoDBDataRetriever           (This is a Lambda function used by the ApiGateway RestApi)
     Properties:
       Description: An API Gateway that allows to retrieve Covid data from MongoDB
       EndpointConfiguration:
@@ -190,13 +256,16 @@ Resources:
           - REGIONAL
       Name: CACAA1CovidAPI
 
+  #Description: This is the ApiGateway Resource, this acts as a endpoint for the API.
   CACAA1APIResource:
     Type: AWS::ApiGateway::Resource
     Properties:
-      ParentId: !GetAtt CACAA1CovidAPI.RootResourceId
+      ParentId: Fn::GetAtt: [ CACAA1CovidAPI, "RootResourceId" ]          #DO: CACAA1CovidAPI                       (Get RootResourceId of the CACAA1CovidAPI ApiGateway RestApi)
       PathPart: 'CACAA1MongoDBDataRetriever'
-      RestApiId: !Ref CACAA1CovidAPI
+      RestApiId: !Ref CACAA1CovidAPI                                      #DO: CACAA1CovidAPI                       (This is the CACAA1CovidAPI ApiGateway RestApi)
 
+  #Description: This is the ApiGateway Method, this defines how the ApiGateway Resource can be interacted with / accessed, in this case the Api can be interacted with over 
+  #             a HTTP POST request.
   CACAA1APIGatewayMethod:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -210,60 +279,39 @@ Resources:
         Type: AWS_PROXY
         Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CACAA1MongoDBDataRetriever.Arn}/invocations'
       OperationName: 'lambda'
-      ResourceId: !Ref CACAA1APIResource
-      RestApiId: !Ref CACAA1CovidAPI
+      ResourceId: !Ref CACAA1APIResource                                  #DO: CACAA1APIResource                    (This is the CACAA1APIResource ApiGateway Resoruce)
+      RestApiId: !Ref CACAA1CovidAPI                                      #DO: CACAA1CovidAPI                       (This is the CACAA1CovidAPI ApiGateway RestApi)
 
-  CACAA1CORSOptionsMethod:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      AuthorizationType: NONE
-      RestApiId: !Ref CACAA1CovidAPI
-      ResourceId: !Ref CACAA1APIResource
-      HttpMethod: OPTIONS
-      Integration:
-        IntegrationResponses:
-        - StatusCode: 200
-          ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-            method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS,GET'"
-            method.response.header.Access-Control-Allow-Origin: "'*'"
-          ResponseTemplates:
-            application/json: ''
-        PassthroughBehavior: WHEN_NO_MATCH
-        RequestTemplates:
-          application/json: '{"statusCode": 200}'
-        Type: MOCK
-      MethodResponses:
-      - StatusCode: 200
-        ResponseModels:
-          application/json: 'Empty'
-        ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: false
-            method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
-
+  #Description: 
   CACAA1APIGatewayModel:
     Type: AWS::ApiGateway::Model
     Properties:
       ContentType: 'application/json'
-      RestApiId: !Ref CACAA1CovidAPI
+      RestApiId: !Ref CACAA1CovidAPI                                      #DO: CACAA1CovidAPI                       (This is the CACAA1CovidAPI ApiGateway RestApi)
       Schema: {}
 
-  CACAA1APIGatewayStage:
-    Type: AWS::ApiGateway::Stage
-    Properties:
-      DeploymentId: !Ref CACAA1APIGatewayDeployment
-      Description: Lambda API Stage v0
-      RestApiId: !Ref CACAA1CovidAPI
-      StageName: 'v0'
-
+  #Description: 
   CACAA1APIGatewayDeployment:
     Type: AWS::ApiGateway::Deployment
     DependsOn: CACAA1APIGatewayMethod
     Properties:
       Description: Lambda API Deployment
-      RestApiId: !Ref CACAA1CovidAPI
+      RestApiId: !Ref CACAA1CovidAPI                                      #DO: CACAA1CovidAPI                       (This is the CACAA1CovidAPI ApiGateway RestApi)
 
+  #Description: 
+  CACAA1APIGatewayStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      DeploymentId: !Ref CACAA1APIGatewayDeployment
+      Description: Lambda API Stage v0
+      RestApiId: !Ref CACAA1CovidAPI                                      #DO: CACAA1CovidAPI                       (This is the CACAA1CovidAPI ApiGateway RestApi)
+      StageName: 'v0'
+
+
+
+
+
+  #Description: 
   CACAA1APIConfigLambdaPermission:
     Type: "AWS::Lambda::Permission"
     DependsOn:
@@ -273,43 +321,62 @@ Resources:
       FunctionName: CACAA1MongoDBDataRetriever
       Principal: apigateway.amazonaws.com
 
+
+
+
+
+
+
+
+
+                                                                                                              
+#       ,o888888o.     8 8888      88 8888888 8888888888 8 888888888o   8 8888      88 8888888 8888888888 d888888o.   
+#    . 8888     `88.   8 8888      88       8 8888       8 8888    `88. 8 8888      88       8 8888     .`8888:' `88. 
+#   ,8 8888       `8b  8 8888      88       8 8888       8 8888     `88 8 8888      88       8 8888     8.`8888.   Y8 
+#   88 8888        `8b 8 8888      88       8 8888       8 8888     ,88 8 8888      88       8 8888     `8.`8888.     
+#   88 8888         88 8 8888      88       8 8888       8 8888.   ,88' 8 8888      88       8 8888      `8.`8888.    
+#   88 8888         88 8 8888      88       8 8888       8 888888888P'  8 8888      88       8 8888       `8.`8888.   
+#   88 8888        ,8P 8 8888      88       8 8888       8 8888         8 8888      88       8 8888        `8.`8888.  
+#   `8 8888       ,8P  ` 8888     ,8P       8 8888       8 8888         ` 8888     ,8P       8 8888    8b   `8.`8888. 
+#    ` 8888     ,88'     8888   ,d8P        8 8888       8 8888           8888   ,d8P        8 8888    `8b.  ;8.`8888 
+#       `8888888P'        `Y88888P'         8 8888       8 8888            `Y88888P'         8 8888     `Y8888P ,88P' 
 Outputs:
 
   MongoDBSecurityGroupRef:
     Description: Reference to the security group for MongoDB
     Value: !Ref CACAA1MongoDBSecurityGroup
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", MongoDBSecurityGroup ] ]
+      Name: DataStack01:MongoDBSecurityGroup
 
   LambdaVPCSecurityGroupRef:
     Description: Reference to the security group for VPC connected Lambdas
     Value: !Ref CACAA1LambdaVPCSecurityGroup
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", LambdaVPCSecurityGroup ] ]
+      Name: DataStack01:LambdaVPCSecurityGroup
 
   MongoDBPrimaryInstanceRef:
     Description: Reference to the primary MongoDB instance
     Value: !Ref CACAA1MongoDBInstancePrimary
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", MongoDBPrimaryInstance ] ]
+      Name: DataStack01:MongoDBPrimaryInstance
 
   LambdaExecutionRoleRef:
     Description: Reference to the execution role used by Lambdas
     Value: !Ref CACAA1LambdaBasicRole
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", LambdaExecutionRole ] ]
+      Name: DataStack01:LambdaExecutionRole
 
   LambdaDataRefresherFunctionRef:
     Description: Reference to the Lambda function resposible for refreshing the covid data in MongoDB
     Value: !Ref CACAA1MongoDBDataRefresher
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", LambdaDataRefresherFunction ] ]
+      Name: DataStack01:LambdaDataRefresherFunction
 
   LambdaDataRetrieverFunctionRef:
     Description: Reference to the Lambda function resposible for retrieving the covid data from MongoDB
     Value: !Ref CACAA1MongoDBDataRetriever
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", LambdaDataRetrieverFunction ] ]
+      Name: DataStack01:LambdaDataRetrieverFunction
 
   CovidDataAPIEndpointURL:
     Description: The URL of the API endpoint that allows to retrieve Covid data
