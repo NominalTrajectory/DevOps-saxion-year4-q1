@@ -1,10 +1,42 @@
-# Ivan Shishkalov | Cloud Automation Concepts | Assessment Assignment 1
-Description: This stack deploys a load-balanced autoscaling high-available web environment serving the Broad COVID-19 dashboard 
+#   8 888888888o.      8 8888888888     d888888o.       ,o888888o.    8 888888888o.    8 8888 8 888888888o 8888888 8888888888  8 8888     ,o888888o.     b.             8
+#   8 8888    `^888.   8 8888         .`8888:' `88.    8888     `88.  8 8888    `88.   8 8888 8 8888    `88.     8 8888        8 8888  . 8888     `88.   888o.          8
+#   8 8888        `88. 8 8888         8.`8888.   Y8 ,8 8888       `8. 8 8888     `88   8 8888 8 8888     `88     8 8888        8 8888 ,8 8888       `8b  Y88888o.       8
+#   8 8888         `88 8 8888         `8.`8888.     88 8888           8 8888     ,88   8 8888 8 8888     ,88     8 8888        8 8888 88 8888        `8b .`Y888888o.    8
+#   8 8888          88 8 888888888888  `8.`8888.    88 8888           8 8888.   ,88'   8 8888 8 8888.   ,88'     8 8888        8 8888 88 8888         88 8o. `Y888888o. 8
+#   8 8888          88 8 8888           `8.`8888.   88 8888           8 888888888P'    8 8888 8 888888888P'      8 8888        8 8888 88 8888         88 8`Y8o. `Y88888o8
+#   8 8888         ,88 8 8888            `8.`8888.  88 8888           8 8888`8b        8 8888 8 8888             8 8888        8 8888 88 8888        ,8P 8   `Y8o. `Y8888
+#   8 8888        ,88' 8 8888        8b   `8.`8888. `8 8888       .8' 8 8888 `8b.      8 8888 8 8888             8 8888        8 8888 `8 8888       ,8P  8      `Y8o. `Y8
+#   8 8888    ,o88P'   8 8888        `8b.  ;8.`8888    8888     ,88'  8 8888   `8b.    8 8888 8 8888             8 8888        8 8888  ` 8888     ,88'   8         `Y8o.`
+#   8 888888888P'      8 888888888888 `Y8888P ,88P'     `8888888P'    8 8888     `88.  8 8888 8 8888             8 8888        8 8888     `8888888P'     8            `Yo
+Description: This is Stack 04 of Cloud Engineering\Cloud Automation Concepts\Assessment 01 | WebStack | This stack deploys a load-balanced autoscaling high-available web environment serving the Broad COVID-19 dashboard 
 
 
+
+
+
+
+
+
+
+
+#   8 888888888o.   8 8888888888     d888888o.       ,o888888o.     8 8888      88 8 888888888o.      ,o888888o.    8 8888888888     d888888o.
+#   8 8888    `88.  8 8888         .`8888:' `88.  . 8888     `88.   8 8888      88 8 8888    `88.    8888     `88.  8 8888         .`8888:' `88.
+#   8 8888     `88  8 8888         8.`8888.   Y8 ,8 8888       `8b  8 8888      88 8 8888     `88 ,8 8888       `8. 8 8888         8.`8888.   Y8
+#   8 8888     ,88  8 8888         `8.`8888.     88 8888        `8b 8 8888      88 8 8888     ,88 88 8888           8 8888         `8.`8888.
+#   8 8888.   ,88'  8 888888888888  `8.`8888.    88 8888         88 8 8888      88 8 8888.   ,88' 88 8888           8 888888888888  `8.`8888.
+#   8 888888888P'   8 8888           `8.`8888.   88 8888         88 8 8888      88 8 888888888P'  88 8888           8 8888           `8.`8888.
+#   8 8888`8b       8 8888            `8.`8888.  88 8888        ,8P 8 8888      88 8 8888`8b      88 8888           8 8888            `8.`8888.
+#   8 8888 `8b.     8 8888        8b   `8.`8888. `8 8888       ,8P  ` 8888     ,8P 8 8888 `8b.    `8 8888       .8' 8 8888        8b   `8.`8888.
+#   8 8888   `8b.   8 8888        `8b.  ;8.`8888  ` 8888     ,88'     8888   ,d8P  8 8888   `8b.     8888     ,88'  8 8888        `8b.  ;8.`8888
+#   8 8888     `88. 8 888888888888 `Y8888P ,88P'     `8888888P'        `Y88888P'   8 8888     `88.    `8888888P'    8 888888888888 `Y8888P ,88P'
 Resources: 
 
-  #Step 1. Create a security group for the webservers
+  #DO = Dependent on
+  #Par = Parameter
+  #Imp = Imported parameter
+
+  #Description: This is a Security Group, this is used by the Launch Configuration for the AutoScaler group to settup the webservers and allows all incomming  
+  #             tcp packets from port 80 (HTTP), port 443 (HTTPS) and port 22 (SSH), and allows all outgoing packets from all ports.
   CACAA1WebSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties: 
@@ -23,12 +55,15 @@ Resources:
           FromPort: 22
           ToPort: 22
           CidrIp: 0.0.0.0/0
+      VpcId: !ImportValue BaseStack:VPC                                   #Imp: BaseStack:VPC                       (The VPC imported from the BaseStack)
       Tags: 
         - Key: Name
           Value: CACAA1WebSecurityGroup
-      VpcId: !ImportValue BaseStack:VPC
     
-  #Step 2. Create an application load balancer 
+
+
+
+  #Description: This is a Load Balancer, this is connected to the two Public subnets and load balances the auto scaled webservers in the public subnets.
   CACAA1ELB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
@@ -36,41 +71,44 @@ Resources:
       Type: application
       Scheme: internet-facing
       SecurityGroups: 
-        - !Ref CACAA1WebSecurityGroup
+        - !Ref CACAA1WebSecurityGroup                                     #DO: CACAA1WebSecurityGroup               (The security group for the Webservers)
       Subnets: 
-        - !ImportValue BaseStack:PublicSubnet1
-        - !ImportValue BaseStack:PublicSubnet2
+        - !ImportValue BaseStack:PublicSubnet1                            #Imp: BaseStack:PublicSubnet1             (The first public subnet imported from the BaseStack)
+        - !ImportValue BaseStack:PublicSubnet2                            #Imp: BaseStack:PublicSubnet2             (The second public subnet imported from the BaseStack)
       Tags: 
         - Key: Name
           Value: CACAA1ELB
 
-  #Step 3. Create a target group (initially it's empty, but will be populated by an autoscaling group)
+  #Description: This is a Load Balancer Target group, this is used by the load balancer HTTP listener and allows sets it up to received HTTP requests over port 80.
   CACAA1TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       Name: CACAA1TargetGroup
       Port: 80
       Protocol: HTTP
-      VpcId: !ImportValue BaseStack:VPC
+      VpcId: !ImportValue BaseStack:VPC                                   #Imp: BaseStack:VPC                       (The VPC imported from the BaseStack)
       Tags: 
         - Key: Name
           Value: CACAA1TargetGroup
-  
-  #Step 4. Create an HTTP Listener pointing to the target group
+
+  #Description: This is a Load Balancer listener, this receives the HTTP requests sent to the webservers via the load balancers DNS name and gives it to the Load balancer.
   CACAA1Listener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties: 
       DefaultActions: 
         - Type: forward
-          TargetGroupArn: !Ref CACAA1TargetGroup
-      LoadBalancerArn: !Ref CACAA1ELB
+          TargetGroupArn: !Ref CACAA1TargetGroup                          #DO: CACAA1TargetGroup                    (The Load balancer Target group)
+      LoadBalancerArn: !Ref CACAA1ELB                                     #DO: CACAA1ELB                            (The Load balancer)
       Port: 80
       Protocol: HTTP
 
-  #Step 5. Create a launch configuration for the EC2 instances for autoscaling group
+
+
+
+
   #TODO: Change api endpoint substitution
-  #We mount the EFS and create a directory named as the private IP of the server
-  #Then we create a cron job that automatically synchronizes nginx log directory with the directory we created in EFS, it runs every day at midnight
+  #Description: This is the autoscaler launch configuration, that is used by the Autoscaler to set up the webservers in the two public subnets which will host the website, 
+  #             will be accessed through the load balancer and will be supported by the database.
   CACAA1WebserverLaunchConfiguration: 
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
@@ -87,7 +125,11 @@ Resources:
             VolumeSize: 30
             VolumeType: "gp2"
       SecurityGroups: 
-        - !Ref CACAA1WebSecurityGroup
+        - !Ref CACAA1WebSecurityGroup                                     #DO: CACAA1WebSecurityGroup               (The security group for the Webservers)
+      
+      #This folwing notes are regarding the UserData:
+      # -We mount the EFS and create a directory named as the private IP of the server.
+      # -We create a cron job that automatically synchronizes nginx log directory with the directory we created in EFS, it runs every day at midnight.
       UserData:
         Fn::Base64:
           !Sub 
@@ -115,97 +157,164 @@ Resources:
               sudo echo "0 0 * * * root /usr/bin/rsync -a /var/log/nginx /home/ec2-user/efs-mount-nginx-logs/`hostname -I`" >> dailynginxlogsync
           - EFSFileSystemID: 
               Fn::ImportValue:
-                EFSStack:EFSFileSystem
+                EFSStack:EFSFileSystem                                    #Imp: EFSStack:EFSFileSystem              (The EFSFileSystem imported from the EFSStack)
             CovidDataEndpointURL:
               Fn::ImportValue:
-                DataLayerStack:CovidDataAPIEndpointURL
-           
-  #Step 6. Create an autoscaling group
+                DataLayerStack:CovidDataAPIEndpointURL                    #Imp: DataLayerStack:CovidDataAPIEndpointURL  (The API endpoint URL imported from the DataLayerStack)
+
+
+
+
+
+  #Description: This is the autoscaler that is in the end responsible for the setting up of the webservers in two availability zones and scaling, the amount of webservers 
+  #             scaled will depend on expected demand, with two AutoScaling ScheduledActions responsible for the scaling.
   CACAA1AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
-      LaunchConfigurationName: !Ref CACAA1WebserverLaunchConfiguration
+      LaunchConfigurationName: !Ref CACAA1WebserverLaunchConfiguration    #DO: CACAA1WebserverLaunchConfiguration   (The Launch Configuration for the AutoScaler group to settup the webservers)
       MinSize: 2
       MaxSize: 6
       TargetGroupARNs: 
-        - !Ref CACAA1TargetGroup
+        - !Ref CACAA1TargetGroup                                          #DO: CACAA1TargetGroup                    (The Load balancer Target group)
       VPCZoneIdentifier:
-        - !ImportValue BaseStack:PublicSubnet1
-        - !ImportValue BaseStack:PublicSubnet2
+        - !ImportValue BaseStack:PublicSubnet1                            #Imp: BaseStack:PublicSubnet1             (The first public subnet imported from the BaseStack)
+        - !ImportValue BaseStack:PublicSubnet2                            #Imp: BaseStack:PublicSubnet2             (The second public subnet imported from the BaseStack)
       Tags:
         - Key: Name
           Value: AutoscaleWebserverCovidDashboard
           PropagateAtLaunch: true 
 
 
-  #Step 7. Create scheduled actions to scale out between 6pm and 8pm Amsterdam time and scale back in after that with daily recurrance
+
+
+
+  #Description: This is a AutoScaling ScheduledAction, this is used to make the autoscaler scale out (expand capacity) from 6pm Eastern time following expected demand.
   CACAA1AutoscalingScheduledActionOut:
     Type: AWS::AutoScaling::ScheduledAction
     Properties: 
-      AutoScalingGroupName: !Ref CACAA1AutoScalingGroup
+      AutoScalingGroupName: !Ref CACAA1AutoScalingGroup                   #DO: CACAA1AutoScalingGroup               (The AutoScalingGroup responsible for scaling the webserver)
       DesiredCapacity: 6
       MaxSize: 6
       MinSize: 2
       Recurrence: "0 22 * * *" # AWS uses UTC time, 18:00 Eastern time -> 22:00 UTC | Everyday scale out from 18:00
 
+  #Description: This is a AutoScaling ScheduledAction, this is used to make the autoscaler scale in (decrease capacity) from 8pm Eastern time following expected demand.
   CACAA1AutoscalingScheduledActionIn:
     Type: AWS::AutoScaling::ScheduledAction
     Properties: 
-      AutoScalingGroupName: !Ref CACAA1AutoScalingGroup
+      AutoScalingGroupName: !Ref CACAA1AutoScalingGroup                   #DO: CACAA1AutoScalingGroup               (The AutoScalingGroup responsible for scaling the webserver)
       DesiredCapacity: 2
       MaxSize: 2
       MinSize: 2
       Recurrence: "0 0 * * *" # AWS uses UTC time, 20:00 Eastern time -> 00:00 UTC | Everyday scale in from 20:00
 
+
+
+
+
+
+
+
+
+                                                                                                              
+#       ,o888888o.     8 8888      88 8888888 8888888888 8 888888888o   8 8888      88 8888888 8888888888 d888888o.   
+#    . 8888     `88.   8 8888      88       8 8888       8 8888    `88. 8 8888      88       8 8888     .`8888:' `88. 
+#   ,8 8888       `8b  8 8888      88       8 8888       8 8888     `88 8 8888      88       8 8888     8.`8888.   Y8 
+#   88 8888        `8b 8 8888      88       8 8888       8 8888     ,88 8 8888      88       8 8888     `8.`8888.     
+#   88 8888         88 8 8888      88       8 8888       8 8888.   ,88' 8 8888      88       8 8888      `8.`8888.    
+#   88 8888         88 8 8888      88       8 8888       8 888888888P'  8 8888      88       8 8888       `8.`8888.   
+#   88 8888        ,8P 8 8888      88       8 8888       8 8888         8 8888      88       8 8888        `8.`8888.  
+#   `8 8888       ,8P  ` 8888     ,8P       8 8888       8 8888         ` 8888     ,8P       8 8888    8b   `8.`8888. 
+#    ` 8888     ,88'     8888   ,d8P        8 8888       8 8888           8888   ,d8P        8 8888    `8b.  ;8.`8888 
+#       `8888888P'        `Y88888P'         8 8888       8 8888            `Y88888P'         8 8888     `Y8888P ,88P' 
 Outputs:
 
+  #Description: This outputs a reference to the security group for the Webservers.
+  #This value is used in the stacks:
+  # -
   WebSecurityGroupRef:
     Description: Reference to the webservers' security group
-    Value: !Ref CACAA1WebSecurityGroup
+    Value: !Ref CACAA1WebSecurityGroup                                    #DO: CACAA1WebSecurityGroup               (The security group for the Webservers)
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", WebSecurityGroup ] ]
+      Name: WebStack:WebSecurityGroup
 
+
+
+
+  #Description: This outputs a reference to the Load balancer.
+  #This value is used in the stacks:
+  # -
   ELBRef:
     Description: Reference to the application load balancer
-    Value: !Ref CACAA1ELB
+    Value: !Ref CACAA1ELB                                                 #DO: CACAA1ELB                            (The Load balancer)
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", ELB ] ]
+      Name: WebStack:ELB
 
+  #Description: This outputs a reference to the Load balancer Target group.
+  #This value is used in the stacks:
+  # -
   TargetGroupRef:
     Description: Reference to the target group
-    Value: !Ref CACAA1TargetGroup
+    Value: !Ref CACAA1TargetGroup                                         #DO: CACAA1TargetGroup                    (The Load balancer Target group)
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", TargetGroup ] ]
+      Name: WebStack:TargetGroup
 
+  #Description: This outputs a reference to the Load balancer listner.
+  #This value is used in the stacks:
+  # -
   ListenerRef:
     Description: Reference to the listener
-    Value: !Ref CACAA1Listener
+    Value: !Ref CACAA1Listener                                            #DO: CACAA1ELB                            (The Load balancer listner)
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", Listener ] ]
+      Name: WebStack:Listener
 
+
+
+
+
+  #Description: This outputs a reference to the Launch Configuration for the AutoScaler group to settup the webservers.
+  #This value is used in the stacks:
+  # -
   WebserverLaunchConfigurationRef:
     Description: Reference to the launch configuration for webservers
-    Value: !Ref CACAA1WebserverLaunchConfiguration
+    Value: !Ref CACAA1WebserverLaunchConfiguration                        #DO: CACAA1WebserverLaunchConfiguration   (The Launch Configuration for the AutoScaler group to settup the webservers)
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", WebserverLaunchConfiguration ] ]
+      Name: WebStack:WebserverLaunchConfiguration
 
+
+
+
+
+  #Description: This outputs a reference to the AutoScalingGroup responsible for scaling the webserver.
+  #This value is used in the stacks:
+  # -
   AutoScalingGroupRef:
     Description: Reference to the autoscaling group for webservers
-    Value: !Ref CACAA1AutoScalingGroup
+    Value: !Ref CACAA1AutoScalingGroup                                    #DO: CACAA1AutoScalingGroup               (The AutoScalingGroup responsible for scaling the webserver)
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", AutoScalingGroup ] ]
+      Name: WebStack:AutoScalingGroup
 
+
+
+
+
+  #Description: This outputs a reference to the AutoScaling schedualed action that makes the webservers scale out at the set time.
+  #This value is used in the stacks:
+  # -
   AutoscalingScheduledActionOutRef:
     Description: Reference to the scaling out action
-    Value: !Ref CACAA1AutoscalingScheduledActionOut
+    Value: !Ref CACAA1AutoscalingScheduledActionOut                       #DO: CACAA1AutoscalingScheduledActionOut  (The AutoScaling schedualed action that makes the webservers scale out at the set time)
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", AutoscalingScheduledActionOut ] ]
+      Name: WebStack:AutoscalingScheduledActionOut
 
+  #Description: This outputs a reference to the AutoScaling schedualed action that makes the webservers scale in at the set time.
+  #This value is used in the stacks:
+  # -
   AutoscalingScheduledActionInRef:
     Description: Reference to the scaling in action
-    Value: !Ref CACAA1AutoscalingScheduledActionIn
+    Value: !Ref CACAA1AutoscalingScheduledActionIn                        #DO: CACAA1AutoscalingScheduledActionIn   (The AutoScaling schedualed action that makes the webservers scale in at the set time)
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", AutoscalingScheduledActionIn ] ]
+      Name: WebStack:AutoscalingScheduledActionIn
 
 
   

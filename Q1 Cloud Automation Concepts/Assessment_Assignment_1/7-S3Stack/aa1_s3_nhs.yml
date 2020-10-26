@@ -1,5 +1,34 @@
-Description: This stack deploys an S3 bucket and hosts the COVID-19 test registration form provided by NHS
+#   8 888888888o.      8 8888888888     d888888o.       ,o888888o.    8 888888888o.    8 8888 8 888888888o 8888888 8888888888  8 8888     ,o888888o.     b.             8
+#   8 8888    `^888.   8 8888         .`8888:' `88.    8888     `88.  8 8888    `88.   8 8888 8 8888    `88.     8 8888        8 8888  . 8888     `88.   888o.          8
+#   8 8888        `88. 8 8888         8.`8888.   Y8 ,8 8888       `8. 8 8888     `88   8 8888 8 8888     `88     8 8888        8 8888 ,8 8888       `8b  Y88888o.       8
+#   8 8888         `88 8 8888         `8.`8888.     88 8888           8 8888     ,88   8 8888 8 8888     ,88     8 8888        8 8888 88 8888        `8b .`Y888888o.    8
+#   8 8888          88 8 888888888888  `8.`8888.    88 8888           8 8888.   ,88'   8 8888 8 8888.   ,88'     8 8888        8 8888 88 8888         88 8o. `Y888888o. 8
+#   8 8888          88 8 8888           `8.`8888.   88 8888           8 888888888P'    8 8888 8 888888888P'      8 8888        8 8888 88 8888         88 8`Y8o. `Y88888o8
+#   8 8888         ,88 8 8888            `8.`8888.  88 8888           8 8888`8b        8 8888 8 8888             8 8888        8 8888 88 8888        ,8P 8   `Y8o. `Y8888
+#   8 8888        ,88' 8 8888        8b   `8.`8888. `8 8888       .8' 8 8888 `8b.      8 8888 8 8888             8 8888        8 8888 `8 8888       ,8P  8      `Y8o. `Y8
+#   8 8888    ,o88P'   8 8888        `8b.  ;8.`8888    8888     ,88'  8 8888   `8b.    8 8888 8 8888             8 8888        8 8888  ` 8888     ,88'   8         `Y8o.`
+#   8 888888888P'      8 888888888888 `Y8888P ,88P'     `8888888P'    8 8888     `88.  8 8888 8 8888             8 8888        8 8888     `8888888P'     8            `Yo
+Description: This is Stack 06 of Cloud Engineering\Cloud Automation Concepts\Assessment 01 | S3Stack | This stack deploys an S3 bucket and hosts the COVID-19 test registration form provided by NHS
 
+
+
+
+
+
+
+
+
+
+#   8 888888888o      .8.          8 888888888o.            .8.                   ,8.       ,8.          8 8888888888 8888888 8888888888 8 8888888888   8 888888888o.     d888888o.
+#   8 8888    `88.   .888.         8 8888    `88.          .888.                 ,888.     ,888.         8 8888             8 8888       8 8888         8 8888    `88.  .`8888:' `88.
+#   8 8888     `88  :88888.        8 8888     `88         :88888.               .`8888.   .`8888.        8 8888             8 8888       8 8888         8 8888     `88  8.`8888.   Y8
+#   8 8888     ,88 . `88888.       8 8888     ,88        . `88888.             ,8.`8888. ,8.`8888.       8 8888             8 8888       8 8888         8 8888     ,88  `8.`8888.
+#   8 8888.   ,88'.8. `88888.      8 8888.   ,88'       .8. `88888.           ,8'8.`8888,8^8.`8888.      8 888888888888     8 8888       8 888888888888 8 8888.   ,88'   `8.`8888.
+#   8 888888888P'.8`8. `88888.     8 888888888P'       .8`8. `88888.         ,8' `8.`8888' `8.`8888.     8 8888             8 8888       8 8888         8 888888888P'     `8.`8888.
+#   8 8888      .8' `8. `88888.    8 8888`8b          .8' `8. `88888.       ,8'   `8.`88'   `8.`8888.    8 8888             8 8888       8 8888         8 8888`8b          `8.`8888.
+#   8 8888     .8'   `8. `88888.   8 8888 `8b.       .8'   `8. `88888.     ,8'     `8.`'     `8.`8888.   8 8888             8 8888       8 8888         8 8888 `8b.    8b   `8.`8888.
+#   8 8888    .888888888. `88888.  8 8888   `8b.    .888888888. `88888.   ,8'       `8        `8.`8888.  8 8888             8 8888       8 8888         8 8888   `8b.  `8b.  ;8.`8888
+#   8 8888   .8'       `8. `88888. 8 8888     `88. .8'       `8. `88888. ,8'         `         `8.`8888. 8 888888888888     8 8888       8 888888888888 8 8888     `88. `Y8888P ,88P'
 Parameters:
 
   GitRepositoryWithNHSForm:
@@ -12,8 +41,28 @@ Parameters:
     Type: String
     Default: cac-aa1-static-website-covid-game
 
+
+
+
+
+
+
+
+
+
+#   8 888888888o.   8 8888888888     d888888o.       ,o888888o.     8 8888      88 8 888888888o.      ,o888888o.    8 8888888888     d888888o.
+#   8 8888    `88.  8 8888         .`8888:' `88.  . 8888     `88.   8 8888      88 8 8888    `88.    8888     `88.  8 8888         .`8888:' `88.
+#   8 8888     `88  8 8888         8.`8888.   Y8 ,8 8888       `8b  8 8888      88 8 8888     `88 ,8 8888       `8. 8 8888         8.`8888.   Y8
+#   8 8888     ,88  8 8888         `8.`8888.     88 8888        `8b 8 8888      88 8 8888     ,88 88 8888           8 8888         `8.`8888.
+#   8 8888.   ,88'  8 888888888888  `8.`8888.    88 8888         88 8 8888      88 8 8888.   ,88' 88 8888           8 888888888888  `8.`8888.
+#   8 888888888P'   8 8888           `8.`8888.   88 8888         88 8 8888      88 8 888888888P'  88 8888           8 8888           `8.`8888.
+#   8 8888`8b       8 8888            `8.`8888.  88 8888        ,8P 8 8888      88 8 8888`8b      88 8888           8 8888            `8.`8888.
+#   8 8888 `8b.     8 8888        8b   `8.`8888. `8 8888       ,8P  ` 8888     ,8P 8 8888 `8b.    `8 8888       .8' 8 8888        8b   `8.`8888.
+#   8 8888   `8b.   8 8888        `8b.  ;8.`8888  ` 8888     ,88'     8888   ,d8P  8 8888   `8b.     8888     ,88'  8 8888        `8b.  ;8.`8888
+#   8 8888     `88. 8 888888888888 `Y8888P ,88P'     `8888888P'        `Y88888P'   8 8888     `88.    `8888888P'    8 888888888888 `Y8888P ,88P'
 Resources:
 
+  #Description: This is a S3 Bucket, which is meant for storing / hosting a static covid related website.
   CACAA1S3Bucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Delete
@@ -24,6 +73,7 @@ Resources:
         IndexDocument: index.html
         ErrorDocument: error.html
   
+  #Description: This is a S3 BucketPolicy, which is meant for setting the policy for the enitre bucket.
   CACAA1BucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
@@ -38,12 +88,13 @@ Resources:
             Resource: !Join 
               - ''
               - - 'arn:aws:s3:::'
-                - !Ref CACAA1S3Bucket
+                - !Ref CACAA1S3Bucket                                     #DO: CACAA1S3Bucket                       (The S3 Bucket, storing the static website)
                 - /*
-      Bucket: !Ref CACAA1S3Bucket
+      Bucket: !Ref CACAA1S3Bucket                                         #DO: CACAA1S3Bucket                       (The S3 Bucket, storing the static website)
 
       #TODO: Upload files into S3 automatically (maybe from git)
   
+  #Description: 
   #Create S3 access role for Lambda
   CACAA1LambdaS3Role:
     Type: AWS::IAM::Role
@@ -63,6 +114,7 @@ Resources:
         - arn:aws:iam::aws:policy/AWSLambdaFullAccess
       RoleName: CACAA1LambdaS3Role
 
+
   #This Lambda function will pull static website files from Github and upload them to S3 automatically
   #This function uses an additional layer with git, and it uses child process to perform bash commands in the underlying Amazon Linux
   #Then, it clones the git repo into /tmp directory - this is the only directory we have write permissions for
@@ -70,6 +122,7 @@ Resources:
   #All variables are dynamic through environment variables of lambda
   #Timeout set to 1 minute
 
+  #Description: 
   CAC1AA1StaticWebsiteUploaderLambda:
     Type: AWS::Lambda::Function
     DependsOn: CACAA1S3Bucket
@@ -77,13 +130,13 @@ Resources:
       FunctionName: CAC1AA1StaticWebsiteUploaderLambda
       Description: Pull the static website files from Github repo and upload them to the S3 bucket
       Role:
-        Fn::GetAtt: [ CACAA1LambdaS3Role, "Arn" ]
+        Fn::GetAtt: [ CACAA1LambdaS3Role, "Arn" ]                         #DO: CACAA1LambdaS3Role                   (Get Amazon Resource Name of the CACAA1LambdaBasicRole IAM Role)
       Runtime: nodejs12.x
       Timeout: 60
       Environment:
         Variables:
-          repoUrl: !Ref GitRepositoryWithNHSForm
-          bucketName: !Ref S3BucketName
+          repoUrl: !Ref GitRepositoryWithNHSForm                          #Par: GitRepositoryWithNHSForm            (The link for the Git Repository)
+          bucketName: !Ref S3BucketName                                   #DO: CACAA1S3Bucket                       (The S3 Bucket, storing the static website)
       Handler: index.handler
       Layers:
         - arn:aws:lambda:us-east-1:553035198032:layer:git-lambda2:7 # Git layer
@@ -145,6 +198,7 @@ Resources:
             return "text/html";
           }
 
+  #Description: 
   #This function will be invoked by the custom resource and the uploader function will be called
   CAC1AA1CFNInvokerLambda:
     Type: AWS::Lambda::Function
@@ -181,7 +235,11 @@ Resources:
                   response.send(event, context, responseStatus, responseData)
               })
           }
-        
+  
+
+
+
+  #Description: 
   CACAA1LambdaInvoker:
     Type: AWS::CloudFormation::CustomResource
     DependsOn: CAC1AA1CFNInvokerLambda
@@ -189,20 +247,48 @@ Resources:
       ServiceToken: 
         Fn::GetAtt: [ CAC1AA1CFNInvokerLambda, "Arn" ]
 
+
+
+
+
+
+
+
+
+                                                                                                              
+#       ,o888888o.     8 8888      88 8888888 8888888888 8 888888888o   8 8888      88 8888888 8888888888 d888888o.   
+#    . 8888     `88.   8 8888      88       8 8888       8 8888    `88. 8 8888      88       8 8888     .`8888:' `88. 
+#   ,8 8888       `8b  8 8888      88       8 8888       8 8888     `88 8 8888      88       8 8888     8.`8888.   Y8 
+#   88 8888        `8b 8 8888      88       8 8888       8 8888     ,88 8 8888      88       8 8888     `8.`8888.     
+#   88 8888         88 8 8888      88       8 8888       8 8888.   ,88' 8 8888      88       8 8888      `8.`8888.    
+#   88 8888         88 8 8888      88       8 8888       8 888888888P'  8 8888      88       8 8888       `8.`8888.   
+#   88 8888        ,8P 8 8888      88       8 8888       8 8888         8 8888      88       8 8888        `8.`8888.  
+#   `8 8888       ,8P  ` 8888     ,8P       8 8888       8 8888         ` 8888     ,8P       8 8888    8b   `8.`8888. 
+#    ` 8888     ,88'     8888   ,d8P        8 8888       8 8888           8888   ,d8P        8 8888    `8b.  ;8.`8888 
+#       `8888888P'        `Y88888P'         8 8888       8 8888            `Y88888P'         8 8888     `Y8888P ,88P' 
 Outputs:
 
+  #Description: 
+  #This value is used in the stacks:
+  # -
   S3BucketRef:
     Description: Reference to the S3 bucket hosting NHS form
     Value: !Ref CACAA1S3Bucket
     Export:
-      Name: !Join [ ":", [ !Ref "AWS::StackName", S3Bucket ] ]
+      Name: S3Stack:S3Bucket
   
+  #Description: 
+  #This value is used in the stacks:
+  # -
   NHSFormURL:
     Description: URL for the NHS form hosted on S3
     Value: !GetAtt 
       - CACAA1S3Bucket
       - WebsiteURL
 
+  #Description: 
+  #This value is used in the stacks:
+  # -
   S3BucketSecureURL:
     Value: !Join 
       - ''
