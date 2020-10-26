@@ -2,6 +2,15 @@ Description: This CloudFormation stack deploys the ELK stack for log aggregation
 
 Parameters:
 
+  AWSAccessKeyId:
+    Description: Please enter
+    Type: String
+  AWSSecretAccessKey:
+    Description: Please enter
+    Type: String
+  AWSSessionToken:
+    Description: Please enter
+    Type: String
 
 
 Resources:
@@ -37,42 +46,102 @@ Resources:
           Value: CACAA1ELKSecurityGroup
       VpcId: !ImportValue BaseStack:VPC
 
+  CACAA1FunctionbeatLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - lambda.amazonaws.com
+            Action:
+            - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/CloudWatchFullAccess
+        - arn:aws:iam::aws:policy/AWSLambdaFullAccess
+        - arn:aws:iam::aws:policy/AmazonVPCCrossAccountNetworkInterfaceOperations #To be able to create a network interface for a VPC
+      RoleName: CACAA1FunctionbeatLambdaRole
+
+
   CACAA1ELKInstance: 
     Type: AWS::EC2::Instance
-      Properties:
-        InstanceType: m4.large
-        ImageId: ami-0f82752aa17ff8f5d #Ubuntu 16.04
-        SubnetId: !ImportValue BaseStack:PublicSubnet1
-        KeyName: CAC_Assignments
-        SecurityGroupIds: 
-          - CACAA1ELKSecurityGroup
-        UserData: #latest: elasticsearch throwing exception / use newer guide maybe containers?
-          Fn::Base64:
-            !Sub |
-              sudo apt-get update -y
-              sudo apt-get upgrade -y
-              wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
-              sudo apt-get install apt-transport-https -y
-              echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
-              sudo apt-get update && sudo apt-get install elasticsearch -y
-              sudo chown -R ubuntu:ubuntu /etc/elasticsearch
-              echo "network.host: \"localhost\"" >> /etc/elasticsearch/elasticsearch.yml
-              echo "http.port: 9200" >> /etc/elasticsearch/elasticsearch.yml
-              PIP=$(echo `hostname -I` | sed 's/ //g') && echo "cluster.initial_master_nodes: [\"`echo $PIP`\"]">>/etc/elasticsearch/elasticsearch.yml
-              sudo chown -R elasticsearch:elasticsearch /etc/elasticsearch/
-              sudo service elasticsearch start
-              sudo update-rc.d elasticsearch defaults 95 10
-              sudo apt-get install default-jre -y
-              sudo apt-get install logstash -y
-              
-
-                      
-        Tags:
-          - Key: Name
-            Value: CACAA1ELKInstance
+    Properties:
+      InstanceType: m4.large
+      ImageId: ami-0817d428a6fb68645 #Ubuntu 18.04
+      SubnetId: !ImportValue BaseStack:PublicSubnet1
+      KeyName: CAC_Assignments
+      SecurityGroupIds: 
+        - !GetAtt CACAA1ELKSecurityGroup.GroupId
+      UserData: #latest: elasticsearch throwing exception / use newer guide maybe containers?
+        Fn::Base64:
+          !Sub
+          - |
+            #!/bin/bash
+            sudo apt update
+            sudo apt upgrade -y
+            sudo apt-get install openjdk-8-jdk -y
+            sudo apt-get install nginx -y
+            wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+            sudo apt-get install apt-transport-https -y
+            echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
+            sudo apt-get update
+            sudo apt-get install elasticsearch -y
+            sudo chown -R ubuntu:ubuntu /etc/elasticsearch
+            PIP=$(echo `hostname -I` | sed 's/ //g') && echo "network.host: `echo $PIP`">>/etc/elasticsearch/elasticsearch.yml
+            echo "http.port: 9200" >> /etc/elasticsearch/elasticsearch.yml
+            echo "discovery.type: single-node" >> /etc/elasticsearch/elasticsearch.yml
+            sudo chown -R elasticsearch:elasticsearch /etc/elasticsearch/
+            sudo systemctl start elasticsearch.service
+            sudo systemctl enable elasticsearch.service
+            sudo apt-get install kibana -y
+            sudo chown -R ubuntu:ubuntu /etc/kibana/
+            echo "server.port: 5601" >> /etc/kibana/kibana.yml
+            echo "server.host: \"0.0.0.0\"" >> /etc/kibana/kibana.yml
+            PIP=$(echo `hostname -I` | sed 's/ //g') && echo "elasticsearch.hosts: [\"http://`echo $PIP`:9200\"]">>/etc/kibana/kibana.yml
+            sudo chown -R kibana:kibana /etc/kibana/
+            sudo systemctl start kibana
+            sudo systemctl enable kibana
+            sudo ufw allow 5601/tcp
+            sudo apt-get install logstash -y
+            sudo systemctl start logstash
+            sudo systemctl enable logstash
+            curl -L -O https://artifacts.elastic.co/downloads/beats/functionbeat/functionbeat-7.9.3-linux-x86_64.tar.gz
+            tar xzvf functionbeat-7.9.3-linux-x86_64.tar.gz
+            sudo apt-get install git -y
+            git clone https://github.com/BFL-Psycho/cac-aa1-configfiles.git
+            rm ./functionbeat-7.9.3-linux-x86_64/functionbeat.yml
+            cp ./cac-aa1-configfiles/functionbeat.yml ./functionbeat-7.9.3-linux-x86_64
+            PIP=$(echo `hostname -I` | sed 's/ //g') && sed -i "s|localhost|$PIP|g" ./functionbeat-7.9.3-linux-x86_64/functionbeat.yml
+            sed -i 's|<role_arn>|${CACAA1FunctionbeatLambdaRole.Arn}|g' ./functionbeat-7.9.3-linux-x86_64/functionbeat.yml
+            sed -i 's|<custom_security_group_id>|${LambdaVPCSecurityGroup}|g' ./functionbeat-7.9.3-linux-x86_64/functionbeat.yml
+            sed -i 's|<custom_subnet_id_1>|${PublicSubnet1}|g' ./functionbeat-7.9.3-linux-x86_64/functionbeat.yml
+            sed -i 's|<custom_subnet_id_2>|${PublicSubnet2}|g' ./functionbeat-7.9.3-linux-x86_64/functionbeat.yml
+            sudo chmod go-w /home/ubuntu/functionbeat-7.9.3-linux-x86_64/functionbeat.yml
+            sudo apt-get install awscli -y
+            aws configure set region "us-east-1"
+            aws configure set output "yaml"
+            aws configure set aws_access_key_id "${AWSAccessKeyId}"
+            aws configure set aws_secret_access_key "${AWSSecretAccessKey}"
+            aws configure set aws_session_token "${AWSSessionToken}"
+            cd functionbeat-7.9.3-linux-x86_64
+            ./functionbeat deploy fn-cloudwatch-logs
+          - LambdaVPCSecurityGroup:
+              Fn::ImportValue:
+                DataLayerStack:LambdaVPCSecurityGroup
+            PublicSubnet1:
+              Fn::ImportValue:
+                BaseStack:PublicSubnet1
+            PublicSubnet2:
+              Fn::ImportValue:
+                BaseStack:PublicSubnet2
+                    
+      Tags:
+        - Key: Name
+          Value: CACAA1ELKInstance
 
   
-
 Outputs:
 
   ELKSecurityGroupRef:
@@ -85,5 +154,3 @@ Outputs:
     Value: !Ref CACAA1ELKInstance
     Export:
       Name: !Join [ ":", [ !Ref "AWS::StackName", ELKInstanceRef ] ]
-
-
