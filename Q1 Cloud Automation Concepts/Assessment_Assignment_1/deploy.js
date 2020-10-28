@@ -10,13 +10,15 @@
 //           `8.` .8'       `8. `88888. 8 8888     `88.  8 8888 .8'       `8. `88888. 8 888888888P   8 888888888888 8 888888888888 `Y8888P ,88P'
 
 
-//Description: TODO: Ask Ivan
-const { performance } = require("perf_hooks");
-const { CodeDeploy } = require("aws-sdk");
-const AWS = require("aws-sdk");
-const { error } = require("console");
+//Description: Importing of non AWS npm packages
 const fs = require("fs");
 const { exit } = require("process");
+const { error } = require("console");
+const { performance } = require("perf_hooks");
+
+//Description: Importing of the AWS npm packages
+const AWS = require("aws-sdk");
+const { CodeDeploy } = require("aws-sdk");
 
 
 
@@ -27,12 +29,13 @@ const credentials = new AWS.SharedIniFileCredentials({
   profile: "default",
 });
 AWS.config.credentials = credentials;
-AWS.config.update({
-  region: "us-east-1",
-});
-AWS.config.apiVersions = {
-  lambda: "2015-03-31",
-};
+AWS.config.update({region: "us-east-1",});
+AWS.config.apiVersions = {lambda: "2015-03-31",};
+
+
+
+
+//Description: Instanciating AWS API classes
 const CFN = new AWS.CloudFormation();
 const LAMBDA = new AWS.Lambda();
 
@@ -59,7 +62,7 @@ const CACAA1MongoDBDataRetrieverZip = fs.readFileSync("./4-Lambdas/MongoDBDataRe
 
 
 
-//Description: TODO: Ask Ivan
+//Description: Start timer by writing System time to t0
 let t0 = performance.now();
 
 
