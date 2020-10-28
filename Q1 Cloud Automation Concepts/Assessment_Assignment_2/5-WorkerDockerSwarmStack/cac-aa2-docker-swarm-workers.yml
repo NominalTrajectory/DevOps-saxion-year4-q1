@@ -123,15 +123,19 @@ Description:
                 sudo systemctl start docker
                 sudo systemctl enable docker
                 sudo apt-get install awscli -y
-                aws configure set region "us-east-1"
-                aws configure set output "yaml"
+                aws configure set region us-east-1
+                aws configure set output json
                 aws configure set aws_access_key_id ${AWSAccessKeyId}
                 aws configure set aws_secret_access_key ${AWSSecretAccessKey}
                 aws configure set aws_session_token ${AWSSessionToken}
                 sudo aws ecr get-login --no-include-email --region us-east-1 | sed -e 's/-e none//' | sudo bash
                 sudo docker pull ${CovidDashboardECRUrl}
                 sudo docker pull ${CovidRegistrationFormECRUrl}
-                sudo docker swarm join --token ${SwarmWorkerJoinToken} ${SwarmMasterPrivateIp}:2377
+
+                aws dynamodb get-item --table-name docker-swarm-join-token --key '{"id":{"N":"1"}}' >> token.json
+                sudo apt-get install jq -y
+                JOIN_TOKEN=$(jq -r '.Item.token.S' token.json)  
+                sudo docker swarm join --token $JOIN_TOKEN ${SwarmMasterPrivateIp}:2377
   
             - CovidDataAPIEndpointURL:
                 Fn::ImportValue:
