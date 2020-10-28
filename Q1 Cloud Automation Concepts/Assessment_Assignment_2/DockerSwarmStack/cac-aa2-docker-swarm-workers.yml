@@ -1,0 +1,194 @@
+Description:
+
+Parameters:
+
+  AWSAccessKeyId:
+    Description: Please enter
+    Type: String
+  AWSSecretAccessKey:
+    Description: Please enter
+    Type: String
+  AWSSessionToken:
+    Description: Please enter
+    Type: String
+  SwarmWorkerJoinToken:
+    Description: Please enter
+    Type: String
+
+Resources:
+
+  CACAA2WebSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: This security groups allows incoming connections to ports 80 (HTTP), 443 (HTTPS), 22 (SSH)
+      GroupName: CACAA2WebSecurityGroup
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 5000 # this port will be used for test purposes to access the NHS registration form running in a Docker container
+          ToPort: 5000
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      VpcId: !ImportValue BaseStack:VPC                                   #Imp: BaseStack:VPC                       (The VPC imported from the BaseStack)
+      Tags: 
+        - Key: Name
+          Value: CACAA2WebSecurityGroup
+    
+
+  # Fix the comments (they are copy pasted from assignment 1)
+
+  #Description: This is a Load Balancer, this is connected to the two Public subnets and load balances the auto scaled Docker workers in the public subnets.
+  CACAA2ELB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: CACAA2ELB
+      Type: application
+      Scheme: internet-facing
+      SecurityGroups: 
+        - !Ref CACAA2WebSecurityGroup                                     #DO: CACAA2WebSecurityGroup               (The security group for the Webservers)
+      Subnets: 
+        - !ImportValue BaseStack:PublicSubnet1                            #Imp: BaseStack:PublicSubnet1             (The first public subnet imported from the BaseStack)
+        - !ImportValue BaseStack:PublicSubnet2                            #Imp: BaseStack:PublicSubnet2             (The second public subnet imported from the BaseStack)
+      Tags: 
+        - Key: Name
+          Value: CACAA2ELB
+
+  #Description: This is a Load Balancer Target group, this is used by the load balancer HTTP listener and allows sets it up to received HTTP requests over port 80.
+  CACAA2TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: CACAA2TargetGroup
+      Port: 80
+      Protocol: HTTP
+      VpcId: !ImportValue BaseStack:VPC                                   #Imp: BaseStack:VPC                       (The VPC imported from the BaseStack)
+      Tags: 
+        - Key: Name
+          Value: CACAA2TargetGroup
+
+  #Description: This is a Load Balancer listener, this receives the HTTP requests sent to the webservers via the load balancers DNS name and gives it to the Load balancer.
+  CACAA2Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties: 
+      DefaultActions: 
+        - Type: forward
+          TargetGroupArn: !Ref CACAA2TargetGroup                          #DO: CACAA2TargetGroup                    (The Load balancer Target group)
+      LoadBalancerArn: !Ref CACAA2ELB                                     #DO: CACAA2ELB                            (The Load balancer)
+      Port: 80
+      Protocol: HTTP
+
+
+  #Description: This is the autoscaler launch configuration, that is used by the Autoscaler to set up the webservers in the two public subnets which will host the website, 
+  #             will be accessed through the load balancer and will be supported by the database.
+  CACAA2DockerSwarmWorkerLaunchConfiguration: 
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      AssociatePublicIpAddress: true
+      ImageId: ami-0817d428a6fb68645 # Ubuntu 18.04
+      InstanceMonitoring: false # basic monitoring enabled
+      InstanceType: t2.micro # For production change this to t3.large
+      KeyName: CAC_Assignments
+      LaunchConfigurationName: CACAA2WebserverLaunchConfiguration
+      PlacementTenancy: default
+      BlockDeviceMappings: 
+        - DeviceName: /dev/xvda
+          Ebs: 
+            VolumeSize: 30
+            VolumeType: "gp2"
+      SecurityGroups: 
+        - !Ref CACAA2WebSecurityGroup                                     #DO: CACAA2WebSecurityGroup               (The security group for the Webservers)
+      
+      #This folwing notes are regarding the UserData:
+      # -We mount the EFS and create a directory named as the private IP of the server.
+      # -We create a cron job that automatically synchronizes nginx log directory with the directory we created in EFS, it runs every day at midnight.
+      UserData:
+        Fn::Base64:
+          !Sub 
+          - |
+              #!/bin/bash
+              echo ${CovidAPIEndpointURL} >> apiEndpoint
+              sudo apt-get update && sudo apt-get upgrade -y
+              sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
+              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+              sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+              sudo apt update
+              sudo apt install -y docker-ce
+              sudo docker swarm join --token ${SwarmWorkerJoinToken} ${SwarmMasterPrivateIp}:2377
+              sudo apt-get install awscli -y
+              aws configure set region "us-east-1"
+              aws configure set output "yaml"
+              aws configure set aws_access_key_id "${AWSAccessKeyId}"
+              aws configure set aws_secret_access_key "${AWSSecretAccessKey}"
+              aws configure set aws_session_token "${AWSSessionToken}"
+              sudo aws ecr get-login --no-include-email --region us-east-1 | sed -e 's/-e none//' | sudo bash
+              sudo docker pull ${CovidDashboardECR}
+              sudo docker pull ${CovidRegistrationFormECR}
+
+          - CovidDataEndpointURL:
+              Fn::ImportValue:
+                DataLayerStack:CovidDataAPIEndpointURL                    #Imp: DataLayerStack:CovidDataAPIEndpointURL  (The API endpoint URL imported from the DataLayerStack)
+            SwarmMasterPrivateIp:
+              Fn::ImportValue:
+                SwarmMasterStack:SwarmMasterPrivateIp
+            CovidDashboardECR:
+              Fn::ImportValue:
+                ECRStack:CovidDashboardECR
+            CovidRegistrationFormECR:
+              Fn::ImportValue:
+                ECRStack:CovidRegistrationFormECR
+
+
+
+
+  #Description: This is the autoscaler that is in the end responsible for the setting up of the webservers in two availability zones and scaling, the amount of webservers 
+  #             scaled will depend on expected demand, with two AutoScaling ScheduledActions responsible for the scaling.
+  CACAA2AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      LaunchConfigurationName: !Ref CACAA2WebserverLaunchConfiguration    #DO: CACAA2WebserverLaunchConfiguration   (The Launch Configuration for the AutoScaler group to settup the webservers)
+      MinSize: 2
+      MaxSize: 6
+      TargetGroupARNs: 
+        - !Ref CACAA2TargetGroup                                          #DO: CACAA2TargetGroup                    (The Load balancer Target group)
+      VPCZoneIdentifier:
+        - !ImportValue BaseStack:PublicSubnet1                            #Imp: BaseStack:PublicSubnet1             (The first public subnet imported from the BaseStack)
+        - !ImportValue BaseStack:PublicSubnet2                            #Imp: BaseStack:PublicSubnet2             (The second public subnet imported from the BaseStack)
+      Tags:
+        - Key: Name
+          Value: BroadWebWorkers
+          PropagateAtLaunch: true 
+
+
+
+
+
+  #Description: This is a AutoScaling ScheduledAction, this is used to make the autoscaler scale out (expand capacity) from 6pm Eastern time following expected demand.
+  CACAA2AutoscalingScheduledActionOut:
+    Type: AWS::AutoScaling::ScheduledAction
+    Properties: 
+      AutoScalingGroupName: !Ref CACAA2AutoScalingGroup                   #DO: CACAA2AutoScalingGroup               (The AutoScalingGroup responsible for scaling the webserver)
+      DesiredCapacity: 6
+      MaxSize: 6
+      MinSize: 2
+      Recurrence: "0 22 * * *" # AWS uses UTC time, 18:00 Eastern time -> 22:00 UTC | Everyday scale out from 18:00
+
+  #Description: This is a AutoScaling ScheduledAction, this is used to make the autoscaler scale in (decrease capacity) from 8pm Eastern time following expected demand.
+  CACAA2AutoscalingScheduledActionIn:
+    Type: AWS::AutoScaling::ScheduledAction
+    Properties: 
+      AutoScalingGroupName: !Ref CACAA2AutoScalingGroup                   #DO: CACAA2AutoScalingGroup               (The AutoScalingGroup responsible for scaling the webserver)
+      DesiredCapacity: 2
+      MaxSize: 2
+      MinSize: 2
+      Recurrence: "0 0 * * *" # AWS uses UTC time, 20:00 Eastern time -> 00:00 UTC | Everyday scale in from 20:00
+
+

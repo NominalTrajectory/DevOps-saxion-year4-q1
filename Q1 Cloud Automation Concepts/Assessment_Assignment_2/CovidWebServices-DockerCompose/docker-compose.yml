@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+   broad-covid19-dashboard:
+     image: covid-dashboard:latest
+     ports:
+        - "8080:80"
+
+   nhs-covid19-registration-form:
+     image: covid-form:latest
+     ports:
+       - "5000:5000"

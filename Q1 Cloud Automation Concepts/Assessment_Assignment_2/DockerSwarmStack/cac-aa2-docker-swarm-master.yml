@@ -1,0 +1,101 @@
+Description:
+
+Parameters:
+
+  AWSAccessKeyId:
+    Description: Please enter
+    Type: String
+  AWSSecretAccessKey:
+    Description: Please enter
+    Type: String
+  AWSSessionToken:
+    Description: Please enter
+    Type: String
+
+Resources:
+
+  CACAA2DockerSwarmSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: 2377
+      GroupName: CACAA2DockerSwarmSecurityGroup
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 2377
+          ToPort: 2377
+          CidrIp: 0.0.0.0/0
+      VpcId: !ImportValue BaseStack:VPC                                   #Imp: BaseStack:VPC                       (The VPC imported from the BaseStack)
+      Tags: 
+        - Key: Name
+          Value: CACAA2DockerSwarmSecurityGroup
+
+  CACAA2BroadBuildServer01:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: m4.large
+      ImageId: ami-0817d428a6fb68645 # Ubuntu 18.04
+      SubnetId: !ImportValue BaseStack:PrivateSubnet1
+      KeyName: CAC_Assignments
+      SecurityGroupIds: 
+        - !Ref CACAA2DockerSwarmSecurityGroup
+      UserData: 
+        Fn::Base64:
+          !Sub 
+          - |
+              #!/bin/bash
+              echo ${CovidAPIEndpointURL} >> apiEndpoint
+              sudo apt-get update && sudo apt-get upgrade -y
+              sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
+              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+              sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+              sudo apt update
+              sudo apt install -y docker-ce
+              sudo systemctl start docker
+              sudo systemctl enable docker
+              sudo docker swarm init --advertise-addr $(hostname -I | awk '{print $1}')
+              sudo apt-get install awscli -y
+              aws configure set region "us-east-1"
+              aws configure set output "yaml"
+              aws configure set aws_access_key_id "${AWSAccessKeyId}"
+              aws configure set aws_secret_access_key "${AWSSecretAccessKey}"
+              aws configure set aws_session_token "${AWSSessionToken}"
+              sudo aws ecr get-login --no-include-email --region us-east-1 | sed -e 's/-e none//' | sudo bash
+              git clone https://github.com/BFL-Psycho/cac-aa2-covid-dashboard-docker.git
+              cp apiEndpoint cac-aa2-covid-dashboard-docker/
+              cd cac-aa2-covid-dashboard-docker && sudo docker build -t covid-dashboard:latest .
+              sudo aws ecr get-login --no-include-email --region us-east-1 | sed -e 's/-e none//' | sudo bash
+              DASHBOARD_IMAGE_ID=$(echo `sudo docker images --filter=reference=covid-dashboard:latest --format "{{.ID}}"`) && sudo docker tag $DASHBOARD_IMAGE_ID ${CovidDashboardECR} 
+              sudo docker push ${CovidDashboardECR}
+              
+
+              cd ~ && git clone https://github.com/BFL-Psycho/cac-aa2-covid-registration-form-docker.git
+              cd cac-aa2-covid-registration-form-docker && sudo docker build -t covid-form:latest .
+              sudo aws ecr get-login --no-include-email --region us-east-1 | sed -e 's/-e none//' | sudo bash
+              FORM_IMAGE_ID=$(echo `sudo docker images --filter=reference=covid-form:latest --format "{{.ID}}"`) && sudo docker tag $FORM_IMAGE_ID ${CovidRegistrationFormECR}
+              sudo docker push ${CovidRegistrationFormECR}
+
+              cd ~ && git clone https://github.com/BFL-Psycho/cac-aa2-covid-services.git
+              cd cac-aa2-covid-services
+              sed -i "s|covid-dashboard:latest|${CovidDashboardECR}|g" ./docker-compose.yml
+              sed -i "s|covid-form:latest|${CovidRegistrationFormECR}|g" ./docker-compose.yml
+              sudo docker stack deploy -c ./docker-compose.yml covid-services
+
+
+          - CovidDataEndpointURL:
+              Fn::ImportValue:
+                DataLayerStack:CovidDataAPIEndpointURL
+            CovidDashboardECR:
+              Fn::ImportValue:
+                ECRStack:CovidDashboardECR
+            CovidRegistrationFormECR:
+              Fn::ImportValue:
+                ECRStack:CovidRegistrationFormECR
+
+                          
+      Tags:
+        - Key: Name
+          Value: CACAA2BroadBuildServer01
