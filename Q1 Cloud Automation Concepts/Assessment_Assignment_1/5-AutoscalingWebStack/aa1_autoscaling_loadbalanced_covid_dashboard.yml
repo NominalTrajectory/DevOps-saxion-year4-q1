@@ -59,6 +59,23 @@ Resources:
       Tags: 
         - Key: Name
           Value: CACAA1WebSecurityGroup
+
+  #Description: This is a Security Group, this is used by the load balancer and allows all incomming tcp packets from port 80 (HTTP) 
+  #             and allows all outgoing packets from all ports.
+  CACAA1LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: This security groups allows incoming connections to ports 80 (HTTP)
+      GroupName: CACAA1LoadBalancerSecurityGroup
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      VpcId: !ImportValue BaseStack:VPC                                   #Imp: BaseStack:VPC                       (The VPC imported from the BaseStack)
+      Tags: 
+        - Key: Name
+          Value: CACAA1LoadBalancerSecurityGroup
     
 
 
@@ -71,7 +88,7 @@ Resources:
       Type: application
       Scheme: internet-facing
       SecurityGroups: 
-        - !Ref CACAA1WebSecurityGroup                                     #DO: CACAA1WebSecurityGroup               (The security group for the Webservers)
+        - !Ref CACAA1LoadBalancerSecurityGroup                            #DO: CACAA1LoadBalancerSecurityGroup      (The security group for the load balancer)
       Subnets: 
         - !ImportValue BaseStack:PublicSubnet1                            #Imp: BaseStack:PublicSubnet1             (The first public subnet imported from the BaseStack)
         - !ImportValue BaseStack:PublicSubnet2                            #Imp: BaseStack:PublicSubnet2             (The second public subnet imported from the BaseStack)
