@@ -65,7 +65,8 @@ Resources:
   #For the purpose of this assignment (and to save credits) a siplified configuration will be used
   #ELK stack will run on a single EC2 instance and won't be configured for high availability
 
-  #Description: 
+  #Description: This is a Security Group, this is used by the ELK instance and allows all incomming tcp packets from port 80 (HTTP), port 443 (HTTPS), port 22 (SSH) and 5601 (Kibana) 
+  #             and allows all outgoing packets from all ports.
   CACAA1ELKSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties: 
@@ -93,6 +94,10 @@ Resources:
           Value: CACAA1ELKSecurityGroup
       VpcId: !ImportValue BaseStack:VPC
 
+
+
+
+  #Description: This is a IAM role, it is used by the .
   CACAA1FunctionbeatLambdaRole:
     Type: AWS::IAM::Role
     Properties:
