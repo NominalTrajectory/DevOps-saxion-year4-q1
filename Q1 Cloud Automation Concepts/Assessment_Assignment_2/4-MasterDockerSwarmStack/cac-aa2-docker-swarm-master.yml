@@ -33,6 +33,8 @@ Resources:
         - Key: Name
           Value: CACAA2DockerSwarmSecurityGroup
 
+  # Docker Swarm will ensure to automatically run all the necessary services on the new nodes joining the cluster
+  # 
   CACAA2BroadBuildServer01:
     Type: AWS::EC2::Instance
     Properties:

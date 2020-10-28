@@ -4,19 +4,21 @@ version: "3.8"
 
 services:
   broad-covid19-dashboard:
-    image: 251277730687.dkr.ecr.us-east-1.amazonaws.com/cac-aa2-ecr-1
+    image: covid-dashboard:latest
     ports:
       - "80:80"
     deploy:
-      mode: global # this will deploy service automatically on all nodes except for manager
-      constraints:
-        - node.role == worker
+      mode: global # this will deploy service automatically on all the worker nodes, also the new joiners
+      placement:
+        constraints:
+          - node.role == worker
 
   nhs-covid19-registration-form:
-    image: 251277730687.dkr.ecr.us-east-1.amazonaws.com/cac-aa2-covid-form-ecr
+    image: covid-form:latest
     ports:
       - "5000:80"
     deploy:
-      mode: global # this will deploy service automatically on all nodes except for manager
-      constraints:
-        - node.role == worker
+      mode: global # this will deploy service automatically on all the worker nodes, also the new joiners
+      placement:
+        constraints:
+          - node.role == worker
