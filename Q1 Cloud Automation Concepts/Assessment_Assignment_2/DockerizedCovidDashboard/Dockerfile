@@ -1,3 +1,6 @@
+#This file is already in a git repo and will not be called from here
+#The file is located here: https://github.com/BFL-Psycho/cac-aa2-covid-dashboard-docker.git
+
 FROM nginx:latest
 RUN apt-get update && apt-get -y install git
 RUN git clone https://github.com/broadinstitute/covid19-testing.git

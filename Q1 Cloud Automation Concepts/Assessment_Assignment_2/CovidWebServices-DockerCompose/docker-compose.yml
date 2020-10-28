@@ -1,3 +1,5 @@
+#This file is already in a git repo and will not be called from here
+#The file is located here: https://github.com/BFL-Psycho/cac-aa2-covid-services.git
 version: '3.8'
 
 services:

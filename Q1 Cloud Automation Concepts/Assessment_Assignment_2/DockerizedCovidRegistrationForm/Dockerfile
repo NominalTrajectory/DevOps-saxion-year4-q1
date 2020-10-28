@@ -1,3 +1,6 @@
+#This file is already in a git repo and will not be called from here
+#The file is located here: https://github.com/BFL-Psycho/cac-aa2-covid-registration-form-docker
+
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build-env
 
 RUN apt-get update && apt-get install git
