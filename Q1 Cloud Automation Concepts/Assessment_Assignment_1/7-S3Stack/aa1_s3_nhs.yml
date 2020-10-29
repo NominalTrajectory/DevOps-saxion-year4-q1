@@ -115,14 +115,9 @@ Resources:
       RoleName: CACAA1LambdaS3Role
 
 
-  #This Lambda function will pull static website files from Github and upload them to S3 automatically
-  #This function uses an additional layer with git, and it uses child process to perform bash commands in the underlying Amazon Linux
-  #Then, it clones the git repo into /tmp directory - this is the only directory we have write permissions for
-  #After that it loops through all the cloned files and uploads them to S3 using aws sdk
-  #All variables are dynamic through environment variables of lambda
-  #Timeout set to 1 minute
+  
 
-  #Description: This script will pull a static website from a github 
+  #Description: This is a Lambda funcition, This script will pull a static website from a github repository and uploads it to the CACAA1S3Bucket s3 bucket and to be publicly accessible.
   CAC1AA1StaticWebsiteUploaderLambda:
     Type: AWS::Lambda::Function
     DependsOn: CACAA1S3Bucket
@@ -141,6 +136,13 @@ Resources:
       Layers:
         - arn:aws:lambda:us-east-1:553035198032:layer:git-lambda2:7 # Git layer
       Code: 
+        #Decription of code:
+          #This Lambda function will pull static website files from Github and upload them to S3 automatically
+          #This function uses an additional layer with git, and it uses child process to perform bash commands in the underlying Amazon Linux
+          #Then, it clones the git repo into /tmp directory - this is the only directory we have write permissions for
+          #After that it loops through all the cloned files and uploads them to S3 using aws sdk
+          #All variables are dynamic through environment variables of lambda
+          #Timeout set to 1 minute
         ZipFile: |
           const { execSync } = require("child_process");
           const fs = require("fs");
@@ -198,8 +200,7 @@ Resources:
             return "text/html";
           }
 
-  #Description: 
-  #This function will be invoked by the custom resource and the uploader function will be called
+  #Description: This is a Lambda funcition, This script will invoke the CAC1AA1StaticWebsiteUploaderLambda lambda function and send a success signal to the cloud formation stack when it has done so.
   CAC1AA1CFNInvokerLambda:
     Type: AWS::Lambda::Function
     DependsOn: CAC1AA1StaticWebsiteUploaderLambda
@@ -239,7 +240,7 @@ Resources:
 
 
 
-  #Description: 
+  #Description: This is a CloudFormation CustomResource, This will invoke the CAC1AA1CFNInvokerLambda lambda function when this stack had finished deploying.
   CACAA1LambdaInvoker:
     Type: AWS::CloudFormation::CustomResource
     DependsOn: CAC1AA1CFNInvokerLambda
@@ -268,7 +269,7 @@ Resources:
 #       `8888888P'        `Y88888P'         8 8888       8 8888            `Y88888P'         8 8888     `Y8888P ,88P' 
 Outputs:
 
-  #Description: 
+  #Description: This outputs a reference to the S3 stack that hosts the static NHS form.
   #This value is used in the stacks:
   # -
   S3BucketRef:
@@ -277,7 +278,7 @@ Outputs:
     Export:
       Name: S3Stack:S3Bucket
   
-  #Description: 
+  #Description: This is a URL that links to the public NHS from in the public bucket.
   #This value is used in the stacks:
   # -
   NHSFormURL:
@@ -285,15 +286,3 @@ Outputs:
     Value: !GetAtt 
       - CACAA1S3Bucket
       - WebsiteURL
-
-  #Description: 
-  #This value is used in the stacks:
-  # -
-  S3BucketSecureURL:
-    Value: !Join 
-      - ''
-      - - 'https://'
-        - !GetAtt 
-          - CACAA1S3Bucket
-          - DomainName
-    Description: Name of S3 bucket to hold website content
