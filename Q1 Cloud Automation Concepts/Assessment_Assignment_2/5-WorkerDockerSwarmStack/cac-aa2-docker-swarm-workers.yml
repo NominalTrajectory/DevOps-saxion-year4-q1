@@ -5,15 +5,15 @@ Description:
     AWSAccessKeyId:
       Description: Please enter
       Type: String
+      AllowedPattern: ".+"
     AWSSecretAccessKey:
       Description: Please enter
       Type: String
+      AllowedPattern: ".+"
     AWSSessionToken:
       Description: Please enter
       Type: String
-    SwarmWorkerJoinToken:
-      Description: Please enter
-      Type: String
+      AllowedPattern: ".+"
   
   Resources:
   
@@ -195,5 +195,10 @@ Description:
         MinSize: 2
         Recurrence: "0 0 * * *" # AWS uses UTC time, 20:00 Eastern time -> 00:00 UTC | Everyday scale in from 20:00
   
-  
-  
+Outputs:
+
+  WebWorkersLoadBalancerURL:
+    Description: Reference to
+    Value: !GetAtt CACAA2ELB.DNSName
+    Export:
+      Name: DockerSwarmWorkersStack:WebWorkersLoadBalancerURL

@@ -35,7 +35,7 @@ AWS.config.apiVersions = {lambda: "2015-03-31",};
 
 
 
-//Description: Instanciating AWS API classes
+//Description: Instantiating AWS API classes
 const CFN = new AWS.CloudFormation();
 const LAMBDA = new AWS.Lambda();
 
@@ -43,22 +43,21 @@ const LAMBDA = new AWS.Lambda();
 
 
 
-//Description: Define the stack locations in the enviroment
+//Description: Read the stack template files into variables
 const BASE_NETWORK_STACK_TEMPLATE = fs.readFileSync("./1-BaseStack/aa1_base_network.yml");
 const EFS_STACK_TEMPLATE = fs.readFileSync("./2-EFSStack/cac_aa1_efs.yml");
 const DATA_LAYER_STACK_TEMPLATE = fs.readFileSync("./3-DataLayerStack/aa1_data_layer_stack.yml");
 const AUTOSCALING_WEB_STACK_TEMPLATE = fs.readFileSync("./5-AutoscalingWebStack/aa1_autoscaling_loadbalanced_covid_dashboard.yml");
 const S3_STACK_TEMPLATE = fs.readFileSync("./7-S3Stack/aa1_s3_nhs.yml");
+const ELK_STACK_TEMPLATE = fs.readFileSync("./6-ELKStack/cac_aa1_elk_stack.yml");
 
 
 
 
 
-//Description: Define the script location for the code/configuartion of the Lambda functions
+//Description: Read buffer from zip archives with Lambda functions code into variables
 const CACAA1MongoDBDataRefresherZip = fs.readFileSync("./4-Lambdas/MongoDBDataRefresher/MongoDBDataRefresher.zip");
 const CACAA1MongoDBDataRetrieverZip = fs.readFileSync("./4-Lambdas/MongoDBDataRetriever/MongoDBDataRetriever.zip");
-
-
 
 
 
@@ -277,14 +276,7 @@ function deployWebStack() {
               process.exit(1);
             } else {
               console.log(`WebStack has been successfully deployed.`);
-              let t1 = performance.now();
-              console.info(
-                `Deployment completed successfully! Total time elapsed: ${(
-                  (t1 - t0) /
-                  60000
-                ).toFixed(2)} min.`
-              );
-              return true;
+              deployELKStack();
             }
           }
         );
@@ -292,6 +284,7 @@ function deployWebStack() {
     }
   );
 }
+
 
 
 /*Descrition: This is the uploadCACAA1MongoDBDataRefresherCode function, it is called by the deployDataLayerStack function of the program and uplaods the code for the CACAA1MongoDBDataRefresher 
@@ -328,6 +321,63 @@ function uploadCACAA1MongoDBDataRetrieverCode() {
       } else {
         console.log(
           "CACAA1MongoDBDataRetriever Lambda code has been successfully uploaded."
+        );
+      }
+    }
+  );
+}
+
+function deployELKStack() {
+  console.log(
+    `Deploying the ELKStack with Elasticsearch, Logstash and Kibana to monitor Lambda function logs using Functionbeat. Please wait (~5 min)...`
+  );
+  CFN.createStack(
+    (params = {
+      StackName: "ELKStack",
+      Capabilities: ["CAPABILITY_NAMED_IAM"],
+      TemplateBody: `${ELK_STACK_TEMPLATE}`,
+      Parameters: [
+        {
+          ParameterKey: 'AWSAccessKeyId',
+          ParameterValue: AWS.config.credentials.accessKeyId
+        },
+        {
+          ParameterKey: 'AWSSecretAccessKey',
+          ParameterValue: AWS.config.credentials.secretAccessKey
+        },
+        {
+          ParameterKey: 'AWSSessionToken',
+          ParameterValue: AWS.config.credentials.sessionToken
+        }
+      ]
+    }),
+    (err, data) => {
+      if (err) {
+        console.warn(err);
+        process.exit(1);
+      } else {
+        CFN.waitFor(
+          //Wait for ELKStack deployment to complete
+          "stackCreateComplete",
+          (params = {
+            StackName: "ELKStack",
+          }),
+          (err, data) => {
+            if (err) {
+              console.warn(err);
+              process.exit(1);
+            } else {
+              console.log(`ELKStack has been successfully deployed. Kibana with logs will be available in ~10 min.`);
+              let t1 = performance.now();
+              console.info(
+                `Deployment completed successfully! Total time elapsed: ${(
+                  (t1 - t0) /
+                  60000
+                ).toFixed(2)} min.`
+              );
+              return true;
+            }
+          }
         );
       }
     }

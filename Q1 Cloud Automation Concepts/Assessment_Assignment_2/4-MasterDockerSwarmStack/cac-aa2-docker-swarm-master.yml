@@ -127,3 +127,13 @@ Resources:
       Tags:
         - Key: Name
           Value: CACAA2BroadBuildServer01
+
+
+Outputs:
+
+  BuildServerPrivateIp:
+    Description: Reference to 
+    Value: !GetAtt CACAA2BroadBuildServer01.PrivateIp
+    Export:
+      Name: DockerSwarmMasterStack:BuildServerPrivateIp
+# Export master Private Ip
