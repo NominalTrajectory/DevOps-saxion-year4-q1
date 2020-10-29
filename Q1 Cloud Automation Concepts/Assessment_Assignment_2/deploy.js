@@ -141,6 +141,7 @@ function deployECRStack() {
             } else {
               console.log(`ECRStack has been successfully deployed.`);
               deployDockerSwarmMasterStack();
+              invokeDataRefresher();
             }
           }
         );
@@ -348,4 +349,20 @@ function uploadCACAA2MongoDBDataRetrieverCode() {
       }
     }
   );
+}
+
+function invokeDataRefresher() {
+  console.log("Refreshing covid data in the MongoDB...");
+  LAMBDA.invoke(
+    params = {
+        FunctionName: "CACAA2MongoDBDataRefresher",
+    },
+    (err, data) => {
+        if(err) {
+            console.log(err);
+        } else {
+            console.log("Data in the MongoDB successfully refreshed");
+        }
+    }
+);
 }

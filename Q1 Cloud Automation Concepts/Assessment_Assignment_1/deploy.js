@@ -277,6 +277,7 @@ function deployWebStack() {
             } else {
               console.log(`WebStack has been successfully deployed.`);
               deployELKStack();
+              invokeDataRefresher();
             }
           }
         );
@@ -382,4 +383,20 @@ function deployELKStack() {
       }
     }
   );
+}
+
+function invokeDataRefresher() {
+  console.log("Refreshing covid data in the MongoDB...");
+  LAMBDA.invoke(
+    params = {
+        FunctionName: "CACAA1MongoDBDataRefresher",
+    },
+    (err, data) => {
+        if(err) {
+            console.log(err);
+        } else {
+            console.log("Data in the MongoDB successfully refreshed");
+        }
+    }
+);
 }

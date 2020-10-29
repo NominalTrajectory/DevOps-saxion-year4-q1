@@ -48,10 +48,10 @@ Resources:
   # Fix the comments (they are copy pasted from assignment 1)
 
   #Description: This is a Load Balancer, this is connected to the two Public subnets and load balances the auto scaled Docker workers in the public subnets.
-  CACAA2ELB:
+  CACAA2CovidDashboardELB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: CACAA2ELB
+      Name: CACAA2CovidDashboardELB
       Type: application
       Scheme: internet-facing
       SecurityGroups: 
@@ -61,40 +61,65 @@ Resources:
         - !ImportValue BaseStack:PublicSubnet2                            #Imp: BaseStack:PublicSubnet2             (The second public subnet imported from the BaseStack)
       Tags: 
         - Key: Name
-          Value: CACAA2ELB
+          Value: CACAA2CovidDashboardELB
 
   #Description: This is a Load Balancer Target group, this is used by the load balancer HTTP listener and allows sets it up to received HTTP requests over port 80.
-  CACAA2TargetGroup:
+  CACAA2CovidDashboardTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: CACAA2TargetGroup
+      Name: CACAA2CovidDashboardTargetGroup
       Port: 80
       Protocol: HTTP
       VpcId: !ImportValue BaseStack:VPC                                   #Imp: BaseStack:VPC                       (The VPC imported from the BaseStack)
       Tags: 
         - Key: Name
-          Value: CACAA2TargetGroup
+          Value: CACAA2CovidDashboardTargetGroup
 
   #Description: This is a Load Balancer listener, this receives the HTTP requests sent to the webservers via the load balancers DNS name and gives it to the Load balancer.
-  CACAA2DashboardListener:
+  CACAA2CovidDashboardListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties: 
       DefaultActions: 
         - Type: forward
-          TargetGroupArn: !Ref CACAA2TargetGroup                          #DO: CACAA2TargetGroup                    (The Load balancer Target group)
-      LoadBalancerArn: !Ref CACAA2ELB                                     #DO: CACAA2ELB                            (The Load balancer)
+          TargetGroupArn: !Ref CACAA2CovidDashboardTargetGroup                          #DO: CACAA2CovidDashboardTargetGroup                    (The Load balancer Target group)
+      LoadBalancerArn: !Ref CACAA2CovidDashboardELB                                     #DO: CACAA2CovidDashboardELB                            (The Load balancer)
       Port: 80
       Protocol: HTTP
 
-  CACAA2FormListener:
+  CACAA2CovidFormELB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: CACAA2CovidFormELB
+      Type: network
+      Scheme: internet-facing
+      Subnets: 
+        - !ImportValue BaseStack:PublicSubnet1                            #Imp: BaseStack:PublicSubnet1             (The first public subnet imported from the BaseStack)
+        - !ImportValue BaseStack:PublicSubnet2                            #Imp: BaseStack:PublicSubnet2             (The second public subnet imported from the BaseStack)
+      Tags: 
+        - Key: Name
+          Value: CACAA2CovidFormELB
+
+  #Description: This is a Load Balancer Target group, this is used by the load balancer HTTP listener and allows sets it up to received HTTP requests over port 80.
+  CACAA2CovidFormTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: CACAA2CovidDashboardTargetGroup
+      Port: 5000
+      Protocol: TCP
+      VpcId: !ImportValue BaseStack:VPC                                   #Imp: BaseStack:VPC                       (The VPC imported from the BaseStack)
+      Tags: 
+        - Key: Name
+          Value: CACAA2CovidFormTargetGroup
+
+  CACAA2CovidFormListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties: 
       DefaultActions: 
         - Type: forward
-          TargetGroupArn: !Ref CACAA2TargetGroup                          #DO: CACAA2TargetGroup                    (The Load balancer Target group)
-      LoadBalancerArn: !Ref CACAA2ELB                                     #DO: CACAA2ELB                            (The Load balancer)
+          TargetGroupArn: !Ref CACAA2CovidFormTargetGroup                          
+      LoadBalancerArn: !Ref CACAA2CovidFormELB                                     
       Port: 5000
-      Protocol: HTTP
+      Protocol: TCP
 
 
   #Description: This is the autoscaler launch configuration, that is used by the Autoscaler to set up the webservers in the two public subnets which will host the website, 
@@ -182,7 +207,7 @@ Resources:
       MinSize: 2
       MaxSize: 6
       TargetGroupARNs: 
-        - !Ref CACAA2TargetGroup                                          #DO: CACAA2TargetGroup                    (The Load balancer Target group)
+        - !Ref CACAA2CovidDashboardTargetGroup                                          #DO: CACAA2CovidDashboardTargetGroup                    (The Load balancer Target group)
       VPCZoneIdentifier:
         - !ImportValue BaseStack:PublicSubnet1                            #Imp: BaseStack:PublicSubnet1             (The first public subnet imported from the BaseStack)
         - !ImportValue BaseStack:PublicSubnet2                            #Imp: BaseStack:PublicSubnet2             (The second public subnet imported from the BaseStack)
@@ -217,9 +242,14 @@ Resources:
   
 Outputs:
 
-  WebWorkersLoadBalancerURL:
+  WebWorkersCovidDashboardLoadBalancerURL:
     Description: Reference to
-    Value: !GetAtt CACAA2ELB.DNSName
+    Value: !GetAtt CACAA2CovidDashboardELB.DNSName
     Export:
-      Name: DockerSwarmWorkersStack:WebWorkersLoadBalancerURL
+      Name: DockerSwarmWorkersStack:WebWorkersCovidDashboardLoadBalancerURL
+  WebWorkersCovidFormLoadBalancerURL:
+    Description: Reference to
+    Value: !GetAtt CACAA2CovidFormELB.DNSName
+    Export:
+      Name: DockerSwarmWorkersStack:WebWorkersCovidFormLoadBalancerURL
 
