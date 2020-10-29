@@ -111,4 +111,16 @@ Resources:
   
 #Provide exports
 
+Outputs:
+
 #Export ECR Urls
+  CovidDashboardECRUrl:
+    Description: Reference to
+    Value: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${CovidDashboardECRName}"
+    Export:
+      Name: ECRStack:CovidDashboardECRUrl
+  CovidRegistrationFormECRUrl:
+    Description: Reference to
+    Value: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${CovidRegistrationFormECRName}"
+    Export:
+      Name: ECRStack:CovidRegistrationFormECRUrl

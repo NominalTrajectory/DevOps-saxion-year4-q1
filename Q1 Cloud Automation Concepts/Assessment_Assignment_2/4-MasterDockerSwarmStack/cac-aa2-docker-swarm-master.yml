@@ -12,7 +12,26 @@ Parameters:
     Description: Please enter
     Type: String
 
+
 Resources:
+
+  CACAA2DynamoDBJoinTokenTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: docker-swarm-join-token
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: 'N'
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      Tags:
+        - Key: Name
+          Value: CACAA2DynamoDBJoinTokenTable
+
 
   CACAA2DockerSwarmSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -33,8 +52,11 @@ Resources:
         - Key: Name
           Value: CACAA2DockerSwarmSecurityGroup
 
+  # Docker Swarm will ensure to automatically run all the necessary services on the new nodes joining the cluster
+  # 
   CACAA2BroadBuildServer01:
     Type: AWS::EC2::Instance
+    DependsOn: CACAA2DynamoDBJoinTokenTable
     Properties:
       InstanceType: m4.large
       ImageId: ami-0817d428a6fb68645 # Ubuntu 18.04
@@ -57,12 +79,18 @@ Resources:
               sudo systemctl start docker
               sudo systemctl enable docker
               sudo docker swarm init --advertise-addr $(hostname -I | awk '{print $1}')
+
+              TOKEN=$(sudo docker swarm join-token worker -q)
+              echo "{\"id\": {\"N\":\"1\"}, \"token\": {\"S\":\"$TOKEN\"}}" >> docker-swarm-join-token.json
+              aws dynamodb put-item --table-name docker-swarm-join-token --item file://docker-swarm-join-token.json
+
+
               sudo apt-get install awscli -y
-              aws configure set region "us-east-1"
-              aws configure set output "yaml"
-              aws configure set aws_access_key_id "${AWSAccessKeyId}"
-              aws configure set aws_secret_access_key "${AWSSecretAccessKey}"
-              aws configure set aws_session_token "${AWSSessionToken}"
+              aws configure set region us-east-1
+              aws configure set output json
+              aws configure set aws_access_key_id ${AWSAccessKeyId}
+              aws configure set aws_secret_access_key ${AWSSecretAccessKey}
+              aws configure set aws_session_token ${AWSSessionToken}
               sudo aws ecr get-login --no-include-email --region us-east-1 | sed -e 's/-e none//' | sudo bash
 
 
@@ -104,3 +132,13 @@ Resources:
       Tags:
         - Key: Name
           Value: CACAA2BroadBuildServer01
+
+
+Outputs:
+
+  BuildServerPrivateIp:
+    Description: Reference to 
+    Value: !GetAtt CACAA2BroadBuildServer01.PrivateIp
+    Export:
+      Name: DockerSwarmMasterStack:BuildServerPrivateIp
+# Export master Private Ip
