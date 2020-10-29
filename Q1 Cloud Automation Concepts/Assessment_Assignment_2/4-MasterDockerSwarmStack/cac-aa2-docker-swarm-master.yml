@@ -64,6 +64,8 @@ Resources:
               aws configure set aws_secret_access_key "${AWSSecretAccessKey}"
               aws configure set aws_session_token "${AWSSessionToken}"
               sudo aws ecr get-login --no-include-email --region us-east-1 | sed -e 's/-e none//' | sudo bash
+
+
               git clone https://github.com/BFL-Psycho/cac-aa2-covid-dashboard-docker.git
               cp apiEndpoint cac-aa2-covid-dashboard-docker/
               cd cac-aa2-covid-dashboard-docker && sudo docker build -t covid-dashboard:latest .
@@ -71,14 +73,17 @@ Resources:
               DASHBOARD_IMAGE_ID=$(echo `sudo docker images --filter=reference=covid-dashboard:latest --format "{{.ID}}"`) && sudo docker tag $DASHBOARD_IMAGE_ID ${CovidDashboardECR} 
               sudo docker push ${CovidDashboardECR}
               
+              cd ~
 
-              cd ~ && git clone https://github.com/BFL-Psycho/cac-aa2-covid-registration-form-docker.git
+              git clone https://github.com/BFL-Psycho/cac-aa2-covid-registration-form-docker.git
               cd cac-aa2-covid-registration-form-docker && sudo docker build -t covid-form:latest .
               sudo aws ecr get-login --no-include-email --region us-east-1 | sed -e 's/-e none//' | sudo bash
               FORM_IMAGE_ID=$(echo `sudo docker images --filter=reference=covid-form:latest --format "{{.ID}}"`) && sudo docker tag $FORM_IMAGE_ID ${CovidRegistrationFormECR}
               sudo docker push ${CovidRegistrationFormECR}
 
-              cd ~ && git clone https://github.com/BFL-Psycho/cac-aa2-covid-services.git
+              cd ~
+              
+              git clone https://github.com/BFL-Psycho/cac-aa2-covid-services.git
               cd cac-aa2-covid-services
               sed -i "s|covid-dashboard:latest|${CovidDashboardECR}|g" ./docker-compose.yml
               sed -i "s|covid-form:latest|${CovidRegistrationFormECR}|g" ./docker-compose.yml

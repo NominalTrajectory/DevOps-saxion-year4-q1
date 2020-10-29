@@ -97,7 +97,7 @@ Resources:
 
 
 
-  #Description: This is a IAM role, it is used by the .
+  #Description: This is a IAM role, it is used by the EC2 instance that hosts the ELK related services.
   CACAA1FunctionbeatLambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -121,7 +121,8 @@ Resources:
 
 
 
-  #Description: 
+  #Description: This is a EC2 instance, this instance is resposible for hosting the relavent ELK services wich include Elasticsearch, Logstash and Kibana.
+  #             The currect settup monitors the CACAA1MongoDBDataRetriever Lambda function.
   CACAA1ELKInstance: 
     Type: AWS::EC2::Instance
     Properties:
@@ -220,7 +221,7 @@ Resources:
 #       `8888888P'        `Y88888P'         8 8888       8 8888            `Y88888P'         8 8888     `Y8888P ,88P' 
 Outputs:
 
-  #Description: 
+  #Description: This outputs a reference to the SecurityGroup used by the EC2 Instance that hosts the ELK services.
   #This value is used in the stacks:
   # -
   ELKSecurityGroupRef:
@@ -229,7 +230,7 @@ Outputs:
     Export:
       Name: ElkStack:ELKSecurityGroup
 
-  #Description: 
+  #Description: This outputs a reference to the EC2 Instance that hosts the ELK services.
   #This value is used in the stacks:
   # -
   ELKInstanceRef:

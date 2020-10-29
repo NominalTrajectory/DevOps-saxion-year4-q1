@@ -94,7 +94,7 @@ Resources:
 
       #TODO: Upload files into S3 automatically (maybe from git)
   
-  #Description: 
+  #Description: This is a IAM Role, which is used for the Lambda functions: CAC1AA1StaticWebsiteUploaderLambda & CAC1AA1CFNInvokerLambda 
   #Create S3 access role for Lambda
   CACAA1LambdaS3Role:
     Type: AWS::IAM::Role
@@ -122,7 +122,7 @@ Resources:
   #All variables are dynamic through environment variables of lambda
   #Timeout set to 1 minute
 
-  #Description: 
+  #Description: This script will pull a static website from a github 
   CAC1AA1StaticWebsiteUploaderLambda:
     Type: AWS::Lambda::Function
     DependsOn: CACAA1S3Bucket
