@@ -5,12 +5,15 @@ Parameters:
   AWSAccessKeyId:
     Description: Please enter
     Type: String
+    AllowedPattern: ".+"
   AWSSecretAccessKey:
     Description: Please enter
     Type: String
+    AllowedPattern: ".+"
   AWSSessionToken:
     Description: Please enter
     Type: String
+    AllowedPattern: ".+"
 
 
 Resources:
@@ -69,7 +72,8 @@ Resources:
           !Sub 
           - |
               #!/bin/bash
-              echo ${CovidAPIEndpointURL} >> apiEndpoint
+              cd ~
+              echo ${CovidDataAPIEndpointURL} >> apiEndpoint
               sudo apt-get update && sudo apt-get upgrade -y
               sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
               curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
@@ -79,12 +83,6 @@ Resources:
               sudo systemctl start docker
               sudo systemctl enable docker
               sudo docker swarm init --advertise-addr $(hostname -I | awk '{print $1}')
-
-              TOKEN=$(sudo docker swarm join-token worker -q)
-              echo "{\"id\": {\"N\":\"1\"}, \"token\": {\"S\":\"$TOKEN\"}}" >> docker-swarm-join-token.json
-              aws dynamodb put-item --table-name docker-swarm-join-token --item file://docker-swarm-join-token.json
-
-
               sudo apt-get install awscli -y
               aws configure set region us-east-1
               aws configure set output json
@@ -93,40 +91,59 @@ Resources:
               aws configure set aws_session_token ${AWSSessionToken}
               sudo aws ecr get-login --no-include-email --region us-east-1 | sed -e 's/-e none//' | sudo bash
 
+              TOKEN=$(sudo docker swarm join-token worker -q)
+              echo "{\"id\": {\"N\":\"1\"}, \"token\": {\"S\":\"$TOKEN\"}}" >> docker-swarm-join-token.json
+              aws dynamodb put-item --table-name docker-swarm-join-token --item file://docker-swarm-join-token.json
 
               git clone https://github.com/BFL-Psycho/cac-aa2-covid-dashboard-docker.git
               cp apiEndpoint cac-aa2-covid-dashboard-docker/
               cd cac-aa2-covid-dashboard-docker && sudo docker build -t covid-dashboard:latest .
               sudo aws ecr get-login --no-include-email --region us-east-1 | sed -e 's/-e none//' | sudo bash
-              DASHBOARD_IMAGE_ID=$(echo `sudo docker images --filter=reference=covid-dashboard:latest --format "{{.ID}}"`) && sudo docker tag $DASHBOARD_IMAGE_ID ${CovidDashboardECR} 
-              sudo docker push ${CovidDashboardECR}
+              DASHBOARD_IMAGE_ID=$(echo `sudo docker images --filter=reference=covid-dashboard:latest --format "{{.ID}}"`) && sudo docker tag $DASHBOARD_IMAGE_ID ${CovidDashboardECRUrl} 
+              sudo docker push ${CovidDashboardECRUrl}
               
               cd ~
 
               git clone https://github.com/BFL-Psycho/cac-aa2-covid-registration-form-docker.git
               cd cac-aa2-covid-registration-form-docker && sudo docker build -t covid-form:latest .
               sudo aws ecr get-login --no-include-email --region us-east-1 | sed -e 's/-e none//' | sudo bash
-              FORM_IMAGE_ID=$(echo `sudo docker images --filter=reference=covid-form:latest --format "{{.ID}}"`) && sudo docker tag $FORM_IMAGE_ID ${CovidRegistrationFormECR}
-              sudo docker push ${CovidRegistrationFormECR}
+              FORM_IMAGE_ID=$(echo `sudo docker images --filter=reference=covid-form:latest --format "{{.ID}}"`) && sudo docker tag $FORM_IMAGE_ID ${CovidRegistrationFormECRUrl}
+              sudo docker push ${CovidRegistrationFormECRUrl}
 
               cd ~
               
               git clone https://github.com/BFL-Psycho/cac-aa2-covid-services.git
               cd cac-aa2-covid-services
-              sed -i "s|covid-dashboard:latest|${CovidDashboardECR}|g" ./docker-compose.yml
-              sed -i "s|covid-form:latest|${CovidRegistrationFormECR}|g" ./docker-compose.yml
+              sed -i "s|covid-dashboard:latest|${CovidDashboardECRUrl}|g" ./docker-compose.yml
+              sed -i "s|covid-form:latest|${CovidRegistrationFormECRUrl}|g" ./docker-compose.yml
               sudo docker stack deploy -c ./docker-compose.yml covid-services
+              
+              mkdir ~/automation
+              touch ~/automation/cron-nightly-covid-services-build-push-deploy.sh
+              cd ~/automation
+              echo '#!/bin/bash' >> cron-nightly-covid-services-build-push-deploy.sh
+              echo 'echo Building covid-services images...' >> cron-nightly-covid-services-build-push-deploy.sh
+              echo 'cd ~/cac-aa2-covid-dashboard-docker && docker build -t covid-dashboard:latest .' >> cron-nightly-covid-services-build-push-deploy.sh
+              echo 'aws ecr get-login --no-include-email --region us-east-1 | sed -e "s/-e none//" | sudo bash' >> cron-nightly-covid-services-build-push-deploy.sh
+              echo 'DASHBOARD_IMAGE_ID=$(echo `sudo docker images --filter=reference=covid-dashboard:latest --format "{{.ID}}"`) && sudo docker tag $DASHBOARD_IMAGE_ID ${CovidDashboardECRUrl}' >> cron-nightly-covid-services-build-push-deploy.sh
+              echo 'docker push ${CovidDashboardECRUrl}' >> cron-nightly-covid-services-build-push-deploy.sh
+              echo 'cd ~/cac-aa2-covid-registration-form-docker && docker build -t covid-form:latest .' >> cron-nightly-covid-services-build-push-deploy.sh
+              echo 'FORM_IMAGE_ID=$(echo `sudo docker images --filter=reference=covid-form:latest --format "{{.ID}}"`) && sudo docker tag $FORM_IMAGE_ID ${CovidRegistrationFormECRUrl}' >> cron-nightly-covid-services-build-push-deploy.sh
+              echo 'docker push ${CovidRegistrationFormECRUrl}' >> cron-nightly-covid-services-build-push-deploy.sh
+              echo 'sleep 10m' >> cron-nightly-covid-services-build-push-deploy.sh
+              echo 'docker stack rm covid-services' >> cron-nightly-covid-services-build-push-deploy.sh
+              echo 'docker stack deploy -c ~/cac-aa2-covid-services/docker-compose.yml covid-services' >> cron-nightly-covid-services-build-push-deploy.sh
+              (crontab -l 2>/dev/null; echo "0 2 * * * ~/automation/cron-nightly-covid-services-build-push-deploy.sh") | crontab -
 
-
-          - CovidDataEndpointURL:
+          - CovidDataAPIEndpointURL:
               Fn::ImportValue:
                 DataLayerStack:CovidDataAPIEndpointURL
-            CovidDashboardECR:
+            CovidDashboardECRUrl:
+                Fn::ImportValue:
+                  ECRStack:CovidDashboardECRUrl
+            CovidRegistrationFormECRUrl:
               Fn::ImportValue:
-                ECRStack:CovidDashboardECR
-            CovidRegistrationFormECR:
-              Fn::ImportValue:
-                ECRStack:CovidRegistrationFormECR
+                ECRStack:CovidRegistrationFormECRUrl
 
                           
       Tags:
@@ -142,3 +159,5 @@ Outputs:
     Export:
       Name: DockerSwarmMasterStack:BuildServerPrivateIp
 # Export master Private Ip
+
+
