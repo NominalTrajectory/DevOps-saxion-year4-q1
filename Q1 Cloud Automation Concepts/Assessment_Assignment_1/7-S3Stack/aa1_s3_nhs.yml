@@ -131,7 +131,7 @@ Resources:
       Environment:
         Variables:
           repoUrl: !Ref GitRepositoryWithNHSForm                          #Par: GitRepositoryWithNHSForm            (The link for the Git Repository)
-          bucketName: !Ref S3BucketName                                   #DO: CACAA1S3Bucket                       (The S3 Bucket, storing the static website)
+          bucketName: !Ref S3BucketName                                   #Par: S3BucketName                        (The name of the S3 Bucket, that is meant to store the static website)
       Handler: index.handler
       Layers:
         - arn:aws:lambda:us-east-1:553035198032:layer:git-lambda2:7 # Git layer

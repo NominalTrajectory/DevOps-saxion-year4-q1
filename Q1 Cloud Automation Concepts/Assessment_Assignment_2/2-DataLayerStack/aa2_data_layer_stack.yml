@@ -8,7 +8,7 @@
 #   8 8888        ,88' 8 8888        8b   `8.`8888. `8 8888       .8' 8 8888 `8b.      8 8888 8 8888             8 8888        8 8888 `8 8888       ,8P  8      `Y8o. `Y8
 #   8 8888    ,o88P'   8 8888        `8b.  ;8.`8888    8888     ,88'  8 8888   `8b.    8 8888 8 8888             8 8888        8 8888  ` 8888     ,88'   8         `Y8o.`
 #   8 888888888P'      8 888888888888 `Y8888P ,88P'     `8888888P'    8 8888     `88.  8 8888 8 8888             8 8888        8 8888     `8888888P'     8            `Yo
-Description: This is Stack 03 of Cloud Engineering\Cloud Automation Concepts\Assessment 01 | DataLayerStack | This CFN stack deploys an EC2 instance based MongoDB replicated over two availability zones, Lambda functions and REST API to interact with Covid data
+Description: This is Stack 02 of Cloud Engineering\Cloud Automation Concepts\Assessment 01 | DataLayerStack | This CFN stack deploys an EC2 instance based MongoDB replicated over two availability zones, Lambda functions and REST API to interact with Covid data
 
 
 

@@ -61,6 +61,10 @@ Parameters:
 #   8 8888     `88. 8 888888888888 `Y8888P ,88P'     `8888888P'        `Y88888P'   8 8888     `88.    `8888888P'    8 888888888888 `Y8888P ,88P'
 Resources:
 
+  #DO = Dependent on
+  #Par = Parameter
+  #Imp = Imported parameter
+
   #Resources for ELK stack
   #For the purpose of this assignment (and to save credits) a siplified configuration will be used
   #ELK stack will run on a single EC2 instance and won't be configured for high availability
@@ -92,7 +96,7 @@ Resources:
       Tags: 
         - Key: Name
           Value: CACAA1ELKSecurityGroup
-      VpcId: !ImportValue BaseStack:VPC
+      VpcId: !ImportValue BaseStack:VPC                                   #Imp: BaseStack:VPC                       (The VPC imported from the BaseStack)
 
 
 
@@ -128,7 +132,7 @@ Resources:
     Properties:
       InstanceType: m4.large
       ImageId: ami-0817d428a6fb68645 #Ubuntu 18.04
-      SubnetId: !ImportValue BaseStack:PublicSubnet1
+      SubnetId: !ImportValue BaseStack:PublicSubnet1                      #Imp: BaseStack:PublicSubnet1             (The first public subnet imported from the BaseStack)
       KeyName: CAC_Assignments
       SecurityGroupIds: 
         - !GetAtt CACAA1ELKSecurityGroup.GroupId
@@ -187,13 +191,13 @@ Resources:
             ./functionbeat deploy fn-cloudwatch-logs
           - LambdaVPCSecurityGroup:
               Fn::ImportValue:
-                DataLayerStack:LambdaVPCSecurityGroup
+                DataLayerStack:LambdaVPCSecurityGroup                     #Imp: DataLayerStack:LambdaVPCSecurityGroup (The SecurityGroup used for the VPC connected Lambdas)
             PublicSubnet1:
               Fn::ImportValue:
-                BaseStack:PublicSubnet1
+                BaseStack:PublicSubnet1                                   #Imp: BaseStack:PublicSubnet1             (The first public subnet imported from the BaseStack)
             PublicSubnet2:
               Fn::ImportValue:
-                BaseStack:PublicSubnet2
+                BaseStack:PublicSubnet2                                   #Imp: BaseStack:PublicSubnet2             (The second public subnet imported from the BaseStack)
                     
       Tags:
         - Key: Name
