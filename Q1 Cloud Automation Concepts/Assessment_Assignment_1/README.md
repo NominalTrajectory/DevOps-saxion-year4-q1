@@ -9,9 +9,10 @@
 Before deploying the solution, make sure you follow the checklist below:
 
 - Amazon CLI has to be installed
-- Fresh AWS credentials are set in ~/.aws/credentials
-- Node.js **10.x** is installed on your machine
-- Your CloudFormation doesn't have stacks whose names can conflict with the solution: BaseStack, DataLayerStack, EFSStack, WebStack, S3Stack, ELKStack
+- Fresh AWS credentials are set in ~/.aws/credentials.
+- Node.js **10.x** is installed on your machine.
+- Your CloudFormation doesn't have stacks whose names can conflict with the solution: BaseStack, DataLayerStack, EFSStack, WebStack, S3Stack, ELKStack.
+- Make sure there is a AWS KSM (Key Management Service) key named "CAC_Assignments" and that you have the private key so you can log into the EC2 instances for testing and troubleshooting.
 
 
 ## Deploy the solution
