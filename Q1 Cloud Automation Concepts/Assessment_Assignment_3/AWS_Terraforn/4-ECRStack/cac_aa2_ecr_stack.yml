@@ -1,0 +1,215 @@
+#   8 888888888o.      8 8888888888     d888888o.       ,o888888o.    8 888888888o.    8 8888 8 888888888o 8888888 8888888888  8 8888     ,o888888o.     b.             8
+#   8 8888    `^888.   8 8888         .`8888:' `88.    8888     `88.  8 8888    `88.   8 8888 8 8888    `88.     8 8888        8 8888  . 8888     `88.   888o.          8
+#   8 8888        `88. 8 8888         8.`8888.   Y8 ,8 8888       `8. 8 8888     `88   8 8888 8 8888     `88     8 8888        8 8888 ,8 8888       `8b  Y88888o.       8
+#   8 8888         `88 8 8888         `8.`8888.     88 8888           8 8888     ,88   8 8888 8 8888     ,88     8 8888        8 8888 88 8888        `8b .`Y888888o.    8
+#   8 8888          88 8 888888888888  `8.`8888.    88 8888           8 8888.   ,88'   8 8888 8 8888.   ,88'     8 8888        8 8888 88 8888         88 8o. `Y888888o. 8
+#   8 8888          88 8 8888           `8.`8888.   88 8888           8 888888888P'    8 8888 8 888888888P'      8 8888        8 8888 88 8888         88 8`Y8o. `Y88888o8
+#   8 8888         ,88 8 8888            `8.`8888.  88 8888           8 8888`8b        8 8888 8 8888             8 8888        8 8888 88 8888        ,8P 8   `Y8o. `Y8888
+#   8 8888        ,88' 8 8888        8b   `8.`8888. `8 8888       .8' 8 8888 `8b.      8 8888 8 8888             8 8888        8 8888 `8 8888       ,8P  8      `Y8o. `Y8
+#   8 8888    ,o88P'   8 8888        `8b.  ;8.`8888    8888     ,88'  8 8888   `8b.    8 8888 8 8888             8 8888        8 8888  ` 8888     ,88'   8         `Y8o.`
+#   8 888888888P'      8 888888888888 `Y8888P ,88P'     `8888888P'    8 8888     `88.  8 8888 8 8888             8 8888        8 8888     `8888888P'     8            `Yo
+Description: This is Stack 03 of Cloud Engineering\Cloud Automation Concepts\Assessment 02 | ECRStack | This stack contains an ECR (Elastic Container Repository)
+
+
+
+
+
+
+
+
+
+
+#   8 888888888o      .8.          8 888888888o.            .8.                   ,8.       ,8.          8 8888888888 8888888 8888888888 8 8888888888   8 888888888o.     d888888o.
+#   8 8888    `88.   .888.         8 8888    `88.          .888.                 ,888.     ,888.         8 8888             8 8888       8 8888         8 8888    `88.  .`8888:' `88.
+#   8 8888     `88  :88888.        8 8888     `88         :88888.               .`8888.   .`8888.        8 8888             8 8888       8 8888         8 8888     `88  8.`8888.   Y8
+#   8 8888     ,88 . `88888.       8 8888     ,88        . `88888.             ,8.`8888. ,8.`8888.       8 8888             8 8888       8 8888         8 8888     ,88  `8.`8888.
+#   8 8888.   ,88'.8. `88888.      8 8888.   ,88'       .8. `88888.           ,8'8.`8888,8^8.`8888.      8 888888888888     8 8888       8 888888888888 8 8888.   ,88'   `8.`8888.
+#   8 888888888P'.8`8. `88888.     8 888888888P'       .8`8. `88888.         ,8' `8.`8888' `8.`8888.     8 8888             8 8888       8 8888         8 888888888P'     `8.`8888.
+#   8 8888      .8' `8. `88888.    8 8888`8b          .8' `8. `88888.       ,8'   `8.`88'   `8.`8888.    8 8888             8 8888       8 8888         8 8888`8b          `8.`8888.
+#   8 8888     .8'   `8. `88888.   8 8888 `8b.       .8'   `8. `88888.     ,8'     `8.`'     `8.`8888.   8 8888             8 8888       8 8888         8 8888 `8b.    8b   `8.`8888.
+#   8 8888    .888888888. `88888.  8 8888   `8b.    .888888888. `88888.   ,8'       `8        `8.`8888.  8 8888             8 8888       8 8888         8 8888   `8b.  `8b.  ;8.`8888
+#   8 8888   .8'       `8. `88888. 8 8888     `88. .8'       `8. `88888. ,8'         `         `8.`8888. 8 888888888888     8 8888       8 888888888888 8 8888     `88. `Y8888P ,88P'
+Parameters: 
+
+  #The name to be used for the ECR hosting the Covid dashboard worker images (CACAA2CovidDashboardECR)
+  CovidDashboardECRName:
+    Description: Provide a name for Elastic Container Repository for the Covid dashboard docker worker
+    Type: String
+    AllowedPattern: (?:[a-z0-9]+(?:[._-][a-z0-9]+)*/)*[a-z0-9]+(?:[._-][a-z0-9]+)*
+    Default: cac-aa2-covid-dashboard-ecr
+
+  #The name to be used for the ECR hosting the Covid NHS form worker images (CACAA2CovidDashboardECR)
+  CovidRegistrationFormECRName:
+    Description: Provide a name for Elastic Container Repository for the NHS form docker worker
+    Type: String
+    AllowedPattern: (?:[a-z0-9]+(?:[._-][a-z0-9]+)*/)*[a-z0-9]+(?:[._-][a-z0-9]+)*
+    Default: cac-aa2-covid-form-ecr
+
+
+
+
+
+
+
+
+
+#   8 888888888o.   8 8888888888     d888888o.       ,o888888o.     8 8888      88 8 888888888o.      ,o888888o.    8 8888888888     d888888o.
+#   8 8888    `88.  8 8888         .`8888:' `88.  . 8888     `88.   8 8888      88 8 8888    `88.    8888     `88.  8 8888         .`8888:' `88.
+#   8 8888     `88  8 8888         8.`8888.   Y8 ,8 8888       `8b  8 8888      88 8 8888     `88 ,8 8888       `8. 8 8888         8.`8888.   Y8
+#   8 8888     ,88  8 8888         `8.`8888.     88 8888        `8b 8 8888      88 8 8888     ,88 88 8888           8 8888         `8.`8888.
+#   8 8888.   ,88'  8 888888888888  `8.`8888.    88 8888         88 8 8888      88 8 8888.   ,88' 88 8888           8 888888888888  `8.`8888.
+#   8 888888888P'   8 8888           `8.`8888.   88 8888         88 8 8888      88 8 888888888P'  88 8888           8 8888           `8.`8888.
+#   8 8888`8b       8 8888            `8.`8888.  88 8888        ,8P 8 8888      88 8 8888`8b      88 8888           8 8888            `8.`8888.
+#   8 8888 `8b.     8 8888        8b   `8.`8888. `8 8888       ,8P  ` 8888     ,8P 8 8888 `8b.    `8 8888       .8' 8 8888        8b   `8.`8888.
+#   8 8888   `8b.   8 8888        `8b.  ;8.`8888  ` 8888     ,88'     8888   ,d8P  8 8888   `8b.     8888     ,88'  8 8888        `8b.  ;8.`8888
+#   8 8888     `88. 8 888888888888 `Y8888P ,88P'     `8888888P'        `Y88888P'   8 8888     `88.    `8888888P'    8 888888888888 `Y8888P ,88P'
+Resources:
+
+  #DO = Dependent on
+  #Par = Parameter
+  #Imp = Imported parameter
+  
+  #Description: This is a Security Group, this is used by the VPCEndpoints CACAA2ECRVPCEndpointAPI & CACAA2ECRVPCEndpointDKR which are both use by thier respective ECR Repositorys  
+  #             and allows all incomming tcp packets from port 443 (HTTPS for the ECR Privatelink) and allows all outgoing packets from all ports.
+  CACAA2ECRPrivateLinkSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: This security groups allows 443 (HTTPS) which is required for the ECR PrivateLink #Refer to https://aws.amazon.com/premiumsupport/knowledge-center/ecs-pull-container-api-error-ecr/
+      GroupName: CACAA2ECRPrivateLinkSecurityGroup
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      VpcId: !ImportValue BaseStack:VPC
+      Tags: 
+        - Key: Name
+          Value: CACAA2ECRPrivateLinkSecurityGroup
+
+
+
+
+
+  #Description: This is a EC2 VPCEndpoints, which is used for calls to the Amazon ECR API. API actions such as DescribeImages and CreateRepositories go to this endpoint.  
+  #             Link for references: https://docs.aws.amazon.com/AmazonECR/latest/userguide/vpc-endpoints.html      
+  CACAA2ECRVPCEndpointAPI:
+    Type: AWS::EC2::VPCEndpoint
+    Properties: 
+      PrivateDnsEnabled: false
+      SecurityGroupIds: 
+        - !Ref CACAA2ECRPrivateLinkSecurityGroup
+      ServiceName: com.amazonaws.us-east-1.ecr.api
+      SubnetIds: 
+        - !ImportValue BaseStack:PublicSubnet1
+        - !ImportValue BaseStack:PublicSubnet2
+      VpcEndpointType: Interface
+      VpcId: !ImportValue BaseStack:VPC
+
+  #Description: This is a EC2 VPCEndpoints, This endpoint is used for the Docker Registry APIs. Docker client commands such as push and pull use this endpoint. 
+  #             Link for references: https://docs.aws.amazon.com/AmazonECR/latest/userguide/vpc-endpoints.html   
+  CACAA2ECRVPCEndpointDKR:
+      Type: AWS::EC2::VPCEndpoint
+      Properties: 
+        PrivateDnsEnabled: true
+        SecurityGroupIds: 
+          - !Ref CACAA2ECRPrivateLinkSecurityGroup
+        ServiceName: com.amazonaws.us-east-1.ecr.dkr
+        SubnetIds: 
+          - !ImportValue BaseStack:PublicSubnet1
+          - !ImportValue BaseStack:PublicSubnet2
+        VpcEndpointType: Interface
+        VpcId: !ImportValue BaseStack:VPC
+
+
+
+
+
+  #Description: This is a ECR Repository, this Repository is used to store the Docker Covid dashboard worker images.
+  CACAA2CovidDashboardECR:
+    Type: AWS::ECR::Repository
+    DeletionPolicy: Delete
+    Properties: 
+      RepositoryName: !Ref CovidDashboardECRName
+      # RepositoryPolicyText: # this policy doesn't work, need to think of something else
+      #   Version: '2012-10-17'
+      #   Id: CACAA2ECRAccessPolicy
+      #   Statement:
+      #   - Sid: IPAllow
+      #     Effect: Allow
+      #     Action: ecr:*
+      #     Resource: "*"
+      #     Condition:
+      #       ForAnyValue:IpAddress:
+      #         aws:SourceIp:
+      #         - 10.0.1.0/24 #Maybe replace with CIDR vars from BaseStack
+      #         - 10.0.2.0/24
+      #         - 10.0.51.0/24
+      #         - 10.0.52.0/24     
+      Tags: 
+        - Key: Name
+          Value: CACAA2CovidDashboardECR
+
+  #Description: This is a ECR Repository, this Repository is used to store the Docker Covid NHS form worker images.
+  CACAA2CovidRegistrationFormECR:
+    Type: AWS::ECR::Repository
+    DeletionPolicy: Delete
+    Properties: 
+      RepositoryName: !Ref CovidRegistrationFormECRName
+      # RepositoryPolicyText: # this policy doesn't work, need to think of something else
+      #   Version: '2012-10-17'
+      #   Id: CACAA2ECRAccessPolicy
+      #   Statement:
+      #   - Sid: IPAllow
+      #     Effect: Allow
+      #     Action: ecr:*
+      #     Resource: "*"
+      #     Condition:
+      #       ForAnyValue:IpAddress:
+      #         aws:SourceIp:
+      #         - 10.0.1.0/24 #Maybe replace with CIDR vars from BaseStack
+      #         - 10.0.2.0/24
+      #         - 10.0.51.0/24
+      #         - 10.0.52.0/24     
+      Tags: 
+        - Key: Name
+          Value: CACAA2CovidRegistrationFormECR
+
+  
+
+
+
+
+
+
+
+
+                                                                                                              
+#       ,o888888o.     8 8888      88 8888888 8888888888 8 888888888o   8 8888      88 8888888 8888888888 d888888o.   
+#    . 8888     `88.   8 8888      88       8 8888       8 8888    `88. 8 8888      88       8 8888     .`8888:' `88. 
+#   ,8 8888       `8b  8 8888      88       8 8888       8 8888     `88 8 8888      88       8 8888     8.`8888.   Y8 
+#   88 8888        `8b 8 8888      88       8 8888       8 8888     ,88 8 8888      88       8 8888     `8.`8888.     
+#   88 8888         88 8 8888      88       8 8888       8 8888.   ,88' 8 8888      88       8 8888      `8.`8888.    
+#   88 8888         88 8 8888      88       8 8888       8 888888888P'  8 8888      88       8 8888       `8.`8888.   
+#   88 8888        ,8P 8 8888      88       8 8888       8 8888         8 8888      88       8 8888        `8.`8888.  
+#   `8 8888       ,8P  ` 8888     ,8P       8 8888       8 8888         ` 8888     ,8P       8 8888    8b   `8.`8888. 
+#    ` 8888     ,88'     8888   ,d8P        8 8888       8 8888           8888   ,d8P        8 8888    `8b.  ;8.`8888 
+#       `8888888P'        `Y88888P'         8 8888       8 8888            `Y88888P'         8 8888     `Y8888P ,88P' 
+Outputs:
+
+  #Description: This outputs the URL of the ECR Repository which is used to store the Docker Covid dashboard worker images.
+  #This value is used in the stacks:
+  # -
+  CovidDashboardECRUrl:
+    Description: Reference to
+    Value: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${CovidDashboardECRName}"
+    Export:
+      Name: ECRStack:CovidDashboardECRUrl
+
+  #Description: This outputs the URL of the ECR Repository which is used to store the Docker Covid NHS form worker images.
+  #This value is used in the stacks:
+  # -
+  CovidRegistrationFormECRUrl:
+    Description: Reference to
+    Value: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${CovidRegistrationFormECRName}"
+    Export:
+      Name: ECRStack:CovidRegistrationFormECRUrl

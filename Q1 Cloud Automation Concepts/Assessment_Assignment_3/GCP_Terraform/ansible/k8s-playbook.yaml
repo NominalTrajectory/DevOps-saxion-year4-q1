@@ -1,0 +1,70 @@
+---
+- name: Install Kubernetes
+    hosts: all
+    gather_facts: false
+    remote_user: packer
+    become: true
+    
+
+    tasks:
+
+    # Install Docker
+    - name: Install aptitude using apt
+      apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
+
+    - name: Install required system packages
+      apt: name={{ item }} state=latest update_cache=yes
+      loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python3-pip', 'virtualenv', 'python3-setuptools']
+
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
+        state: present
+
+    - name: Update apt and install docker-ce
+      apt: update_cache=yes name=docker-ce state=latest
+
+    - name: Ensure Docker is started and enabled at boot
+        service:
+        name: docker
+        state: started
+        enabled: true
+
+    # Install Kubernetes
+    - name: Get Kubernetes apt-key
+      apt_key:
+       url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+       state: present
+
+   # Note: currently the latest repository is still xenial not bionic
+   - name: Add Kubernetes APT repository
+     apt_repository:
+      repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+      state: present
+      filename: 'kubernetes'
+      
+   # Install packages
+   - name: Install required software
+     apt: 
+       name: "{{ packages }}"
+       update_cache: true
+       state: present
+     vars:
+       packages:
+       - docker
+       - kubelet
+       - kubeadm
+       - kubectl
+       - kubernetes-cni
+
+    - name: Set IP Tables config for Kubernetes Networking
+        sysctl:
+          name: net.bridge.bridge-nf-call-iptables
+          value: 1
+          state: present
+    

@@ -1,7 +1,0 @@
-For the deployment script:
-
-- Deploy BaseStack
-- Deploy DataLayerStack & Lambdas
-- Deploy Docker Swarm Master
-- Sleep for 10(?) minutes
-- Deploy Docker Swarm Workers
