@@ -73,7 +73,7 @@ Resources:
   #Par = Parameter
   #Imp = Imported parameter
 
-  #Description: The database table storing the... TODO
+  #Description: The database table storing the join token workers can use to join the docker swarm cluster.
   CACAA2DynamoDBJoinTokenTable:
     Type: AWS::DynamoDB::Table
     Properties:
