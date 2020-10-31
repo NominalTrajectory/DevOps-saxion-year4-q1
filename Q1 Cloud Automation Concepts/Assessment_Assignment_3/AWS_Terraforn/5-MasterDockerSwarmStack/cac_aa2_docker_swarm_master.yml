@@ -8,7 +8,7 @@
 #   8 8888        ,88' 8 8888        8b   `8.`8888. `8 8888       .8' 8 8888 `8b.      8 8888 8 8888             8 8888        8 8888 `8 8888       ,8P  8      `Y8o. `Y8
 #   8 8888    ,o88P'   8 8888        `8b.  ;8.`8888    8888     ,88'  8 8888   `8b.    8 8888 8 8888             8 8888        8 8888  ` 8888     ,88'   8         `Y8o.`
 #   8 888888888P'      8 888888888888 `Y8888P ,88P'     `8888888P'    8 8888     `88.  8 8888 8 8888             8 8888        8 8888     `8888888P'     8            `Yo
-Description: This is Stack 04 of Cloud Engineering\Cloud Automation Concepts\Assessment 01 | DockerSwarmMasterStack | Creates a docker swarm cluster, this pulls dockerfiles from git repo, then build docker images and pushes them to ECR
+Description: This is Stack 04 of Cloud Engineering\Cloud Automation Concepts\Assessment 02 | DockerSwarmMasterStack | Creates a docker swarm cluster, this pulls dockerfiles from git repo, then build docker images and pushes them to ECR
 
 
 
@@ -31,16 +31,21 @@ Description: This is Stack 04 of Cloud Engineering\Cloud Automation Concepts\Ass
 #   8 8888   .8'       `8. `88888. 8 8888     `88. .8'       `8. `88888. ,8'         `         `8.`8888. 8 888888888888     8 8888       8 888888888888 8 8888     `88. `Y8888P ,88P'
 Parameters:
 
+  #The AWS Security credentails: AWSAccessKeyId
   AWSAccessKeyId:
-    Description: Please enter
+    Description: Please enter the AWS Security credentails AWSAccessKeyId
     Type: String
     AllowedPattern: ".+"
+
+  #The AWS Security credentails: AWSSecretAccessKey
   AWSSecretAccessKey:
-    Description: Please enter
+    Description: Please enter the AWS Security credentails AWSSecretAccessKey
     Type: String
     AllowedPattern: ".+"
+  
+  #The AWS Security credentails: AWSSessionToken
   AWSSessionToken:
-    Description: Please enter
+    Description: Please enter the AWS Security credentails AWSSessionToken
     Type: String
     AllowedPattern: ".+"
 
@@ -68,6 +73,7 @@ Resources:
   #Par = Parameter
   #Imp = Imported parameter
 
+  #Description: The database table storing the... TODO
   CACAA2DynamoDBJoinTokenTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -86,6 +92,11 @@ Resources:
           Value: CACAA2DynamoDBJoinTokenTable
 
 
+
+
+
+  #Description: This is a Security Group, this is used by the EC2 Instance CACAA2BroadBuildServer01 which builds the docker images and pushes them to the ECR  
+  #             Repository and allows all incomming tcp packets from port 22 (SSH) and from port 2377 (For comunication between docker nodes) and allows all outgoing packets from all ports.
   CACAA2DockerSwarmSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties: 
@@ -105,18 +116,23 @@ Resources:
         - Key: Name
           Value: CACAA2DockerSwarmSecurityGroup
 
-  # Docker Swarm will ensure to automatically run all the necessary services on the new nodes joining the cluster
-  # 
+
+
+
+
+  #Description: This is a EC2 Instance, this instance is responsible for the creating of the Docker images based on the dockerfiles form the dashbaord and the Registration form.
+  #             when these have been created the docker images will be pushed to thier respective EC2 repositorys and thier lation will be logged in the docker-compose file
+  #             then the docker compose file will tell all the workder nodes that they should host the new docker images.
   CACAA2BroadBuildServer01:
     Type: AWS::EC2::Instance
     DependsOn: CACAA2DynamoDBJoinTokenTable
     Properties:
       InstanceType: m4.large
       ImageId: ami-0817d428a6fb68645 # Ubuntu 18.04
-      SubnetId: !ImportValue BaseStack:PrivateSubnet1
+      SubnetId: !ImportValue BaseStack:PrivateSubnet1                     #Imp: BaseStack:PrivateSubnet1            (The first private subnet imported from the BaseStack)
       KeyName: CAC_Assignments
       SecurityGroupIds: 
-        - !Ref CACAA2DockerSwarmSecurityGroup
+        - !Ref CACAA2DockerSwarmSecurityGroup                             #Do: CACAA2DockerSwarmSecurityGroup       (The Security group used by the CACAA2BroadBuildServer01)
       UserData: 
         Fn::Base64:
           !Sub 
@@ -187,13 +203,13 @@ Resources:
 
           - CovidDataAPIEndpointURL:
               Fn::ImportValue:
-                DataLayerStack:CovidDataAPIEndpointURL
+                DataLayerStack:CovidDataAPIEndpointURL                    #Imp: DataLayerStack:CovidDataAPIEndpointURL  (The URL of the API endpoint that allows the user to retrieve the covid data from the MongoDB database)
             CovidDashboardECRUrl:
-                Fn::ImportValue:
-                  ECRStack:CovidDashboardECRUrl
+              Fn::ImportValue:
+                ECRStack:CovidDashboardECRUrl                             #Imp: ECRStack:CovidDashboardECRUrl       (The URL of the ECR Repository which is used to store the Docker Covid dashboard worker images.)
             CovidRegistrationFormECRUrl:
               Fn::ImportValue:
-                ECRStack:CovidRegistrationFormECRUrl
+                ECRStack:CovidRegistrationFormECRUrl                      #Imp: ECRStack:CovidRegistrationFormECRUrl  (The URL of the ECR Repository which is used to store the Docker Covid NHS form worker images.)
 
                           
       Tags:
@@ -222,11 +238,13 @@ Resources:
 #       `8888888P'        `Y88888P'         8 8888       8 8888            `Y88888P'         8 8888     `Y8888P ,88P' 
 Outputs:
 
+  #Description: This outputs the private ip adress of the CACAA2BroadBuildServer01.
+  #This value is used in the stacks:
+  # -
   BuildServerPrivateIp:
     Description: Reference to 
-    Value: !GetAtt CACAA2BroadBuildServer01.PrivateIp
+    Value: !GetAtt CACAA2BroadBuildServer01.PrivateIp                     #DO: CACAA2BroadBuildServer01             (This is the PrivateIp of the EC2 instance responsible for managing the docker nodes)
     Export:
       Name: DockerSwarmMasterStack:BuildServerPrivateIp
-# Export master Private Ip
 
 
