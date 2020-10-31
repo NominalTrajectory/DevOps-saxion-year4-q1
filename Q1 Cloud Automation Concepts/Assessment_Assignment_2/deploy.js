@@ -74,8 +74,12 @@ let t0 = performance.now();
 //  8 8888            `Y88888P'   8            `Yo     `8888888P'       8 8888        8 8888     `8888888P'     8            `Yo  `Y8888P ,88P'
 
 //Trigger the deployment process
-//deploy();
-deployECRStack();
+deploy();
+
+
+
+
+
 /*Descrition: This is the Deploy function, it is called at the start of the program and starts the deployment of the solution by first deploying the BaseStack and after that is complete 
               it calls the functions that build the EFSStack, the DataLayerStack and the S3Stack */
 function deploy() {
@@ -350,6 +354,7 @@ function uploadCACAA2MongoDBDataRetrieverCode() {
     }
   );
 }
+
 
 function invokeDataRefresher() {
   console.log("Refreshing covid data in the MongoDB...");

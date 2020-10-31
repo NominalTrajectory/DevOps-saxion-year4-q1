@@ -314,12 +314,12 @@ Resources:
 Outputs:
 
   WebWorkersCovidDashboardLoadBalancerURL:
-    Description: Reference to
+    Description: Reference to the DNS Name of the ELB for Covid Dashboard
     Value: !GetAtt CACAA2CovidDashboardELB.DNSName
     Export:
       Name: DockerSwarmWorkersStack:WebWorkersCovidDashboardLoadBalancerURL
   WebWorkersCovidFormLoadBalancerURL:
-    Description: Reference to
+    Description: Reference to the DNS Name of the ELB for Covid Registration Form
     Value: !GetAtt CACAA2CovidFormELB.DNSName
     Export:
       Name: DockerSwarmWorkersStack:WebWorkersCovidFormLoadBalancerURL
