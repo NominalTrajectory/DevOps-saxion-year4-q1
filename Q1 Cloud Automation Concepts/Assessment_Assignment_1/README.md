@@ -8,6 +8,7 @@
 
 Before deploying the solution, make sure you follow the checklist below:
 
+- Amazon CLI has to be installed
 - Fresh AWS credentials are set in ~/.aws/credentials
 - Node.js **10.x** is installed on your machine
 - Your CloudFormation doesn't have stacks whose names can conflict with the solution: BaseStack, DataLayerStack, EFSStack, WebStack, S3Stack, ELKStack
