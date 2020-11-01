@@ -1,13 +1,12 @@
 # Cloud Automation Concepts - Assessment Assignment 1
 
 **Authors**: Ivan Shishkalov, Rudo Steenmans
-
 **Lecturer**: Erik van der Arend
 
+
+
 ## Prerequisites
-
 Before deploying the solution, make sure you follow the checklist below:
-
 - Amazon CLI has to be installed
 - Fresh AWS credentials are set in ~/.aws/credentials.
 - Node.js **10.x** is installed on your machine.
@@ -15,25 +14,23 @@ Before deploying the solution, make sure you follow the checklist below:
 - Make sure there is a AWS KSM (Key Management Service) key named "CAC_Assignments" and that you have the private key so you can log into the EC2 instances for testing and troubleshooting.
 
 
-## Deploy the solution
 
+## Deploy the solution
 1. Open a terminal window in the Assessment_Assignment_1 folder
 2. Install npm packages
-
-```bash
-npm i
-```
+    ```bash
+        npm i
+    ```
 3. Roll out all the required stacks at once
-
-```bash
-npm run deploy
-```
+    ```bash
+        npm run deploy
+    ```
 4. Don't close the terminal window until all stacks are deployed
+
 
 ## Destroy the solution
 1. Open a terminal window in the Assessment_Assignment_1 folder
 2. Delete all the stacks at once
-
-```bash
-npm run destroy
-```
+    ```bash
+        npm run destroy
+    ```

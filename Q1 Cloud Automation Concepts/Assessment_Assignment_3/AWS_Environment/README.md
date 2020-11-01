@@ -1,17 +1,13 @@
 # Cloud Automation Concepts - Assessment Assignment 3 - Cloud Orchestration
 
 **Authors**: Ivan Shishkalov, Rudo Steenmans
-
 **Lecturer**: Erik van der Arend
 
 # AWS Environment
-
 This part covers the AWS part of the assignment
 
 ## Prerequisites
-
 Before deploying the solution, make sure you follow the checklist below:
-
 - Fresh AWS credentials are set in ~/.aws/credentials
 - No conflicting CloudFormation stacks
 
