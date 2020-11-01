@@ -38,8 +38,8 @@
     # Install Kubernetes
     - name: Get Kubernetes apt-key
       apt_key:
-      url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-      state: present
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
 
     # Note: currently the latest repository is still xenial not bionic
     - name: Add Kubernetes APT repository
