@@ -3,6 +3,7 @@
 version: "3.8"
 
 services:
+  #Description: This makes the docker workers deploy the dockerfile that will setup a webserver that hosts the Covid dashbaord.
   broad-covid19-dashboard:
     image: covid-dashboard:latest
     ports:
@@ -13,6 +14,7 @@ services:
         constraints:
           - node.role == worker
 
+  #Description: This makes the docker workers deploy the dockerfile that will setup a webserver that hosts NHS covid registration form.
   nhs-covid19-registration-form:
     image: covid-form:latest
     ports:

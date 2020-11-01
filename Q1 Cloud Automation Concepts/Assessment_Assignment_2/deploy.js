@@ -80,8 +80,8 @@ deploy();
 
 
 
-/*Descrition: This is the Deploy function, it is called at the start of the program and starts the deployment of the solution by first deploying the BaseStack and after that is complete 
-              it calls the functions that build the EFSStack, the DataLayerStack and the S3Stack */
+/*Descrition: This is the deploy function, it is called at the start of the program, this function deploys the BaseStack and after that is complete it calls the folowing function:
+               -deployDataLayerStack, the function that deploys the DataLayerStack */
 function deploy() {
   console.log(
     `Deploying the BaseStack with network configuration. Please wait (~5 min)...`
@@ -89,7 +89,7 @@ function deploy() {
   return CFN.createStack(
     (params = {
       StackName: "BaseStack",
-      TemplateBody: `${BASE_NETWORK_STACK_TEMPLATE}`, //Var: BASE_NETWORK_STACK_TEMPLATE          (The location of the BaseStack yml file)
+      TemplateBody: `${BASE_NETWORK_STACK_TEMPLATE}`,                     //Var: BASE_NETWORK_STACK_TEMPLATE        (The location of the BaseStack yml file)
     }),
     (err, data) => {
       if (err) {
@@ -108,7 +108,7 @@ function deploy() {
               process.exit(1);
             } else {
               console.log(`BaseStack has been successfully deployed.`);
-              deployDataLayerStack(); //Fun: deployDataLayerStack               (The function that deploys the DataLayerStack)
+              deployDataLayerStack();                                     //Fun: deployDataLayerStack               (The function that deploys the DataLayerStack)
             }
           }
         );
@@ -117,9 +117,10 @@ function deploy() {
   );
 }
 
-/*Descrition: This is the deployDataLayerStack function, it is called by the deploy function of the program and starts the deployment of the DataLayerStack and runs parales with the functions that 
-              build the EFSStack and the S3Stack, ending with a message to the console alerting the user the deployment is complete. But like the deploy function that deployed the BaseStack
-              this function also calls the function that build the WebStack and also two other functions that uploads the code for the Lambda functions  */
+/*Descrition: This is the deployDataLayerStack function, it is called by the deploy fucntion, this function deploys the DataLayerStack and after that is complete it calls the folowing functions:
+               -uploadCACAA2MongoDBDataRefresherCode, the function that uploads the code for the CACAA2MongoDBDataRefresher Lambda function
+               -uploadCACAA2MongoDBDataRetrieverCode, the function that uploads the code for the CACAA2MongoDBDataRetriever Lambda function
+               -deployECRStack, the function that deploys the ECRStack */
 function deployDataLayerStack() {
   console.log(
     `Deploying the DataLayerStack with MongoDB, REST API and underlying Lambda functions. Please wait (~5 min)...`
@@ -128,7 +129,7 @@ function deployDataLayerStack() {
     (params = {
       StackName: "DataLayerStack",
       Capabilities: ["CAPABILITY_NAMED_IAM"],
-      TemplateBody: `${DATA_LAYER_STACK_TEMPLATE}`, //Var: DATA_LAYER_STACK_TEMPLATE          (The location of the DataLayerStack yml file)
+      TemplateBody: `${DATA_LAYER_STACK_TEMPLATE}`,                       //Var: DATA_LAYER_STACK_TEMPLATE          (The location of the DataLayerStack yml file)
     }),
     (err, data) => {
       if (err) {
@@ -150,9 +151,9 @@ function deployDataLayerStack() {
               console.log(
                 `Uploading the supportive Lambda functions code from local zip-files. Please wait (~2 min)...`
               );
-              uploadCACAA2MongoDBDataRefresherCode(); //Fun: uploadCACAA2MongoDBDataRefresherCode   (The function that uploads the code for the CACAA2MongoDBDataRefresher Lambda function)
-              uploadCACAA2MongoDBDataRetrieverCode(); //Fun: uploadCACAA2MongoDBDataRetrieverCode   (The function that uploads the code for the CACAA2MongoDBDataRetriever Lambda function)
-              deployECRStack();
+              uploadCACAA2MongoDBDataRefresherCode();                     //Fun: uploadCACAA2MongoDBDataRefresherCode   (The function that uploads the code for the CACAA2MongoDBDataRefresher Lambda function)
+              uploadCACAA2MongoDBDataRetrieverCode();                     //Fun: uploadCACAA2MongoDBDataRetrieverCode   (The function that uploads the code for the CACAA2MongoDBDataRetriever Lambda function)
+              deployECRStack();                                           //Fun: deployECRStack                         (The function that deploys the ECRStack)
             }
           }
         );
@@ -162,6 +163,9 @@ function deployDataLayerStack() {
 }
 
 
+/*Descrition: This is the deployECRStack function, it is called by the deployDataLayerStack fucntion, this function deploys the ECRStack and after that is complete it calls the folowing functions:
+               -deployDockerSwarmMasterStack, the function that deploys the DockerSwarmMasterStack
+               -invokeDataRefresher, the function that invokes the CACAA2MongoDBDataRefresher Lambda function */
 function deployECRStack() {
   console.log(
     `Deploying the ECRStack with two repositories for images of Covid Dashboard and Covid Registration Form (~3 min)...`
@@ -189,8 +193,8 @@ function deployECRStack() {
               process.exit(1);
             } else {
               console.log(`ECRStack has been successfully deployed.`);
-              deployDockerSwarmMasterStack();
-              invokeDataRefresher();
+              deployDockerSwarmMasterStack();                             //Fun: deployDockerSwarmMasterStack           (The function that deploys the DockerSwarmMasterStack)
+              invokeDataRefresher();                                      //Fun: invokeDataRefresher                    (The function that invokes the CACAA2MongoDBDataRefresher Lambda function)
             }
           }
         );
@@ -200,8 +204,8 @@ function deployECRStack() {
 }
 
 
-/*Descrition: This is the deployWebStack function, it is called by the deployDataLayerStack function of the program and starts the deployment of the WebStack, ending with a message 
-              to the console alerting the user the deployment is complete or has failed */
+/*Descrition: This is the deployDockerSwarmMasterStack function, it is called by the deployECRStack fucntion, this function deploys the DockerSwarmMasterStack and after that is complete it calls the folowing function:
+               -deployDockerSwarmWorkersStack, the function that deploys the DockerSwarmWorkersStack */
 function deployDockerSwarmMasterStack() {
   console.log(
     `Deploying the DockerSwarmMasterStack with BuildServer01. Please wait (~5 min)...`
@@ -249,7 +253,7 @@ function deployDockerSwarmMasterStack() {
               );
               //Wait 10 minutes for BuildServer to initialize and send out the join token to DynamoDB, then deploy Workers
               sleep(600000).then(() => {
-                deployDockerSwarmWorkersStack();
+                deployDockerSwarmWorkersStack();                          //Fun: deployDockerSwarmWorkersStack          (The function that deploys the DockerSwarmWorkersStack)
               });
             }
           }
@@ -259,6 +263,7 @@ function deployDockerSwarmMasterStack() {
   );
 }
 
+/*Descrition: This is the deployDockerSwarmWorkersStack function, it is called by the deployDockerSwarmMasterStack function, this function deploys the DockerSwarmWorkersStack. */
 function deployDockerSwarmWorkersStack() {
   console.log(
     `Deploying the DockerSwarmWorkersStack with Worker Nodes running the covid-services stack in a global mode. Please wait (~5 min)...`
@@ -317,8 +322,7 @@ function deployDockerSwarmWorkersStack() {
   );
 }
 
-/*Descrition: This is the uploadCACAA2MongoDBDataRefresherCode function, it is called by the deployDataLayerStack function of the program and uplaods the code for the CACAA2MongoDBDataRefresher 
-              Lambda function of the WebStack, ending with a message to the console alerting the user the upload is complete or has failed */
+/*Descrition: This is the uploadCACAA2MongoDBDataRefresherCode function, it is called by the deployDataLayerStack function, this function uploads the code for the CACAA2MongoDBDataRefresher Lambda function. */
 function uploadCACAA2MongoDBDataRefresherCode() {
   LAMBDA.updateFunctionCode(
     (params = {
@@ -337,8 +341,7 @@ function uploadCACAA2MongoDBDataRefresherCode() {
   );
 }
 
-/*Descrition: This is the uploadCACAA2MongoDBDataRetrieverCode function, it is called by the deployDataLayerStack function of the program and uplaods the code for the CACAA2MongoDBDataRetriever 
-              Lambda function of the WebStack, ending with a message to the console alerting the user the upload is complete or has failed */
+/*Descrition: This is the uploadCACAA2MongoDBDataRetrieverCode function, it is called by the deployDataLayerStack function, this function uploads the code for the CACAA2MongoDBDataRetriever Lambda function. */
 function uploadCACAA2MongoDBDataRetrieverCode() {
   LAMBDA.updateFunctionCode(
     (params = {
@@ -357,7 +360,7 @@ function uploadCACAA2MongoDBDataRetrieverCode() {
   );
 }
 
-
+/*Descrition: This is the uploadCACAA2MongoDBDataRetrieverCode function, it is called by the deployECRStack function, this function invokes CACAA2MongoDBDataRefresher Lambda function. */
 function invokeDataRefresher() {
   console.log("Refreshing covid data in the MongoDB...");
   LAMBDA.invoke(

@@ -1,11 +1,10 @@
-# Create a VPC
+#Description: This is the VPC, within this VPC the solution is build.
 resource "google_compute_network" "cac-aa3-vpc" {
   name                    = "cac-aa3-vpc"
   auto_create_subnetworks = false
 }
 
-# Create a subnet
-
+#Description: This is a subnet, it is the only subnet within the solution and will host the docker swarm.
 resource "google_compute_subnetwork" "cac-aa3-subnet-1" {
   name          = "cac-aa3-subnet-1"
   ip_cidr_range = "10.0.1.0/24"
