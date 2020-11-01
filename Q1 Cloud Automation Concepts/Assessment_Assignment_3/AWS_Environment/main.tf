@@ -12,7 +12,7 @@
 
 
 
-#Description: Configure enviroment variables for Terradorm
+#Description: Configure requirements for Terraform to deploy this script
 terraform {
   required_providers {
     aws = {
