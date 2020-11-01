@@ -20,7 +20,7 @@ resource "time_sleep" "master-docker-swarm-initialize-timer" {
   depends_on      = [aws_cloudformation_stack.master-docker-swarm-stack]
 
   #Wait for 10 minutes
-  create_duration = "10m"
+  create_duration = "5m"
 }
 
 #Decription: This configures the template for the deployment of the WorkerDockerSwarmStack to CloudFormation

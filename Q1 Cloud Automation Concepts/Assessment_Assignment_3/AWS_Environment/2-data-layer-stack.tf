@@ -14,7 +14,7 @@
 
 #Decription: This configures the template for the deployment of the DataLayerStack to CloudFormation
 resource "aws_cloudformation_stack" "data-layer-stack" {
-  
+
   #Deploy stack after deployment of the BasaStack
   depends_on = [aws_cloudformation_stack.base-stack]
 
@@ -23,7 +23,7 @@ resource "aws_cloudformation_stack" "data-layer-stack" {
 
   #Stack Premissions
   capabilities = [
-      "CAPABILITY_NAMED_IAM"
+    "CAPABILITY_NAMED_IAM"
   ]
 
   #Load in stack file:
@@ -34,49 +34,33 @@ resource "aws_cloudformation_stack" "data-layer-stack" {
 
 
 #Decription: Upload Lambda function code for the CACAA3MongoDBDataRefresher Lambda function
-resource "aws_lambda_function" "mongo-db-data-refresher" {
-  
-  #Uplaod code after the deployment of the DataLayerStack
-  depends_on = [aws_cloudformation_stack.data-layer-stack]
-  
-  #Lambda function variables/configuration
-  function_name = "CACAA3MongoDBDataRefresher"
-  runtime = "nodejs12.x"
-  handler = "index.handler"
-  role = aws_cloudformation_stack.data-layer-stack.outputs.LambdaExecutionRoleArn
+resource "null_resource" "upload-refresher-code" {
+  provisioner "local-exec" {
+    command = "aws lambda update-function-code --function-name CACAA3MongoDBDataRefresher --zip-file fileb://./3-Lambdas/MongoDBDataRefresher/MongoDBDataRefresher.zip"
+  }
 
-  #Load in Lambda code file:
-  filename = "${path.module}/3-Lambdas/MongoDBDataRefresher/MongoDBDataRefresher.zip"  
+  depends_on = [aws_cloudformation_stack.data-layer-stack]
 }
+
+
 
 #Decription: Upload Lambda function code for the CACAA3MongoDBDataRetriever Lambda function
-resource "aws_lambda_function" "mongo-db-data-retriever" {
-  
-  #Uplaod code after the deployment of the DataLayerStack
+resource "null_resource" "upload-retriever-code" {
+  provisioner "local-exec" {
+    command = "aws lambda update-function-code --function-name CACAA3MongoDBDataRetriever --zip-file fileb://./3-Lambdas/MongoDBDataRetriever/MongoDBDataRetriever.zip"
+  }
+
   depends_on = [aws_cloudformation_stack.data-layer-stack]
-  
-  #Lambda function variables/configuration
-  unction_name = "CACAA3MongoDBDataRetriever"
-  runtime = "nodejs12.x"
-  handler = "index.handler"
-  role = aws_cloudformation_stack.data-layer-stack.outputs.LambdaExecutionRoleArn
-
-  #Load in Lambda code file:
-  filename = "${path.module}/3-Lambdas/MongoDBDataRetriever/MongoDBDataRetriever.zip"
 }
-
 
 
 
 
 #Description: Invoke the CACAA3MongoDBDataRefresher Lambda function
 resource "null_resource" "refresh-covid-data" {
-  
-  #Invoke Lambda function after Lambda function code had been uploaded
-  depends_on = [aws_lambda_function.mongo-db-data-refresher]
-  
-  #Invoke the CACAA3MongoDBDataRefresher Lambda function
   provisioner "local-exec" {
-    command = "aws lambda invoke --function-name CACAA3MongoDBDataRefresher"
+    command = "aws lambda invoke --function-name CACAA3MongoDBDataRefresher response.json"
   }
+
+  depends_on = [null_resource.upload-refresher-code]
 }
