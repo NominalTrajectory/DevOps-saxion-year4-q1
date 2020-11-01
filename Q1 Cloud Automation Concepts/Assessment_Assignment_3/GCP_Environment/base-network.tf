@@ -26,6 +26,7 @@ resource "google_compute_subnetwork" "cac-aa3-subnet-1" {
 #   source_ranges = ["0.0.0.0/0"]
 # }
 
+#Description: This is a firewall rule
 resource "google_compute_firewall" "allow-ssh" {
   name        = "allow-ssh"
   network     = "${google_compute_network.cac-aa3-vpc.name}"
@@ -39,6 +40,7 @@ resource "google_compute_firewall" "allow-ssh" {
 
   source_ranges = ["0.0.0.0/0"]
 }
+
 
 resource "google_compute_firewall" "deny-rdp" {
   name        = "deny-rdp"
