@@ -1,0 +1,250 @@
+#   8 888888888o.      8 8888888888     d888888o.       ,o888888o.    8 888888888o.    8 8888 8 888888888o 8888888 8888888888  8 8888     ,o888888o.     b.             8
+#   8 8888    `^888.   8 8888         .`8888:' `88.    8888     `88.  8 8888    `88.   8 8888 8 8888    `88.     8 8888        8 8888  . 8888     `88.   888o.          8
+#   8 8888        `88. 8 8888         8.`8888.   Y8 ,8 8888       `8. 8 8888     `88   8 8888 8 8888     `88     8 8888        8 8888 ,8 8888       `8b  Y88888o.       8
+#   8 8888         `88 8 8888         `8.`8888.     88 8888           8 8888     ,88   8 8888 8 8888     ,88     8 8888        8 8888 88 8888        `8b .`Y888888o.    8
+#   8 8888          88 8 888888888888  `8.`8888.    88 8888           8 8888.   ,88'   8 8888 8 8888.   ,88'     8 8888        8 8888 88 8888         88 8o. `Y888888o. 8
+#   8 8888          88 8 8888           `8.`8888.   88 8888           8 888888888P'    8 8888 8 888888888P'      8 8888        8 8888 88 8888         88 8`Y8o. `Y88888o8
+#   8 8888         ,88 8 8888            `8.`8888.  88 8888           8 8888`8b        8 8888 8 8888             8 8888        8 8888 88 8888        ,8P 8   `Y8o. `Y8888
+#   8 8888        ,88' 8 8888        8b   `8.`8888. `8 8888       .8' 8 8888 `8b.      8 8888 8 8888             8 8888        8 8888 `8 8888       ,8P  8      `Y8o. `Y8
+#   8 8888    ,o88P'   8 8888        `8b.  ;8.`8888    8888     ,88'  8 8888   `8b.    8 8888 8 8888             8 8888        8 8888  ` 8888     ,88'   8         `Y8o.`
+#   8 888888888P'      8 888888888888 `Y8888P ,88P'     `8888888P'    8 8888     `88.  8 8888 8 8888             8 8888        8 8888     `8888888P'     8            `Yo
+Description: This is Stack 04 of Cloud Engineering\Cloud Automation Concepts\Assessment 03 | DockerSwarmMasterStack | Creates a docker swarm cluster, this pulls dockerfiles from git repo, then build docker images and pushes them to ECR
+
+
+
+
+
+
+
+
+
+
+#   8 888888888o      .8.          8 888888888o.            .8.                   ,8.       ,8.          8 8888888888 8888888 8888888888 8 8888888888   8 888888888o.     d888888o.
+#   8 8888    `88.   .888.         8 8888    `88.          .888.                 ,888.     ,888.         8 8888             8 8888       8 8888         8 8888    `88.  .`8888:' `88.
+#   8 8888     `88  :88888.        8 8888     `88         :88888.               .`8888.   .`8888.        8 8888             8 8888       8 8888         8 8888     `88  8.`8888.   Y8
+#   8 8888     ,88 . `88888.       8 8888     ,88        . `88888.             ,8.`8888. ,8.`8888.       8 8888             8 8888       8 8888         8 8888     ,88  `8.`8888.
+#   8 8888.   ,88'.8. `88888.      8 8888.   ,88'       .8. `88888.           ,8'8.`8888,8^8.`8888.      8 888888888888     8 8888       8 888888888888 8 8888.   ,88'   `8.`8888.
+#   8 888888888P'.8`8. `88888.     8 888888888P'       .8`8. `88888.         ,8' `8.`8888' `8.`8888.     8 8888             8 8888       8 8888         8 888888888P'     `8.`8888.
+#   8 8888      .8' `8. `88888.    8 8888`8b          .8' `8. `88888.       ,8'   `8.`88'   `8.`8888.    8 8888             8 8888       8 8888         8 8888`8b          `8.`8888.
+#   8 8888     .8'   `8. `88888.   8 8888 `8b.       .8'   `8. `88888.     ,8'     `8.`'     `8.`8888.   8 8888             8 8888       8 8888         8 8888 `8b.    8b   `8.`8888.
+#   8 8888    .888888888. `88888.  8 8888   `8b.    .888888888. `88888.   ,8'       `8        `8.`8888.  8 8888             8 8888       8 8888         8 8888   `8b.  `8b.  ;8.`8888
+#   8 8888   .8'       `8. `88888. 8 8888     `88. .8'       `8. `88888. ,8'         `         `8.`8888. 8 888888888888     8 8888       8 888888888888 8 8888     `88. `Y8888P ,88P'
+Parameters:
+
+  #The AWS Security credentails: AWSAccessKeyId
+  AWSAccessKeyId:
+    Description: Please enter the AWS Security credentails AWSAccessKeyId
+    Type: String
+    AllowedPattern: ".+"
+
+  #The AWS Security credentails: AWSSecretAccessKey
+  AWSSecretAccessKey:
+    Description: Please enter the AWS Security credentails AWSSecretAccessKey
+    Type: String
+    AllowedPattern: ".+"
+  
+  #The AWS Security credentails: AWSSessionToken
+  AWSSessionToken:
+    Description: Please enter the AWS Security credentails AWSSessionToken
+    Type: String
+    AllowedPattern: ".+"
+
+
+
+
+
+
+
+
+
+#   8 888888888o.   8 8888888888     d888888o.       ,o888888o.     8 8888      88 8 888888888o.      ,o888888o.    8 8888888888     d888888o.
+#   8 8888    `88.  8 8888         .`8888:' `88.  . 8888     `88.   8 8888      88 8 8888    `88.    8888     `88.  8 8888         .`8888:' `88.
+#   8 8888     `88  8 8888         8.`8888.   Y8 ,8 8888       `8b  8 8888      88 8 8888     `88 ,8 8888       `8. 8 8888         8.`8888.   Y8
+#   8 8888     ,88  8 8888         `8.`8888.     88 8888        `8b 8 8888      88 8 8888     ,88 88 8888           8 8888         `8.`8888.
+#   8 8888.   ,88'  8 888888888888  `8.`8888.    88 8888         88 8 8888      88 8 8888.   ,88' 88 8888           8 888888888888  `8.`8888.
+#   8 888888888P'   8 8888           `8.`8888.   88 8888         88 8 8888      88 8 888888888P'  88 8888           8 8888           `8.`8888.
+#   8 8888`8b       8 8888            `8.`8888.  88 8888        ,8P 8 8888      88 8 8888`8b      88 8888           8 8888            `8.`8888.
+#   8 8888 `8b.     8 8888        8b   `8.`8888. `8 8888       ,8P  ` 8888     ,8P 8 8888 `8b.    `8 8888       .8' 8 8888        8b   `8.`8888.
+#   8 8888   `8b.   8 8888        `8b.  ;8.`8888  ` 8888     ,88'     8888   ,d8P  8 8888   `8b.     8888     ,88'  8 8888        `8b.  ;8.`8888
+#   8 8888     `88. 8 888888888888 `Y8888P ,88P'     `8888888P'        `Y88888P'   8 8888     `88.    `8888888P'    8 888888888888 `Y8888P ,88P'
+Resources:
+
+  #DO = Dependent on
+  #Par = Parameter
+  #Imp = Imported parameter
+
+  #Description: The database table storing the... TODO
+  CACAA2DynamoDBJoinTokenTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: docker-swarm-join-token
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: 'N'
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      Tags:
+        - Key: Name
+          Value: CACAA2DynamoDBJoinTokenTable
+
+
+
+
+
+  #Description: This is a Security Group, this is used by the EC2 Instance CACAA2BroadBuildServer01 which builds the docker images and pushes them to the ECR  
+  #             Repository and allows all incomming tcp packets from port 22 (SSH) and from port 2377 (For comunication between docker nodes) and allows all outgoing packets from all ports.
+  CACAA2DockerSwarmSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: 2377
+      GroupName: CACAA2DockerSwarmSecurityGroup
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 2377
+          ToPort: 2377
+          CidrIp: 0.0.0.0/0
+      VpcId: !ImportValue BaseStack:VPC                                   #Imp: BaseStack:VPC                       (The VPC imported from the BaseStack)
+      Tags: 
+        - Key: Name
+          Value: CACAA2DockerSwarmSecurityGroup
+
+
+
+
+
+  #Description: This is a EC2 Instance, this instance is responsible for the creating of the Docker images based on the dockerfiles form the dashbaord and the Registration form.
+  #             when these have been created the docker images will be pushed to thier respective EC2 repositorys and thier lation will be logged in the docker-compose file
+  #             then the docker compose file will tell all the workder nodes that they should host the new docker images.
+  CACAA2BroadBuildServer01:
+    Type: AWS::EC2::Instance
+    DependsOn: CACAA2DynamoDBJoinTokenTable
+    Properties:
+      InstanceType: m4.large
+      ImageId: ami-0817d428a6fb68645 # Ubuntu 18.04
+      SubnetId: !ImportValue BaseStack:PrivateSubnet1                     #Imp: BaseStack:PrivateSubnet1            (The first private subnet imported from the BaseStack)
+      KeyName: CAC_Assignments
+      SecurityGroupIds: 
+        - !Ref CACAA2DockerSwarmSecurityGroup                             #Do: CACAA2DockerSwarmSecurityGroup       (The Security group used by the CACAA2BroadBuildServer01)
+      UserData: 
+        Fn::Base64:
+          !Sub 
+          - |
+              #!/bin/bash
+              cd ~
+              echo ${CovidDataAPIEndpointURL} >> apiEndpoint
+              sudo apt-get update && sudo apt-get upgrade -y
+              sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
+              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+              sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+              sudo apt update
+              sudo apt install -y docker-ce
+              sudo systemctl start docker
+              sudo systemctl enable docker
+              sudo docker swarm init --advertise-addr $(hostname -I | awk '{print $1}')
+              sudo apt-get install awscli -y
+              aws configure set region us-east-1
+              aws configure set output json
+              aws configure set aws_access_key_id ${AWSAccessKeyId}
+              aws configure set aws_secret_access_key ${AWSSecretAccessKey}
+              aws configure set aws_session_token ${AWSSessionToken}
+              sudo aws ecr get-login --no-include-email --region us-east-1 | sed -e 's/-e none//' | sudo bash
+
+              TOKEN=$(sudo docker swarm join-token worker -q)
+              echo "{\"id\": {\"N\":\"1\"}, \"token\": {\"S\":\"$TOKEN\"}}" >> docker-swarm-join-token.json
+              aws dynamodb put-item --table-name docker-swarm-join-token --item file://docker-swarm-join-token.json
+
+              git clone https://github.com/BFL-Psycho/cac-aa2-covid-dashboard-docker.git
+              cp apiEndpoint cac-aa2-covid-dashboard-docker/
+              cd cac-aa2-covid-dashboard-docker && sudo docker build -t covid-dashboard:latest .
+              sudo aws ecr get-login --no-include-email --region us-east-1 | sed -e 's/-e none//' | sudo bash
+              DASHBOARD_IMAGE_ID=$(echo `sudo docker images --filter=reference=covid-dashboard:latest --format "{{.ID}}"`) && sudo docker tag $DASHBOARD_IMAGE_ID ${CovidDashboardECRUrl} 
+              sudo docker push ${CovidDashboardECRUrl}
+              
+              cd ~
+
+              git clone https://github.com/BFL-Psycho/cac-aa2-covid-registration-form-docker.git
+              cd cac-aa2-covid-registration-form-docker && sudo docker build -t covid-form:latest .
+              sudo aws ecr get-login --no-include-email --region us-east-1 | sed -e 's/-e none//' | sudo bash
+              FORM_IMAGE_ID=$(echo `sudo docker images --filter=reference=covid-form:latest --format "{{.ID}}"`) && sudo docker tag $FORM_IMAGE_ID ${CovidRegistrationFormECRUrl}
+              sudo docker push ${CovidRegistrationFormECRUrl}
+
+              cd ~
+              
+              git clone https://github.com/BFL-Psycho/cac-aa2-covid-services.git
+              cd cac-aa2-covid-services
+              sed -i "s|covid-dashboard:latest|${CovidDashboardECRUrl}|g" ./docker-compose.yml
+              sed -i "s|covid-form:latest|${CovidRegistrationFormECRUrl}|g" ./docker-compose.yml
+              sudo docker stack deploy -c ./docker-compose.yml covid-services
+              
+              mkdir ~/automation
+              touch ~/automation/cron-nightly-covid-services-build-push-deploy.sh
+              cd ~/automation
+              echo '#!/bin/bash' >> cron-nightly-covid-services-build-push-deploy.sh
+              echo 'echo Building covid-services images...' >> cron-nightly-covid-services-build-push-deploy.sh
+              echo 'cd ~/cac-aa2-covid-dashboard-docker && docker build -t covid-dashboard:latest .' >> cron-nightly-covid-services-build-push-deploy.sh
+              echo 'aws ecr get-login --no-include-email --region us-east-1 | sed -e "s/-e none//" | sudo bash' >> cron-nightly-covid-services-build-push-deploy.sh
+              echo 'DASHBOARD_IMAGE_ID=$(echo `sudo docker images --filter=reference=covid-dashboard:latest --format "{{.ID}}"`) && sudo docker tag $DASHBOARD_IMAGE_ID ${CovidDashboardECRUrl}' >> cron-nightly-covid-services-build-push-deploy.sh
+              echo 'docker push ${CovidDashboardECRUrl}' >> cron-nightly-covid-services-build-push-deploy.sh
+              echo 'cd ~/cac-aa2-covid-registration-form-docker && docker build -t covid-form:latest .' >> cron-nightly-covid-services-build-push-deploy.sh
+              echo 'FORM_IMAGE_ID=$(echo `sudo docker images --filter=reference=covid-form:latest --format "{{.ID}}"`) && sudo docker tag $FORM_IMAGE_ID ${CovidRegistrationFormECRUrl}' >> cron-nightly-covid-services-build-push-deploy.sh
+              echo 'docker push ${CovidRegistrationFormECRUrl}' >> cron-nightly-covid-services-build-push-deploy.sh
+              echo 'sleep 10m' >> cron-nightly-covid-services-build-push-deploy.sh
+              echo 'docker stack rm covid-services' >> cron-nightly-covid-services-build-push-deploy.sh
+              echo 'docker stack deploy -c ~/cac-aa2-covid-services/docker-compose.yml covid-services' >> cron-nightly-covid-services-build-push-deploy.sh
+              (crontab -l 2>/dev/null; echo "0 2 * * * ~/automation/cron-nightly-covid-services-build-push-deploy.sh") | crontab -
+
+          - CovidDataAPIEndpointURL:
+              Fn::ImportValue:
+                DataLayerStack:CovidDataAPIEndpointURL                    #Imp: DataLayerStack:CovidDataAPIEndpointURL  (The URL of the API endpoint that allows the user to retrieve the covid data from the MongoDB database)
+            CovidDashboardECRUrl:
+              Fn::ImportValue:
+                ECRStack:CovidDashboardECRUrl                             #Imp: ECRStack:CovidDashboardECRUrl       (The URL of the ECR Repository which is used to store the Docker Covid dashboard worker images.)
+            CovidRegistrationFormECRUrl:
+              Fn::ImportValue:
+                ECRStack:CovidRegistrationFormECRUrl                      #Imp: ECRStack:CovidRegistrationFormECRUrl  (The URL of the ECR Repository which is used to store the Docker Covid NHS form worker images.)
+
+                          
+      Tags:
+        - Key: Name
+          Value: CACAA2BroadBuildServer01
+
+  
+
+
+
+
+
+
+
+
+                                                                                                              
+#       ,o888888o.     8 8888      88 8888888 8888888888 8 888888888o   8 8888      88 8888888 8888888888 d888888o.   
+#    . 8888     `88.   8 8888      88       8 8888       8 8888    `88. 8 8888      88       8 8888     .`8888:' `88. 
+#   ,8 8888       `8b  8 8888      88       8 8888       8 8888     `88 8 8888      88       8 8888     8.`8888.   Y8 
+#   88 8888        `8b 8 8888      88       8 8888       8 8888     ,88 8 8888      88       8 8888     `8.`8888.     
+#   88 8888         88 8 8888      88       8 8888       8 8888.   ,88' 8 8888      88       8 8888      `8.`8888.    
+#   88 8888         88 8 8888      88       8 8888       8 888888888P'  8 8888      88       8 8888       `8.`8888.   
+#   88 8888        ,8P 8 8888      88       8 8888       8 8888         8 8888      88       8 8888        `8.`8888.  
+#   `8 8888       ,8P  ` 8888     ,8P       8 8888       8 8888         ` 8888     ,8P       8 8888    8b   `8.`8888. 
+#    ` 8888     ,88'     8888   ,d8P        8 8888       8 8888           8888   ,d8P        8 8888    `8b.  ;8.`8888 
+#       `8888888P'        `Y88888P'         8 8888       8 8888            `Y88888P'         8 8888     `Y8888P ,88P' 
+Outputs:
+
+  #Description: This outputs the private ip adress of the CACAA2BroadBuildServer01.
+  #This value is used in the stacks:
+  # -
+  BuildServerPrivateIp:
+    Description: Reference to 
+    Value: !GetAtt CACAA2BroadBuildServer01.PrivateIp                     #DO: CACAA2BroadBuildServer01             (This is the PrivateIp of the EC2 instance responsible for managing the docker nodes)
+    Export:
+      Name: DockerSwarmMasterStack:BuildServerPrivateIp
+
+
