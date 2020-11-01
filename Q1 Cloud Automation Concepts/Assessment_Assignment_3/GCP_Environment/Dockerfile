@@ -1,9 +1,5 @@
 FROM ubuntu:18.04
 
-ENV TERRAFORM_VERSION=0.13.4
-ENV PACKER_VERSION=1.3.3
-ENV PIP_VERSION=18.1
-
 COPY . /workspace/
 RUN cp /workspace/cac-aa3-terraform-credentials.json ~
 WORKDIR /workspace
@@ -32,3 +28,4 @@ RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add - && \
 # Install terraform
 RUN apt-get update && apt-get install -y terraform
 
+RUN source ./envrc.sh

@@ -470,3 +470,9 @@ Outputs:
     Value: !Sub "https://${CACAA3CovidAPI}.execute-api.${AWS::Region}.amazonaws.com/v0/CACAA3MongoDBDataRetriever"
     Export:
       Name: DataLayerStack:CovidDataAPIEndpointURL
+  LambdaExecutionRoleArn:
+    Description: The Arn of the role used to invoke Lambdas working with MongoDB
+    Value: !GetAtt CACAA3LambdaBasicRole.Arn
+    Export:
+      Name: DataLayerStack:LambdaExecutionRoleArn
+  

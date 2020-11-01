@@ -2,7 +2,7 @@
 # Wait for Docker master node to initialize and send join credentials to DynamoDB
 resource "time_sleep" "master-docker-swarm-initialize-timer" {
   depends_on      = [aws_cloudformation_stack.master-docker-swarm-stack]
-  create_duration = "10m"
+  create_duration = "5m"
 }
 
 resource "aws_cloudformation_stack" "worker-docker-swarm-stack" {

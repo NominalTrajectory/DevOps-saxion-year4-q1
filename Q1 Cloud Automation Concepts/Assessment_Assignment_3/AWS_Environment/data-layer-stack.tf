@@ -13,23 +13,19 @@ resource "aws_cloudformation_stack" "data-layer-stack" {
 }
 
 
-# Upload Lambda function code
-
-resource "aws_lambda_function" "mongo-db-data-refresher" {
-  function_name    = "CACAA3MongoDBDataRefresher"
-  runtime = "nodejs12.x"
-  handler = "index.handler"
-  role = aws_cloudformation_stack.data-layer-stack.outputs.LambdaExecutionRoleArn
-  filename         = "${path.module}/3-Lambdas/MongoDBDataRefresher/MongoDBDataRefresher.zip"  
+resource "null_resource" "upload-refresher-code" {
+  provisioner "local-exec" {
+    command = "aws lambda update-function-code --function-name CACAA3MongoDBDataRefresher --zip-file fileb://./3-Lambdas/MongoDBDataRefresher/MongoDBDataRefresher.zip"
+  }
+  
   depends_on = [aws_cloudformation_stack.data-layer-stack]
 }
 
-resource "aws_lambda_function" "mongo-db-data-retriever" {
-  function_name    = "CACAA3MongoDBDataRetriever"
-  runtime = "nodejs12.x"
-  handler = "index.handler"
-  role = aws_cloudformation_stack.data-layer-stack.outputs.LambdaExecutionRoleArn
-  filename         = "${path.module}/3-Lambdas/MongoDBDataRetriever/MongoDBDataRetriever.zip"
+resource "null_resource" "upload-retriever-code" {
+  provisioner "local-exec" {
+    command = "aws lambda update-function-code --function-name CACAA3MongoDBDataRetriever --zip-file fileb://./3-Lambdas/MongoDBDataRetriever/MongoDBDataRetriever.zip"
+  }
+  
   depends_on = [aws_cloudformation_stack.data-layer-stack]
 }
 
@@ -37,8 +33,8 @@ resource "aws_lambda_function" "mongo-db-data-retriever" {
 
 resource "null_resource" "refresh-covid-data" {
   provisioner "local-exec" {
-    command = "aws lambda invoke --function-name CACAA3MongoDBDataRefresher"
+    command = "aws lambda invoke --function-name CACAA3MongoDBDataRefresher response.json"
   }
   
-  depends_on = [aws_lambda_function.mongo-db-data-refresher]
+  depends_on = [null_resource.upload-refresher-code]
 }

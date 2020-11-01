@@ -13,6 +13,7 @@ This part covers the AWS part of the assignment
 Before deploying the solution, make sure you follow the checklist below:
 
 - Fresh AWS credentials are set in ~/.aws/credentials
+- No conflicting CloudFormation stacks
 
 
 ## Deploy the AWS environment using Terraform
@@ -21,14 +22,28 @@ Before deploying the solution, make sure you follow the checklist below:
 
 **Please make sure you provide fresh credentials**
 
+1. Initialize the Terraform providers
+
 ```bash
 terraform init
 ```
+2. Plan out Terraform deployment (create an execution plan)
 
 ```bash
-terraform apply -var aws_access_key_id=<your aws_access_key_id> -var aws_secret_access_key=<your aws_secret_access_key> -var aws_session_token=<your aws_session_token>
+terraform plan -var aws_access_key_id=<your_aws_access_key_id> -var aws_secret_access_key=<your_aws_secret_access_key> -var aws_session_token=<your_aws_session_token>
 ```
+3. Apply the Terraform changes to reach the desired state of infrastructure (deploy the solution)
 
+```bash
+terraform apply --auto-approve -var aws_access_key_id=<your_aws_access_key_id> -var aws_secret_access_key=<your_aws_secret_access_key> -var aws_session_token=<your_aws_session_token>
+```
+## Clean up the AWS environment using Terraform
 
+1. Ensure your ECR repositories are empty
 
+2. Run
+
+```bash
+terraform destroy --auto-approve -var aws_access_key_id=<your_aws_access_key_id> -var aws_secret_access_key=<your_aws_secret_access_key> -var aws_session_token=<your_aws_session_token>
+```
 
