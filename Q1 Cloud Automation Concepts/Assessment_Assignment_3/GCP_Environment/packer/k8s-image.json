@@ -12,7 +12,6 @@
         "image_family": "k8s",
         "project_id": "{{user `project_id`}}",
         "source_image": "ubuntu-1804-bionic-v20201014",
-        "source_image_family": "centos-7",
         "ssh_username": "packer",
         "zone": "{{user `zone`}}",
         "account_file": "{{ user `service_account_json`}}"

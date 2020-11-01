@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-source .envrc
 packer validate \
     -var zone="$CLOUDSDK_COMPUTE_ZONE" \
     -var project_id="$TF_ADMIN" \

@@ -1,14 +1,14 @@
 ---
 - name: Install Kubernetes
-    hosts: all
-    gather_facts: false
-    remote_user: packer
-    become: true
+  hosts: all
+  gather_facts: false
+  remote_user: packer
+  become: true
     
 
-    tasks:
+  tasks:
 
-    # Install Docker
+  # Install Docker
     - name: Install aptitude using apt
       apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
 
@@ -30,41 +30,41 @@
       apt: update_cache=yes name=docker-ce state=latest
 
     - name: Ensure Docker is started and enabled at boot
-        service:
-        name: docker
-        state: started
-        enabled: true
+      service:
+          name: docker
+          state: started
+          enabled: true
 
     # Install Kubernetes
     - name: Get Kubernetes apt-key
       apt_key:
-       url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-       state: present
-
-   # Note: currently the latest repository is still xenial not bionic
-   - name: Add Kubernetes APT repository
-     apt_repository:
-      repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+      url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
       state: present
-      filename: 'kubernetes'
+
+    # Note: currently the latest repository is still xenial not bionic
+    - name: Add Kubernetes APT repository
+      apt_repository:
+        repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
+        filename: 'kubernetes'
       
-   # Install packages
-   - name: Install required software
-     apt: 
-       name: "{{ packages }}"
-       update_cache: true
-       state: present
-     vars:
-       packages:
-       - docker
-       - kubelet
-       - kubeadm
-       - kubectl
-       - kubernetes-cni
+    # Install packages
+    - name: Install required software
+      apt: 
+        name: "{{ packages }}"
+        update_cache: true
+        state: present
+      vars:
+        packages:
+        - docker
+        - kubelet
+        - kubeadm
+        - kubectl
+        - kubernetes-cni
 
     - name: Set IP Tables config for Kubernetes Networking
-        sysctl:
-          name: net.bridge.bridge-nf-call-iptables
-          value: 1
-          state: present
+      sysctl:
+        name: net.bridge.bridge-nf-call-iptables
+        value: 1
+        state: present
     
