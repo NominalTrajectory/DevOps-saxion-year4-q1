@@ -19,7 +19,7 @@ resource "google_compute_instance" "k8s-node" {
   }
 
   network_interface {
-    network = "${google_compute_subnetwork.cac-aa2-vpc.id}"
+    network = google_compute_network.cac-aa3-vpc.id
 
     access_config {
       // Ephemeral IP
@@ -31,15 +31,18 @@ resource "google_compute_instance" "k8s-node" {
     automatic_restart = false
   }
 
-  provisioner "remote-exec" {
-    inline = [
-      "set -e",
-      "sudo ${data.external.kubeadm_join.result.command}",
-    ]
+  metadata_startup_script = "set -e && sudo ${data.external.kubeadm_join.result.command}"
 
-    connection {
-      user    = "${var.ssh_user}"
-      timeout = "300s"
-    }
-  }
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     "set -e",
+  #     "sudo ${data.external.kubeadm_join.result.command}",
+  #   ]
+
+  #   connection {
+  #     host = self.network_interface.0.access_config.0.
+  #     user    = "${var.ssh_user}"
+  #     timeout = "300s"
+  #   }
+  # }
 }
