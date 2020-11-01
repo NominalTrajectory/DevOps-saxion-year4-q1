@@ -33,7 +33,7 @@ provider "external" {
 
 #Description: Configure GCP project wide metadata, in this case set the log in credentails provided by the user for logging into the instances using ssh.
 resource "google_compute_project_metadata" "default" {
-  metadata {
+  metadata = {
     ssh-keys = "${var.ssh_user}:${file("${var.ssh_public_key}")}"
   }
 }

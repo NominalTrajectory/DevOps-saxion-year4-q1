@@ -20,9 +20,8 @@ data "google_compute_image" "k8s" {
 
 #Description: 
 resource "google_compute_instance" "k8s-master" {
-  count = 1
 
-  name         = "k8s-master-${count.index}"
+  name         = "k8s-master"
   machine_type = "e2-standard-2"
   zone         = "${var.zone}"
 
@@ -40,7 +39,7 @@ resource "google_compute_instance" "k8s-master" {
   }
 
   network_interface {
-    network    = "${google_compute_network.cac-aa2-vpc.id}"
+    network    = google_compute_network.cac-aa3-vpc.id
     network_ip = "${google_compute_address.k8s-master-ip-int.address}"
 
     access_config {
@@ -53,19 +52,21 @@ resource "google_compute_instance" "k8s-master" {
     automatic_restart = false
   }
 
-  provisioner "remote-exec" {
-    inline = [
-      "set -e",
-      "sudo kubeadm init",
-      "mkdir -p $HOME/.kube && sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && sudo chown $(id -u):$(id -g) $HOME/.kube/config",
-      "kubectl apply -f \"https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')\"",
-    ]
+  metadata_startup_script = "${file("${path.module}/scripts/kubeadm-setup.sh")}"
 
-    connection {
-      user    = "${var.ssh_user}"
-      timeout = "300s"
-    }
-  }
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     "set -e",
+  #     "sudo kubeadm init",
+  #     "mkdir -p $HOME/.kube && sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && sudo chown $(id -u):$(id -g) $HOME/.kube/config",
+  #     "kubectl apply -f \"https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')\"",
+  #   ]
+
+  #   connection {
+  #     user    = "${var.ssh_user}"
+  #     timeout = "300s"
+  #   }
+  # }
 }
 
 data "external" "kubeadm_join" {
@@ -77,5 +78,5 @@ data "external" "kubeadm_join" {
     key      = "${var.ssh_private_key}"
   }
 
-  depends_on = ["google_compute_instance.k8s-master"]
+  depends_on = [google_compute_instance.k8s-master]
 }
