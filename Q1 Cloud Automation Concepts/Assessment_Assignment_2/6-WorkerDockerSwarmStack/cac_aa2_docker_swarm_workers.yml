@@ -8,7 +8,7 @@
 #   8 8888        ,88' 8 8888        8b   `8.`8888. `8 8888       .8' 8 8888 `8b.      8 8888 8 8888             8 8888        8 8888 `8 8888       ,8P  8      `Y8o. `Y8
 #   8 8888    ,o88P'   8 8888        `8b.  ;8.`8888    8888     ,88'  8 8888   `8b.    8 8888 8 8888             8 8888        8 8888  ` 8888     ,88'   8         `Y8o.`
 #   8 888888888P'      8 888888888888 `Y8888P ,88P'     `8888888P'    8 8888     `88.  8 8888 8 8888             8 8888        8 8888     `8888888P'     8            `Yo
-Description: This is Stack 05 of Cloud Engineering\Cloud Automation Concepts\Assessment 03 | DockerSwarmWorkersStack | Creates load balancers for both the NHS covid form website and the Covid Dashbaord and also has a autoscaler that sclaes the workers hosting the website in and out depending on time.
+Description: This is Stack 05 of Cloud Engineering\Cloud Automation Concepts\Assessment 02 | DockerSwarmWorkersStack | Creates load balancers for both the NHS covid form website and the Covid Dashbaord and also has a autoscaler that sclaes the workers hosting the website in and out depending on time.
 
 
 
@@ -73,14 +73,14 @@ Resources:
   #Par = Parameter
   #Imp = Imported parameter
 
-  #Description: This is a Security Group, this is used by the AutoScaling LaunchConfiguration CACAA3DockerSwarmWorkerLaunchConfiguration which functions as a worker node in the docker swarm cluster
+  #Description: This is a Security Group, this is used by the AutoScaling LaunchConfiguration CACAA2DockerSwarmWorkerLaunchConfiguration which functions as a worker node in the docker swarm cluster
   #             and allows all incomming tcp packets from port 80 (HTTP), from port 5000 (for testing the Covid NHS form), from port 443 (HTTPS) and from port 22 (SSH).
   #             Besides that it allows all outgoing packets from all ports.
-  CACAA3WebSecurityGroup:
+  CACAA2WebSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties: 
       GroupDescription: This security groups allows incoming connections to ports 80 (HTTP), 443 (HTTPS), 22 (SSH)
-      GroupName: CACAA3WebSecurityGroup
+      GroupName: CACAA2WebSecurityGroup
       SecurityGroupIngress: 
         - IpProtocol: tcp
           FromPort: 80
@@ -101,47 +101,47 @@ Resources:
       VpcId: !ImportValue BaseStack:VPC                                   #Imp: BaseStack:VPC                       (The VPC imported from the BaseStack)
       Tags: 
         - Key: Name
-          Value: CACAA3WebSecurityGroup
+          Value: CACAA2WebSecurityGroup
     
 
   # Fix the comments (they are copy pasted from assignment 1)
 
   #Description: This is a Load Balancer for the Covid Dashboard, this is connected to the two Public subnets and load balances the auto scaled Docker workers in the public subnets.
-  CACAA3CovidDashboardELB:
+  CACAA2CovidDashboardELB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: CACAA3CovidDashboardELB
+      Name: CACAA2CovidDashboardELB
       Type: application
       Scheme: internet-facing
       SecurityGroups: 
-        - !Ref CACAA3WebSecurityGroup                                     #DO: CACAA3WebSecurityGroup               (The security group for the Webservers)
+        - !Ref CACAA2WebSecurityGroup                                     #DO: CACAA2WebSecurityGroup               (The security group for the Webservers)
       Subnets: 
         - !ImportValue BaseStack:PublicSubnet1                            #Imp: BaseStack:PublicSubnet1             (The first public subnet imported from the BaseStack)
         - !ImportValue BaseStack:PublicSubnet2                            #Imp: BaseStack:PublicSubnet2             (The second public subnet imported from the BaseStack)
       Tags: 
         - Key: Name
-          Value: CACAA3CovidDashboardELB
+          Value: CACAA2CovidDashboardELB
 
   #Description: This is a Load Balancer Target group for the Covid Dashboard, this is used by the load balancer HTTP listener and allows sets it up to received HTTP requests over port 80.
-  CACAA3CovidDashboardTargetGroup:
+  CACAA2CovidDashboardTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: CACAA3CovidDashboardTargetGroup
+      Name: CACAA2CovidDashboardTargetGroup
       Port: 80
       Protocol: HTTP
       VpcId: !ImportValue BaseStack:VPC                                   #Imp: BaseStack:VPC                       (The VPC imported from the BaseStack)
       Tags: 
         - Key: Name
-          Value: CACAA3CovidDashboardTargetGroup
+          Value: CACAA2CovidDashboardTargetGroup
 
   #Description: This is a Load Balancer listener for the Covid Dashboard, this receives the HTTP requests sent to the webservers via the load balancers DNS name and gives it to the Load balancer.
-  CACAA3CovidDashboardListener:
+  CACAA2CovidDashboardListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties: 
       DefaultActions: 
         - Type: forward
-          TargetGroupArn: !Ref CACAA3CovidDashboardTargetGroup            #DO: CACAA3CovidDashboardTargetGroup      (The Load balancer Target group for the Covid Dashboard)
-      LoadBalancerArn: !Ref CACAA3CovidDashboardELB                       #DO: CACAA3CovidDashboardELB              (The Load balancer for the Covid Dashboard)
+          TargetGroupArn: !Ref CACAA2CovidDashboardTargetGroup            #DO: CACAA2CovidDashboardTargetGroup      (The Load balancer Target group for the Covid Dashboard)
+      LoadBalancerArn: !Ref CACAA2CovidDashboardELB                       #DO: CACAA2CovidDashboardELB              (The Load balancer for the Covid Dashboard)
       Port: 80
       Protocol: HTTP
 
@@ -150,10 +150,10 @@ Resources:
 
 
   #Description: This is a Load Balancer for the NHS Form, this is connected to the two Public subnets and load balances the auto scaled Docker workers in the public subnets.
-  CACAA3CovidFormELB:
+  CACAA2CovidFormELB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: CACAA3CovidFormELB
+      Name: CACAA2CovidFormELB
       Type: network
       Scheme: internet-facing
       Subnets: 
@@ -161,28 +161,28 @@ Resources:
         - !ImportValue BaseStack:PublicSubnet2                            #Imp: BaseStack:PublicSubnet2             (The second public subnet imported from the BaseStack)
       Tags: 
         - Key: Name
-          Value: CACAA3CovidFormELB
+          Value: CACAA2CovidFormELB
 
   #Description: This is a Load Balancer Target group for the NHS Form, this is used by the load balancer HTTP listener and allows sets it up to received HTTP requests over port 80.
-  CACAA3CovidFormTargetGroup:
+  CACAA2CovidFormTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: CACAA3CovidFormTargetGroup
+      Name: CACAA2CovidFormTargetGroup
       Port: 5000
       Protocol: TCP
       VpcId: !ImportValue BaseStack:VPC                                   #Imp: BaseStack:VPC                       (The VPC imported from the BaseStack)
       Tags: 
         - Key: Name
-          Value: CACAA3CovidFormTargetGroup
+          Value: CACAA2CovidFormTargetGroup
 
   #Description: This is a Load Balancer listener for the NHS Form, this receives the HTTP requests sent to the webservers via the load balancers DNS name and gives it to the Load balancer.
-  CACAA3CovidFormListener:
+  CACAA2CovidFormListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties: 
       DefaultActions: 
         - Type: forward
-          TargetGroupArn: !Ref CACAA3CovidFormTargetGroup                 #DO: CACAA3CovidFormTargetGroup           (The Load Balancer Target group for the NHS Form)
-      LoadBalancerArn: !Ref CACAA3CovidFormELB                            #DO: CACAA3CovidFormELB                   (The Load Balancer for the NHS Form)
+          TargetGroupArn: !Ref CACAA2CovidFormTargetGroup                 #DO: CACAA2CovidFormTargetGroup           (The Load Balancer Target group for the NHS Form)
+      LoadBalancerArn: !Ref CACAA2CovidFormELB                            #DO: CACAA2CovidFormELB                   (The Load Balancer for the NHS Form)
       Port: 5000
       Protocol: TCP
 
@@ -192,7 +192,7 @@ Resources:
 
   #Description: This is the autoscaler launch configuration, that is used by the Autoscaler to set up the docker workers in the two public subnets which will host the docker images that  
   #             the docker-compose tells it to host and will be accessed through thier respective load balancers.
-  CACAA3DockerSwarmWorkerLaunchConfiguration: 
+  CACAA2DockerSwarmWorkerLaunchConfiguration: 
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
       AssociatePublicIpAddress: true
@@ -200,7 +200,7 @@ Resources:
       InstanceMonitoring: false # basic monitoring enabled
       InstanceType: t2.micro # For production change this to t3.large
       KeyName: CAC_Assignments
-      LaunchConfigurationName: CACAA3DockerSwarmWorkerLaunchConfiguration
+      LaunchConfigurationName: CACAA2DockerSwarmWorkerLaunchConfiguration
       PlacementTenancy: default
       BlockDeviceMappings: 
         - DeviceName: /dev/xvda
@@ -208,7 +208,7 @@ Resources:
             VolumeSize: 30
             VolumeType: "gp2"
       SecurityGroups: 
-        - !Ref CACAA3WebSecurityGroup                                     #DO: CACAA3WebSecurityGroup               (The security group for the Webservers)
+        - !Ref CACAA2WebSecurityGroup                                     #DO: CACAA2WebSecurityGroup               (The security group for the Webservers)
       
       # After pulling the images from the ECR we join the Docker Swarm cluster which automatically orders to run all the necessary serviced in the stack (Covid Dashbord and Covid Registration Form)
       UserData:
@@ -268,14 +268,14 @@ Resources:
 
   #Description: This is the autoscaler that is in the end responsible for the setting up of the webservers in two availability zones and scaling, the amount of webservers 
   #             scaled will depend on expected demand, with two AutoScaling ScheduledActions responsible for the scaling.
-  CACAA3AutoScalingGroup:
+  CACAA2AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
-      LaunchConfigurationName: !Ref CACAA3DockerSwarmWorkerLaunchConfiguration    #DO: CACAA3WebserverLaunchConfiguration   (The Launch Configuration for the AutoScaler group to settup the webservers)
+      LaunchConfigurationName: !Ref CACAA2DockerSwarmWorkerLaunchConfiguration    #DO: CACAA2WebserverLaunchConfiguration   (The Launch Configuration for the AutoScaler group to settup the webservers)
       MinSize: 2
       MaxSize: 6
       TargetGroupARNs: 
-        - !Ref CACAA3CovidDashboardTargetGroup                            #DO: CACAA3CovidDashboardTargetGroup      (The Load balancer Target group for the Covid Dashboard)
+        - !Ref CACAA2CovidDashboardTargetGroup                            #DO: CACAA2CovidDashboardTargetGroup      (The Load balancer Target group for the Covid Dashboard)
       VPCZoneIdentifier:
         - !ImportValue BaseStack:PublicSubnet1                            #Imp: BaseStack:PublicSubnet1             (The first public subnet imported from the BaseStack)
         - !ImportValue BaseStack:PublicSubnet2                            #Imp: BaseStack:PublicSubnet2             (The second public subnet imported from the BaseStack)
@@ -289,20 +289,20 @@ Resources:
 
 
   #Description: This is a AutoScaling ScheduledAction, this is used to make the autoscaler scale the docker workers out (expand capacity) from 6pm Eastern time following expected demand.
-  CACAA3AutoscalingScheduledActionOut:
+  CACAA2AutoscalingScheduledActionOut:
     Type: AWS::AutoScaling::ScheduledAction
     Properties: 
-      AutoScalingGroupName: !Ref CACAA3AutoScalingGroup                   #DO: CACAA3AutoScalingGroup               (The AutoScalingGroup responsible for scaling the webserver)
+      AutoScalingGroupName: !Ref CACAA2AutoScalingGroup                   #DO: CACAA2AutoScalingGroup               (The AutoScalingGroup responsible for scaling the webserver)
       DesiredCapacity: 6
       MaxSize: 6
       MinSize: 2
       Recurrence: "0 22 * * *" # AWS uses UTC time, 18:00 Eastern time -> 22:00 UTC | Everyday scale out from 18:00
 
   #Description: This is a AutoScaling ScheduledAction, this is used to make the autoscaler scale the docker workers in (decrease capacity) from 8pm Eastern time following expected demand.
-  CACAA3AutoscalingScheduledActionIn:
+  CACAA2AutoscalingScheduledActionIn:
     Type: AWS::AutoScaling::ScheduledAction
     Properties: 
-      AutoScalingGroupName: !Ref CACAA3AutoScalingGroup                   #DO: CACAA3AutoScalingGroup               (The AutoScalingGroup responsible for scaling the webserver)
+      AutoScalingGroupName: !Ref CACAA2AutoScalingGroup                   #DO: CACAA2AutoScalingGroup               (The AutoScalingGroup responsible for scaling the webserver)
       DesiredCapacity: 2
       MaxSize: 2
       MinSize: 2
@@ -335,7 +335,7 @@ Outputs:
   # -
   WebWorkersCovidDashboardLoadBalancerURL:
     Description: Reference to the DNS Name of the ELB for Covid Dashboard
-    Value: !GetAtt CACAA3CovidDashboardELB.DNSName
+    Value: !GetAtt CACAA2CovidDashboardELB.DNSName
     Export:
       Name: DockerSwarmWorkersStack:WebWorkersCovidDashboardLoadBalancerURL
 
@@ -344,7 +344,7 @@ Outputs:
   # -
   WebWorkersCovidFormLoadBalancerURL:
     Description: Reference to the DNS Name of the ELB for Covid Registration Form
-    Value: !GetAtt CACAA3CovidFormELB.DNSName
+    Value: !GetAtt CACAA2CovidFormELB.DNSName
     Export:
       Name: DockerSwarmWorkersStack:WebWorkersCovidFormLoadBalancerURL
 
