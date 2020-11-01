@@ -74,7 +74,7 @@ Resources:
   #Imp = Imported parameter
 
   #Description: The database table storing the... TODO
-  CACAA3DynamoDBJoinTokenTable:
+  CACAA2DynamoDBJoinTokenTable:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: docker-swarm-join-token
@@ -89,19 +89,19 @@ Resources:
         WriteCapacityUnits: 5
       Tags:
         - Key: Name
-          Value: CACAA3DynamoDBJoinTokenTable
+          Value: CACAA2DynamoDBJoinTokenTable
 
 
 
 
 
-  #Description: This is a Security Group, this is used by the EC2 Instance CACAA3BroadBuildServer01 which builds the docker images and pushes them to the ECR  
+  #Description: This is a Security Group, this is used by the EC2 Instance CACAA2BroadBuildServer01 which builds the docker images and pushes them to the ECR  
   #             Repository and allows all incomming tcp packets from port 22 (SSH) and from port 2377 (For comunication between docker nodes) and allows all outgoing packets from all ports.
-  CACAA3DockerSwarmSecurityGroup:
+  CACAA2DockerSwarmSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties: 
       GroupDescription: 2377
-      GroupName: CACAA3DockerSwarmSecurityGroup
+      GroupName: CACAA2DockerSwarmSecurityGroup
       SecurityGroupIngress: 
         - IpProtocol: tcp
           FromPort: 22
@@ -114,7 +114,7 @@ Resources:
       VpcId: !ImportValue BaseStack:VPC                                   #Imp: BaseStack:VPC                       (The VPC imported from the BaseStack)
       Tags: 
         - Key: Name
-          Value: CACAA3DockerSwarmSecurityGroup
+          Value: CACAA2DockerSwarmSecurityGroup
 
 
 
@@ -123,16 +123,16 @@ Resources:
   #Description: This is a EC2 Instance, this instance is responsible for the creating of the Docker images based on the dockerfiles form the dashbaord and the Registration form.
   #             when these have been created the docker images will be pushed to thier respective EC2 repositorys and thier lation will be logged in the docker-compose file
   #             then the docker compose file will tell all the workder nodes that they should host the new docker images.
-  CACAA3BroadBuildServer01:
+  CACAA2BroadBuildServer01:
     Type: AWS::EC2::Instance
-    DependsOn: CACAA3DynamoDBJoinTokenTable
+    DependsOn: CACAA2DynamoDBJoinTokenTable
     Properties:
       InstanceType: m4.large
       ImageId: ami-0817d428a6fb68645 # Ubuntu 18.04
       SubnetId: !ImportValue BaseStack:PrivateSubnet1                     #Imp: BaseStack:PrivateSubnet1            (The first private subnet imported from the BaseStack)
       KeyName: CAC_Assignments
       SecurityGroupIds: 
-        - !Ref CACAA3DockerSwarmSecurityGroup                             #Do: CACAA3DockerSwarmSecurityGroup       (The Security group used by the CACAA3BroadBuildServer01)
+        - !Ref CACAA2DockerSwarmSecurityGroup                             #Do: CACAA2DockerSwarmSecurityGroup       (The Security group used by the CACAA2BroadBuildServer01)
       UserData: 
         Fn::Base64:
           !Sub 
@@ -214,7 +214,7 @@ Resources:
                           
       Tags:
         - Key: Name
-          Value: CACAA3BroadBuildServer01
+          Value: CACAA2BroadBuildServer01
 
   
 
@@ -238,12 +238,12 @@ Resources:
 #       `8888888P'        `Y88888P'         8 8888       8 8888            `Y88888P'         8 8888     `Y8888P ,88P' 
 Outputs:
 
-  #Description: This outputs the private ip adress of the CACAA3BroadBuildServer01.
+  #Description: This outputs the private ip adress of the CACAA2BroadBuildServer01.
   #This value is used in the stacks:
   # -
   BuildServerPrivateIp:
     Description: Reference to 
-    Value: !GetAtt CACAA3BroadBuildServer01.PrivateIp                     #DO: CACAA3BroadBuildServer01             (This is the PrivateIp of the EC2 instance responsible for managing the docker nodes)
+    Value: !GetAtt CACAA2BroadBuildServer01.PrivateIp                     #DO: CACAA2BroadBuildServer01             (This is the PrivateIp of the EC2 instance responsible for managing the docker nodes)
     Export:
       Name: DockerSwarmMasterStack:BuildServerPrivateIp
 

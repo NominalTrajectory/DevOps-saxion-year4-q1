@@ -117,43 +117,6 @@ function deploy() {
   );
 }
 
-function deployECRStack() {
-  console.log(
-    `Deploying the ECRStack with two repositories for images of Covid Dashboard and Covid Registration Form (~3 min)...`
-  );
-  CFN.createStack(
-    (params = {
-      StackName: "ECRStack",
-      Capabilities: ["CAPABILITY_NAMED_IAM"],
-      TemplateBody: `${ECR_STACK_TEMPLATE}`,
-    }),
-    (err, data) => {
-      if (err) {
-        console.warn(err);
-        process.exit(1);
-      } else {
-        //Wait for EFSStack deployment to complete
-        CFN.waitFor(
-          "stackCreateComplete",
-          (params = {
-            StackName: "ECRStack",
-          }),
-          (err, data) => {
-            if (err) {
-              console.warn(err);
-              process.exit(1);
-            } else {
-              console.log(`ECRStack has been successfully deployed.`);
-              deployDockerSwarmMasterStack();
-              invokeDataRefresher();
-            }
-          }
-        );
-      }
-    }
-  );
-}
-
 /*Descrition: This is the deployDataLayerStack function, it is called by the deploy function of the program and starts the deployment of the DataLayerStack and runs parales with the functions that 
               build the EFSStack and the S3Stack, ending with a message to the console alerting the user the deployment is complete. But like the deploy function that deployed the BaseStack
               this function also calls the function that build the WebStack and also two other functions that uploads the code for the Lambda functions  */
@@ -197,6 +160,45 @@ function deployDataLayerStack() {
     }
   );
 }
+
+
+function deployECRStack() {
+  console.log(
+    `Deploying the ECRStack with two repositories for images of Covid Dashboard and Covid Registration Form (~3 min)...`
+  );
+  CFN.createStack(
+    (params = {
+      StackName: "ECRStack",
+      Capabilities: ["CAPABILITY_NAMED_IAM"],
+      TemplateBody: `${ECR_STACK_TEMPLATE}`,
+    }),
+    (err, data) => {
+      if (err) {
+        console.warn(err);
+        process.exit(1);
+      } else {
+        //Wait for EFSStack deployment to complete
+        CFN.waitFor(
+          "stackCreateComplete",
+          (params = {
+            StackName: "ECRStack",
+          }),
+          (err, data) => {
+            if (err) {
+              console.warn(err);
+              process.exit(1);
+            } else {
+              console.log(`ECRStack has been successfully deployed.`);
+              deployDockerSwarmMasterStack();
+              invokeDataRefresher();
+            }
+          }
+        );
+      }
+    }
+  );
+}
+
 
 /*Descrition: This is the deployWebStack function, it is called by the deployDataLayerStack function of the program and starts the deployment of the WebStack, ending with a message 
               to the console alerting the user the deployment is complete or has failed */

@@ -8,7 +8,7 @@
 #   8 8888        ,88' 8 8888        8b   `8.`8888. `8 8888       .8' 8 8888 `8b.      8 8888 8 8888             8 8888        8 8888 `8 8888       ,8P  8      `Y8o. `Y8
 #   8 8888    ,o88P'   8 8888        `8b.  ;8.`8888    8888     ,88'  8 8888   `8b.    8 8888 8 8888             8 8888        8 8888  ` 8888     ,88'   8         `Y8o.`
 #   8 888888888P'      8 888888888888 `Y8888P ,88P'     `8888888P'    8 8888     `88.  8 8888 8 8888             8 8888        8 8888     `8888888P'     8            `Yo
-Description: This is Stack 01 of Cloud Engineering\Cloud Automation Concepts\Assessment 03 | BaseStack | This stack contains the base network configuration with an empty VPC, two Public subnets, two Private subnets in two different availability zones, Internet Gateway, NAT Instance, Route tables
+Description: This is Stack 01 of Cloud Engineering\Cloud Automation Concepts\Assessment 02 | BaseStack | This stack contains the base network configuration with an empty VPC, two Public subnets, two Private subnets in two different availability zones, Internet Gateway, NAT Instance, Route tables
 
 
 
@@ -31,31 +31,31 @@ Description: This is Stack 01 of Cloud Engineering\Cloud Automation Concepts\Ass
 #   8 8888   .8'       `8. `88888. 8 8888     `88. .8'       `8. `88888. ,8'         `         `8.`8888. 8 888888888888     8 8888       8 888888888888 8 8888     `88. `Y8888P ,88P'
 Parameters:
 
-  #The IP address range to be used for the VPC (CACAA3VPC)
+  #The IP address range to be used for the VPC (CACAA2VPC)
   VPCCIDR:
     Description: Please enter the IP range (CIDR notation) for this VPC.
     Type: String
     Default: 10.0.0.0/16
   
-  #The IP address range to be used for the Public Subnet 1 (CACAA3SubnetPublic1)
+  #The IP address range to be used for the Public Subnet 1 (CACAA2SubnetPublic1)
   PublicSubnet1CIDR:
     Description: Please enter the IP range (CIDR notation) for the first public subnet
     Type: String
     Default: 10.0.1.0/24
 
-  #The IP address range to be used for the Public Subnet 2 (CACAA3SubnetPublic2)
+  #The IP address range to be used for the Public Subnet 2 (CACAA2SubnetPublic2)
   PublicSubnet2CIDR:
     Description: Please enter the IP range (CIDR notation) for the second public subnet
     Type: String
     Default: 10.0.2.0/24
 
-  #The IP address range to be used for the Private Subnet 1 (CACAA3SubnetPrivate1)
+  #The IP address range to be used for the Private Subnet 1 (CACAA2SubnetPrivate1)
   PrivateSubnet1CIDR:
     Description: Please enter the IP range (CIDR notation) for the first private subnet
     Type: String
     Default: 10.0.51.0/24
 
-  #The IP address range to be used for the Private Subnet 2 (CACAA3SubnetPrivate2)
+  #The IP address range to be used for the Private Subnet 2 (CACAA2SubnetPrivate2)
   PrivateSubnet2CIDR:
     Description: Please enter the IP range (CIDR notation) for the second private subnet
     Type: String
@@ -99,7 +99,7 @@ Resources:
   #Imp = Imported parameter
 
   #Description: This is the VPC, within this VPC the solution is build.
-  CACAA3VPC:
+  CACAA2VPC:
     Type: AWS::EC2::VPC
     Properties:
       CidrBlock: !Ref VPCCIDR                                             #Par: VPCCIDR                             (This is a IP range)
@@ -107,27 +107,27 @@ Resources:
       EnableDnsHostnames: true
       Tags: 
         - Key: Name
-          Value: CACAA3VPC
+          Value: CACAA2VPC
 
 
 
 
 
   #Description: This is the internet gateway, that is the portal to the internet for the solution and is connected to the public subnets via the route table.
-  CACAA3InternetGateway:
+  CACAA2InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
         - Key: Name
-          Value: CACAA3InternetGateway
+          Value: CACAA2InternetGateway
 
   #Description: This is the VPCGatewayAttachment, that acts as an connection between the Internet gateway and the VPC allowing it to be used within the 
   #             VPC by things like route tables.
-  CACAA3VPCGatewayAttachment:
+  CACAA2VPCGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
-      InternetGatewayId: !Ref CACAA3InternetGateway                       #DO: CACAA3InternetGateway                (The internet gateway)
-      VpcId: !Ref CACAA3VPC                                               #DO: CACAA3VPC                            (The VPC)
+      InternetGatewayId: !Ref CACAA2InternetGateway                       #DO: CACAA2InternetGateway                (The internet gateway)
+      VpcId: !Ref CACAA2VPC                                               #DO: CACAA2VPC                            (The VPC)
 
 
 
@@ -135,55 +135,55 @@ Resources:
 
   #Description: This is a subnet, it is the first of the four subnets and the first of the two public subnets This subnet is in the first of the two  
   #             availability zones that are used and instances within this subnet will by default get a public IP address.
-  CACAA3SubnetPublic1:
+  CACAA2SubnetPublic1:
     Type: AWS::EC2::Subnet
     Properties:
       CidrBlock: !Ref PublicSubnet1CIDR                                   #Par: PublicSubnet1CIDR                   (This is a IP range)
       MapPublicIpOnLaunch: 'true'
       AvailabilityZone: !Ref AvailabilityZone1                            #Par: AvailabilityZone1                   (This is the first of two AvailabilityZone Names used in the solution)
-      VpcId: !Ref CACAA3VPC                                               #DO: CACAA3VPC                            (The VPC)
+      VpcId: !Ref CACAA2VPC                                               #DO: CACAA2VPC                            (The VPC)
       Tags:
         - Key: Name
-          Value: CACAA3SubnetPublic1
+          Value: CACAA2SubnetPublic1
 
   #Description: This is a subnet, it is the second of the four subnets and the second of the two public subnets This subnet is in the second of the two  
   #             availability zones that are used and instances within this subnet will by default get a public IP address.
-  CACAA3SubnetPublic2:
+  CACAA2SubnetPublic2:
     Type: AWS::EC2::Subnet
     Properties:
       CidrBlock: !Ref PublicSubnet2CIDR                                   #Par: PublicSubnet2CIDR                   (This is a IP range)
       MapPublicIpOnLaunch: 'true'
       AvailabilityZone: !Ref AvailabilityZone2                            #Par: AvailabilityZone2                   (This is the second of two AvailabilityZone Names used in the solution)
-      VpcId: !Ref CACAA3VPC                                               #DO: CACAA3VPC                            (The VPC)
+      VpcId: !Ref CACAA2VPC                                               #DO: CACAA2VPC                            (The VPC)
       Tags:
         - Key: Name
-          Value: CACAA3SubnetPublic2 
+          Value: CACAA2SubnetPublic2 
 
   #Description: This is a subnet, it is the third of the four subnets and the first of the two private subnets This subnet is in the first of the two  
   #             availability zones that are used and instances within this subnet will by default NOT get a public IP address.
-  CACAA3SubnetPrivate1:
+  CACAA2SubnetPrivate1:
     Type: AWS::EC2::Subnet
     Properties:
       CidrBlock: !Ref PrivateSubnet1CIDR                                  #Par: PrivateSubnet1CIDR                  (This is a IP range)
       MapPublicIpOnLaunch: 'false'
       AvailabilityZone: !Ref AvailabilityZone1                            #Par: AvailabilityZone1                   (This is the first of two AvailabilityZone Names used in the solution)
-      VpcId: !Ref CACAA3VPC                                               #DO: CACAA3VPC                            (The VPC)
+      VpcId: !Ref CACAA2VPC                                               #DO: CACAA2VPC                            (The VPC)
       Tags:
         - Key: Name
-          Value: CACAA3SubnetPrivate1
+          Value: CACAA2SubnetPrivate1
   
   #Description: This is a subnet, it is the fourth of the four subnets and the second of the two private subnets This subnet is in the second of the two  
   #             availability zones that are used and instances within this subnet will by default NOT get a public IP address.
-  CACAA3SubnetPrivate2:
+  CACAA2SubnetPrivate2:
     Type: AWS::EC2::Subnet
     Properties:
       CidrBlock: !Ref PrivateSubnet2CIDR                                  #Par: PrivateSubnet2CIDR                  (This is a IP range)
       MapPublicIpOnLaunch: 'false'
       AvailabilityZone: !Ref AvailabilityZone2                            #Par: AvailabilityZone2                   (This is the second of two AvailabilityZone Names used in the solution)
-      VpcId: !Ref CACAA3VPC                                               #DO: CACAA3VPC                            (The VPC)
+      VpcId: !Ref CACAA2VPC                                               #DO: CACAA2VPC                            (The VPC)
       Tags:
         - Key: Name
-          Value: CACAA3SubnetPrivate2
+          Value: CACAA2SubnetPrivate2
 
 
 
@@ -191,63 +191,63 @@ Resources:
 
   #Description: This is a route table, it is the first of the two route tables, it is connected to the two public subnets via route table associations
   #             and to the internet gateway via the default route. Finally the route table also connects to the VPC itself by default.
-  CACAA3PublicRouteTable:
+  CACAA2PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties: 
-      VpcId: !Ref CACAA3VPC                                               #DO: CACAA3VPC                            (The VPC)
+      VpcId: !Ref CACAA2VPC                                               #DO: CACAA2VPC                            (The VPC)
       Tags: 
         - Key: Name
-          Value: CACAA3PublicRouteTable
+          Value: CACAA2PublicRouteTable
 
   #Description: This is a route, it is part of the public route table, it connects to the internet gateway sending all traffic that is not meant for the VPC to there.
-  CACAA3PublicDefaultRoute:
+  CACAA2PublicDefaultRoute:
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref CACAA3InternetGateway                               #DO: CACAA3InternetGateway                (The internet gateway)
-      RouteTableId: !Ref CACAA3PublicRouteTable                           #DO: CACAA3PublicRouteTable               (The route table for public subnets)
+      GatewayId: !Ref CACAA2InternetGateway                               #DO: CACAA2InternetGateway                (The internet gateway)
+      RouteTableId: !Ref CACAA2PublicRouteTable                           #DO: CACAA2PublicRouteTable               (The route table for public subnets)
 
   #Description: This is a SubnetRouteTableAssociation, it connects the first of the two public subnets to the public route table.
-  CACAA3PublicSubnet1RouteTableAssociation:
+  CACAA2PublicSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties: 
-      RouteTableId: !Ref CACAA3PublicRouteTable                           #DO: CACAA3PublicRouteTable               (The route table for public subnets)
-      SubnetId: !Ref CACAA3SubnetPublic1                                  #DO: CACAA3SubnetPublic1                  (The first public subnet)
+      RouteTableId: !Ref CACAA2PublicRouteTable                           #DO: CACAA2PublicRouteTable               (The route table for public subnets)
+      SubnetId: !Ref CACAA2SubnetPublic1                                  #DO: CACAA2SubnetPublic1                  (The first public subnet)
 
   #Description: This is a SubnetRouteTableAssociation, it connects the second of the two public subnets to the public route table.
-  CACAA3PublicSubnet2RouteTableAssociation:
+  CACAA2PublicSubnet2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties: 
-      RouteTableId: !Ref CACAA3PublicRouteTable                           #DO: CACAA3PublicRouteTable               (The route table for public subnets)
-      SubnetId: !Ref CACAA3SubnetPublic2                                  #DO: CACAA3SubnetPublic2                  (The second public subnet)
+      RouteTableId: !Ref CACAA2PublicRouteTable                           #DO: CACAA2PublicRouteTable               (The route table for public subnets)
+      SubnetId: !Ref CACAA2SubnetPublic2                                  #DO: CACAA2SubnetPublic2                  (The second public subnet)
 
 
 
 
 
   #Description: This is a Elastic IP, this is used within the vpc by the Nat gateway as an adress.
-  CACAA3NATElasticIP:
+  CACAA2NATElasticIP:
     Type: AWS::EC2::EIP
-    DependsOn: CACAA3VPCGatewayAttachment                                 #DO: CACAA3VPCGatewayAttachment           (The atachment that connects the VPC and the Internet Gateway)
+    DependsOn: CACAA2VPCGatewayAttachment                                 #DO: CACAA2VPCGatewayAttachment           (The atachment that connects the VPC and the Internet Gateway)
     Properties: 
       Domain: vpc
       Tags: 
         - Key: Name
-          Value: CACAA3NATElasticIP
+          Value: CACAA2NATElasticIP
 
   #Description: This is a Nat Gateway, set up to function like a NAT gateway and works as an intermediary between the webservers in the public subnets and the 
   #             databases in the private subnet.
-  CACAA3NATGateway:
+  CACAA2NATGateway:
     Type: AWS::EC2::NatGateway
     Properties: 
       AllocationId: 
         Fn::GetAtt:
-          - CACAA3NATElasticIP                                            #DO: CACAA3NATElasticIP                   (The Elastic IP adress)
+          - CACAA2NATElasticIP                                            #DO: CACAA2NATElasticIP                   (The Elastic IP adress)
           - AllocationId
-      SubnetId: !Ref CACAA3SubnetPublic1                                  #DO: CACAA3SubnetPublic1                  (The first public subnet)
+      SubnetId: !Ref CACAA2SubnetPublic1                                  #DO: CACAA2SubnetPublic1                  (The first public subnet)
       Tags: 
         - Key: Name
-          Value: CACAA3NATGateway
+          Value: CACAA2NATGateway
 
 
 
@@ -255,35 +255,35 @@ Resources:
 
   #Description: This is a route table, it is the second of the two route tables, it is connected to the two private subnets via route table associations
   #             and to the nat gateway via the default route. Finally the route table also connects to the VPC itself by default.
-  CACAA3NATPrivateRouteTable:
+  CACAA2NATPrivateRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
-      VpcId: !Ref CACAA3VPC                                               #DO: CACAA3VPC                            (The VPC)
+      VpcId: !Ref CACAA2VPC                                               #DO: CACAA2VPC                            (The VPC)
       Tags:
         - Key: Name
-          Value: CACAA3NATPrivateRouteTable
+          Value: CACAA2NATPrivateRouteTable
 
   #Description: This is a route, it is part of the public route table, it connects to the nat instance sending all traffic that is not meant for the VPC to there.
-  CACAA3PrivateDefaultRoute:
+  CACAA2PrivateDefaultRoute:
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref CACAA3NATGateway                                 #DO: CACAA3NATGateway                     (The nat gateway)
-      RouteTableId: !Ref CACAA3NATPrivateRouteTable                       #DO: CACAA3NATPrivateRouteTable           (The route table for private subnets)
+      NatGatewayId: !Ref CACAA2NATGateway                                 #DO: CACAA2NATGateway                     (The nat gateway)
+      RouteTableId: !Ref CACAA2NATPrivateRouteTable                       #DO: CACAA2NATPrivateRouteTable           (The route table for private subnets)
 
   #Description: This is a SubnetRouteTableAssociation, it connects the first of the two private subnets to the private route table.
-  CACAA3PrivateSubnet1RouteTableAssociation:
+  CACAA2PrivateSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref CACAA3NATPrivateRouteTable                       #DO: CACAA3NATPrivateRouteTable           (The route table for private subnets)
-      SubnetId: !Ref CACAA3SubnetPrivate1                                 #DO: CACAA3SubnetPrivate1                 (The first private subnet)
+      RouteTableId: !Ref CACAA2NATPrivateRouteTable                       #DO: CACAA2NATPrivateRouteTable           (The route table for private subnets)
+      SubnetId: !Ref CACAA2SubnetPrivate1                                 #DO: CACAA2SubnetPrivate1                 (The first private subnet)
 
   #Description: This is a SubnetRouteTableAssociation, it connects the second of the two private subnets to the private route table.
-  CACAA3PrivateSubnet2RouteTableAssociation:
+  CACAA2PrivateSubnet2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref CACAA3NATPrivateRouteTable                       #DO: CACAA3NATPrivateRouteTable           (The route table for private subnets)
-      SubnetId: !Ref CACAA3SubnetPrivate2                                 #DO: CACAA3SubnetPrivate2                 (The second private subnet)
+      RouteTableId: !Ref CACAA2NATPrivateRouteTable                       #DO: CACAA2NATPrivateRouteTable           (The route table for private subnets)
+      SubnetId: !Ref CACAA2SubnetPrivate2                                 #DO: CACAA2SubnetPrivate2                 (The second private subnet)
 
 
 
@@ -313,7 +313,7 @@ Outputs:
   # -
   VPCRef:
     Description: Reference to the VPC
-    Value: !Ref CACAA3VPC                                                 #DO: CACAA3VPC                            (The VPC)
+    Value: !Ref CACAA2VPC                                                 #DO: CACAA2VPC                            (The VPC)
     Export:
       Name: BaseStack:VPC
 
@@ -326,7 +326,7 @@ Outputs:
   # - 
   InternetGatewayRef:
     Description: Reference to the Internet Gateway
-    Value: !Ref CACAA3InternetGateway                                     #DO: CACAA3InternetGateway                (The internet gateway)
+    Value: !Ref CACAA2InternetGateway                                     #DO: CACAA2InternetGateway                (The internet gateway)
     Export:
       Name: BaseStack:InternetGateway
   
@@ -334,10 +334,10 @@ Outputs:
   #This value is used in the stacks:
   # - 
   VPCGatewayAttachmentRef:
-    Description: Reference to the VPC gateway attachment                  #DO: CACAA3VPCGatewayAttachment           (The atachment that connects the VPC and the Internet Gateway)
-    Value: !Ref CACAA3VPCGatewayAttachment
+    Description: Reference to the VPC gateway attachment                  #DO: CACAA2VPCGatewayAttachment           (The atachment that connects the VPC and the Internet Gateway)
+    Value: !Ref CACAA2VPCGatewayAttachment
     Export:
-      Name: BaseStack:CACAA3VPCGatewayAttachment
+      Name: BaseStack:CACAA2VPCGatewayAttachment
 
 
 
@@ -350,7 +350,7 @@ Outputs:
   # -
   PublicSubnet1Ref:
     Description: Reference to the first public subnet
-    Value: !Ref CACAA3SubnetPublic1                                       #DO: CACAA3SubnetPublic1                  (The first public subnet)
+    Value: !Ref CACAA2SubnetPublic1                                       #DO: CACAA2SubnetPublic1                  (The first public subnet)
     Export:
       Name: BaseStack:PublicSubnet1
 
@@ -361,7 +361,7 @@ Outputs:
   # -
   PublicSubnet2Ref:
     Description: Reference to the first public subnet
-    Value: !Ref CACAA3SubnetPublic2                                       #DO: CACAA3SubnetPublic2                  (The second public subnet)
+    Value: !Ref CACAA2SubnetPublic2                                       #DO: CACAA2SubnetPublic2                  (The second public subnet)
     Export:
       Name: BaseStack:PublicSubnet2
 
@@ -370,7 +370,7 @@ Outputs:
   # -
   PrivateSubnet1Ref:
     Description: Reference to the first private subnet
-    Value: !Ref CACAA3SubnetPrivate1                                      #DO: CACAA3SubnetPrivate1                 (The first private subnet)
+    Value: !Ref CACAA2SubnetPrivate1                                      #DO: CACAA2SubnetPrivate1                 (The first private subnet)
     Export:
       Name: BaseStack:PrivateSubnet1
 
@@ -379,7 +379,7 @@ Outputs:
   # -
   PrivateSubnet2Ref:
     Description: Reference to the first private subnet
-    Value: !Ref CACAA3SubnetPrivate2                                      #DO: CACAA3SubnetPrivate2                 (The second private subnet)
+    Value: !Ref CACAA2SubnetPrivate2                                      #DO: CACAA2SubnetPrivate2                 (The second private subnet)
     Export:
       Name: BaseStack:PrivateSubnet2
 
@@ -414,7 +414,7 @@ Outputs:
   # -
   NatGatewayRef:
     Description: Reference to the NAT Gateway
-    Value: !Ref CACAA3NATGateway                                          #DO: CACAA3NATGateway                     (The nat gateway)
+    Value: !Ref CACAA2NATGateway                                          #DO: CACAA2NATGateway                     (The nat gateway)
     Export:
       Name: BaseStack:NatGateway
 
@@ -427,7 +427,7 @@ Outputs:
   # -
   PublicRouteTableRef: 
     Description: Reference to the public route table
-    Value: !Ref CACAA3PublicRouteTable                                    #DO: CACAA3PublicRouteTable               (The route table for public subnets)
+    Value: !Ref CACAA2PublicRouteTable                                    #DO: CACAA2PublicRouteTable               (The route table for public subnets)
     Export:
       Name: BaseStack:PublicRouteTable
 
@@ -436,7 +436,7 @@ Outputs:
   # -
   # PrivateRouteTableRef: 
   #   Description: Reference to the private route table
-  #   Value: !Ref CACAA3PrivateRouteTable                                 #DO: CACAA3NATPrivateRouteTable           (The route table for private subnets)
+  #   Value: !Ref CACAA2PrivateRouteTable                                 #DO: CACAA2NATPrivateRouteTable           (The route table for private subnets)
   #   Export:
   #     Name: BaseStack:PrivateRouteTable
 

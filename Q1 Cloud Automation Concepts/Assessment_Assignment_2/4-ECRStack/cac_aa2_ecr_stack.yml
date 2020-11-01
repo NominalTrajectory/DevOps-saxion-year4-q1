@@ -31,14 +31,14 @@ Description: This is Stack 03 of Cloud Engineering\Cloud Automation Concepts\Ass
 #   8 8888   .8'       `8. `88888. 8 8888     `88. .8'       `8. `88888. ,8'         `         `8.`8888. 8 888888888888     8 8888       8 888888888888 8 8888     `88. `Y8888P ,88P'
 Parameters: 
 
-  #The name to be used for the ECR hosting the Covid dashboard worker images (CACAA3CovidDashboardECR)
+  #The name to be used for the ECR hosting the Covid dashboard worker images (CACAA2CovidDashboardECR)
   CovidDashboardECRName:
     Description: Provide a name for Elastic Container Repository for the Covid dashboard docker worker
     Type: String
     AllowedPattern: (?:[a-z0-9]+(?:[._-][a-z0-9]+)*/)*[a-z0-9]+(?:[._-][a-z0-9]+)*
     Default: cac-aa2-covid-dashboard-ecr
 
-  #The name to be used for the ECR hosting the Covid NHS form worker images (CACAA3CovidDashboardECR)
+  #The name to be used for the ECR hosting the Covid NHS form worker images (CACAA2CovidDashboardECR)
   CovidRegistrationFormECRName:
     Description: Provide a name for Elastic Container Repository for the NHS form docker worker
     Type: String
@@ -69,13 +69,13 @@ Resources:
   #Par = Parameter
   #Imp = Imported parameter
   
-  #Description: This is a Security Group, this is used by the VPCEndpoints CACAA3ECRVPCEndpointAPI & CACAA3ECRVPCEndpointDKR which are both use by thier respective ECR Repositorys  
+  #Description: This is a Security Group, this is used by the VPCEndpoints CACAA2ECRVPCEndpointAPI & CACAA2ECRVPCEndpointDKR which are both use by thier respective ECR Repositorys  
   #             and allows all incomming tcp packets from port 443 (HTTPS for the ECR Privatelink) and allows all outgoing packets from all ports.
-  CACAA3ECRPrivateLinkSecurityGroup:
+  CACAA2ECRPrivateLinkSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties: 
       GroupDescription: This security groups allows 443 (HTTPS) which is required for the ECR PrivateLink #Refer to https://aws.amazon.com/premiumsupport/knowledge-center/ecs-pull-container-api-error-ecr/
-      GroupName: CACAA3ECRPrivateLinkSecurityGroup
+      GroupName: CACAA2ECRPrivateLinkSecurityGroup
       SecurityGroupIngress: 
         - IpProtocol: tcp
           FromPort: 443
@@ -84,7 +84,7 @@ Resources:
       VpcId: !ImportValue BaseStack:VPC
       Tags: 
         - Key: Name
-          Value: CACAA3ECRPrivateLinkSecurityGroup
+          Value: CACAA2ECRPrivateLinkSecurityGroup
 
 
 
@@ -92,12 +92,12 @@ Resources:
 
   #Description: This is a EC2 VPCEndpoints, which is used for calls to the Amazon ECR API. API actions such as DescribeImages and CreateRepositories go to this endpoint.  
   #             Link for references: https://docs.aws.amazon.com/AmazonECR/latest/userguide/vpc-endpoints.html      
-  CACAA3ECRVPCEndpointAPI:
+  CACAA2ECRVPCEndpointAPI:
     Type: AWS::EC2::VPCEndpoint
     Properties: 
       PrivateDnsEnabled: false
       SecurityGroupIds: 
-        - !Ref CACAA3ECRPrivateLinkSecurityGroup
+        - !Ref CACAA2ECRPrivateLinkSecurityGroup
       ServiceName: com.amazonaws.us-east-1.ecr.api
       SubnetIds: 
         - !ImportValue BaseStack:PublicSubnet1
@@ -107,12 +107,12 @@ Resources:
 
   #Description: This is a EC2 VPCEndpoints, This endpoint is used for the Docker Registry APIs. Docker client commands such as push and pull use this endpoint. 
   #             Link for references: https://docs.aws.amazon.com/AmazonECR/latest/userguide/vpc-endpoints.html   
-  CACAA3ECRVPCEndpointDKR:
+  CACAA2ECRVPCEndpointDKR:
       Type: AWS::EC2::VPCEndpoint
       Properties: 
         PrivateDnsEnabled: true
         SecurityGroupIds: 
-          - !Ref CACAA3ECRPrivateLinkSecurityGroup
+          - !Ref CACAA2ECRPrivateLinkSecurityGroup
         ServiceName: com.amazonaws.us-east-1.ecr.dkr
         SubnetIds: 
           - !ImportValue BaseStack:PublicSubnet1
@@ -125,14 +125,14 @@ Resources:
 
 
   #Description: This is a ECR Repository, this Repository is used to store the Docker Covid dashboard worker images.
-  CACAA3CovidDashboardECR:
+  CACAA2CovidDashboardECR:
     Type: AWS::ECR::Repository
     DeletionPolicy: Delete
     Properties: 
       RepositoryName: !Ref CovidDashboardECRName
       # RepositoryPolicyText: # this policy doesn't work, need to think of something else
       #   Version: '2012-10-17'
-      #   Id: CACAA3ECRAccessPolicy
+      #   Id: CACAA2ECRAccessPolicy
       #   Statement:
       #   - Sid: IPAllow
       #     Effect: Allow
@@ -147,17 +147,17 @@ Resources:
       #         - 10.0.52.0/24     
       Tags: 
         - Key: Name
-          Value: CACAA3CovidDashboardECR
+          Value: CACAA2CovidDashboardECR
 
   #Description: This is a ECR Repository, this Repository is used to store the Docker Covid NHS form worker images.
-  CACAA3CovidRegistrationFormECR:
+  CACAA2CovidRegistrationFormECR:
     Type: AWS::ECR::Repository
     DeletionPolicy: Delete
     Properties: 
       RepositoryName: !Ref CovidRegistrationFormECRName
       # RepositoryPolicyText: # this policy doesn't work, need to think of something else
       #   Version: '2012-10-17'
-      #   Id: CACAA3ECRAccessPolicy
+      #   Id: CACAA2ECRAccessPolicy
       #   Statement:
       #   - Sid: IPAllow
       #     Effect: Allow
@@ -172,7 +172,7 @@ Resources:
       #         - 10.0.52.0/24     
       Tags: 
         - Key: Name
-          Value: CACAA3CovidRegistrationFormECR
+          Value: CACAA2CovidRegistrationFormECR
 
   
 
