@@ -1,0 +1,8 @@
+-Provide Google credentails file in currect directory
+-modify the file envrc.sh with your own variables (which include but are not immited to the variavbles in the variables.tf file)
+-Start by creating docker immage from the docker file
+-Run docker container with created image
+-Enter the CLI of the docker container
+-Execute the command "run command TODO"
+-Terraform init
+-Terrafom apply

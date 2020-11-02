@@ -13,18 +13,20 @@
 
 
 
-#Description: 
+#Description: This is a google_compute_image, it is used as a to define the boot disk for all kubernetes/docker swarm nodes.
+#Documnetation: https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_image
 data "google_compute_image" "k8s" {
   family = "k8s"
 }
 
-#Description: 
+#Description: This is a google_compute_instance, it is a instance that functions as the master node for the kubernetes/docker swarm.
 resource "google_compute_instance" "k8s-master" {
 
   name         = "k8s-master"
   machine_type = "e2-standard-2"
-  zone         = "${var.zone}"
+  zone         = "${var.zone}"                                              #Var: var.zone                                        (The Zone to provision the solution into)
 
+  #This is the master node for the kubernetes/docker swarm.
   tags = ["k8s-master"]
 
   allow_stopping_for_update = "true"
@@ -32,7 +34,7 @@ resource "google_compute_instance" "k8s-master" {
 
   boot_disk {
     initialize_params {
-      image = "${data.google_compute_image.k8s.self_link}"
+      image = "${data.google_compute_image.k8s.self_link}"                  #DO: data.google_compute_image.k8s.self_link          (The google_compute_image all the swarm nodes uses)
       size  = 20
       type  = "pd-standard"
     }
@@ -40,15 +42,15 @@ resource "google_compute_instance" "k8s-master" {
 
   network_interface {
     network    = google_compute_network.cac-aa3-vpc.id
-    network_ip = "${google_compute_address.k8s-master-ip-int.address}"
+    network_ip = "${google_compute_address.k8s-master-ip-int.address}"      #DO: google_compute_address.k8s-master-ip-int.address (the static google_compute_address which is internal the GDP project)
 
     access_config {
-      nat_ip = "${google_compute_address.k8s-master-ip-ext.address}"
+      nat_ip = "${google_compute_address.k8s-master-ip-ext.address}"        #DO: google_compute_address.k8s-master-ip-ext.address (the static google_compute_address which is public)
     }
   }
 
   scheduling {
-    preemptible       = "${var.is_preemptible}"
+    preemptible       = "${var.is_preemptible}"                             #Var: var.is_preemptible                              (Whether the kubernetes/docker node is preemptible)
     automatic_restart = false
   }
 
@@ -69,14 +71,17 @@ resource "google_compute_instance" "k8s-master" {
   # }
 }
 
+#Description: 
 data "external" "kubeadm_join" {
+  
+  #Create after the google_compute_instance.k8s-master is created
+  depends_on = [google_compute_instance.k8s-master]
+  
   program = ["${path.module}/scripts/kubeadm-token.sh"]
 
   query = {
     host     = "${google_compute_instance.k8s-master.network_interface.0.access_config.0.nat_ip}"
-    ssh_user = "${var.ssh_user}"
-    key      = "${var.ssh_private_key}"
+    ssh_user = "${var.ssh_user}"                                        #Var: var.ssh_user                                        (The user name for loggin into ssh)
+    key      = "${var.ssh_private_key}"                                 #Var: var.ssh_private_key                                 (The private key for loggin into ssh)
   }
-
-  depends_on = [google_compute_instance.k8s-master]
 }

@@ -15,9 +15,10 @@ resource "google_compute_instance" "k8s-node" {
   count = "${var.nodes}"
 
   name         = "k8s-node-${count.index}"
-  machine_type = "${var.nodes_type}"
-  zone         = "${var.zone}"
+  machine_type = "${var.nodes_type}"                                        #Var: var.nodes_type                                  (The mashine-type for the worker swarm nodes)
+  zone         = "${var.zone}"                                              #Var: var.zone                                        (The Zone to provision the solution into)
 
+  #This is a worker node for the kubernetes/docker swarm.
   tags = ["k8s-node"]
 
   allow_stopping_for_update = "true"
@@ -25,7 +26,7 @@ resource "google_compute_instance" "k8s-node" {
 
   boot_disk {
     initialize_params {
-      image = "${data.google_compute_image.k8s.self_link}"
+      image = "${data.google_compute_image.k8s.self_link}"                  #Var: data.google_compute_image.k8s.self_link         (The google_compute_image all the swarm nodes uses)
       size  = 10
       type  = "pd-standard"
     }

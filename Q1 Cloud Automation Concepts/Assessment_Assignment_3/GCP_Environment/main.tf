@@ -26,7 +26,7 @@ provider "google" {
   #credentials = file("./cac-aa3-terraform-credentials.json")
 }
 
-#Description: Configure the external Provider, this is later used to store data
+#Description: Configure the external Provider, this is later used to connect kubernetes/docker swarm nodes
 provider "external" {
   version = "2.0.0"
 }
