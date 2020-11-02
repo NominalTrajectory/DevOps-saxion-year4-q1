@@ -16,13 +16,14 @@ resource "google_compute_instance" "k8s-master" {
   boot_disk {
     initialize_params {
       image = "${data.google_compute_image.k8s.self_link}"
-      size  = 20
+      size  = 25
       type  = "pd-standard"
     }
   }
 
   network_interface {
     network    = google_compute_network.cac-aa3-vpc.id
+    subnetwork = google_compute_subnetwork.cac-aa3-subnet-1.id
     network_ip = "${google_compute_address.k8s-master-ip-int.address}"
 
     access_config {
@@ -35,21 +36,38 @@ resource "google_compute_instance" "k8s-master" {
     automatic_restart = false
   }
 
-  metadata_startup_script = "${file("${path.module}/scripts/kubeadm-setup.sh")}"
+  provisioner "remote-exec" {
+    inline = [
+      "set -e",
+      "sudo kubeadm init",
+      "mkdir -p $HOME/.kube && sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && sudo chown $(id -u):$(id -g) $HOME/.kube/config",
+      "kubectl apply -f \"https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')\"",
+    ]
 
-  # provisioner "remote-exec" {
-  #   inline = [
-  #     "set -e",
-  #     "sudo kubeadm init",
-  #     "mkdir -p $HOME/.kube && sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && sudo chown $(id -u):$(id -g) $HOME/.kube/config",
-  #     "kubectl apply -f \"https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')\"",
-  #   ]
+    connection {
+      host = self.network_interface.0.access_config.0.nat_ip
+      user    = "${var.ssh_user}"
+      private_key = "${file("${var.ssh_private_key}")}"
+      timeout = "300s"
+    }
+  }
+}
 
-  #   connection {
-  #     user    = "${var.ssh_user}"
-  #     timeout = "300s"
-  #   }
-  # }
+resource "null_resource" "provision_google_credentials_k8s_master" {
+
+  provisioner "file" {
+    source      = "${path.module}/cac-aa3-terraform-credentials.json"
+    destination = "/home/ubuntu/cac-aa3-terraform-credentials.json"
+  }
+
+  connection {
+    host        = google_compute_instance.k8s-master.network_interface.0.access_config.0.nat_ip
+    type        = "ssh"
+    user        = "ubuntu"
+    private_key = "${file("${var.ssh_private_key}")}"
+    timeout     = "300s"
+  }
+
 }
 
 data "external" "kubeadm_join" {

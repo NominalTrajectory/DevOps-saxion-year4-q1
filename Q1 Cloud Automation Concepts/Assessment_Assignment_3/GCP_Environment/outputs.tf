@@ -17,3 +17,11 @@ output "k8s-node-ip" {
 output "kubeadm_join_command" {
   value = "${data.external.kubeadm_join.result["command"]}"
 }
+
+output "gcr_uri" {
+  value = "${google_container_registry.registry.bucket_self_link}"
+}
+
+output "gcr_id" {
+  value = "${google_container_registry.registry.id}"
+}
