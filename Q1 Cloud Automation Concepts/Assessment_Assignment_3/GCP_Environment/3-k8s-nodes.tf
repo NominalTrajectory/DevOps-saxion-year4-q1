@@ -11,6 +11,10 @@
 #   8 8888     `Y8.  ▀▀▀▀▀▀▀▀▀▀▀   `Y8888P ,88P'               8            `Yo     `8888888P'     8 888888888P'      8 888888888888 `Y8888P ,88P' 
 
 
+
+
+
+#Description: This is a google_compute_instance, it is the template for the slave/worker nodes of the kubernetes/docker swarm.
 resource "google_compute_instance" "k8s-node" {
   count = "${var.nodes}"
 
@@ -26,7 +30,7 @@ resource "google_compute_instance" "k8s-node" {
 
   boot_disk {
     initialize_params {
-      image = "${data.google_compute_image.k8s.self_link}"                  #Var: data.google_compute_image.k8s.self_link         (The google_compute_image all the swarm nodes uses)
+      image = "${data.google_compute_image.k8s.self_link}"                  #DO: data.google_compute_image.k8s.self_link          (The google_compute_image all the swarm nodes uses)
       size  = 10
       type  = "pd-standard"
     }
@@ -41,7 +45,7 @@ resource "google_compute_instance" "k8s-node" {
   }
 
   scheduling {
-    preemptible       = "${var.is_preemptible}"
+    preemptible       = "${var.is_preemptible}"                             #Var: var.is_preemptible                              (Whether the kubernetes/docker node is preemptible)
     automatic_restart = false
   }
 
