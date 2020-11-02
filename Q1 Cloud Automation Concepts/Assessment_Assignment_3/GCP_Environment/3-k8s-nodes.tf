@@ -31,13 +31,14 @@ resource "google_compute_instance" "k8s-node" {
   boot_disk {
     initialize_params {
       image = "${data.google_compute_image.k8s.self_link}"                  #DO: data.google_compute_image.k8s.self_link          (The google_compute_image all the swarm nodes uses)
-      size  = 10
+      size  = 25
       type  = "pd-standard"
     }
   }
 
   network_interface {
     network = google_compute_network.cac-aa3-vpc.id
+    subnetwork = google_compute_subnetwork.cac-aa3-subnet-1.id
 
     access_config {
       // Ephemeral IP
@@ -45,22 +46,36 @@ resource "google_compute_instance" "k8s-node" {
   }
 
   scheduling {
-    preemptible       = "${var.is_preemptible}"                             #Var: var.is_preemptible                              (Whether the kubernetes/docker node is preemptible)
+    preemptible       = "${var.is_preemptible}"
     automatic_restart = false
   }
 
-  metadata_startup_script = "set -e && sudo ${data.external.kubeadm_join.result.command}"
+  provisioner "remote-exec" {
+    inline = [
+      "set -e",
+      "sudo ${data.external.kubeadm_join.result.command}",
+    ]
 
-  # provisioner "remote-exec" {
-  #   inline = [
-  #     "set -e",
-  #     "sudo ${data.external.kubeadm_join.result.command}",
-  #   ]
+    connection {
+      host = self.network_interface.0.access_config.0.nat_ip
+      user    = "${var.ssh_user}"
+      private_key = "${file("${var.ssh_private_key}")}" 
+      timeout = "300s"
+    }
+  }
 
-  #   connection {
-  #     host = self.network_interface.0.access_config.0.
-  #     user    = "${var.ssh_user}"
-  #     timeout = "300s"
-  #   }
-  # }
+  provisioner "file" {
+    source      = "${path.module}/cac-aa3-terraform-credentials.json"
+    destination = "/home/ubuntu/cac-aa3-terraform-credentials.json"
+
+    connection {
+    host        = self.network_interface.0.access_config.0.nat_ip
+    type        = "ssh"
+    user        = "ubuntu"
+    private_key = "${file("${var.ssh_private_key}")}"
+    timeout     = "300s"
+  }
+  }
+
+  
 }

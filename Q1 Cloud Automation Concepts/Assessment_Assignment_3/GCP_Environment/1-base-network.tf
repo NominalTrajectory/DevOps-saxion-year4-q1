@@ -131,3 +131,18 @@ resource "google_compute_firewall" "remote-k8s-admin" {
 
   target_tags = ["k8s-master", "k8s-node"]
 }
+
+resource "google_compute_firewall" "allow-web-nodes" {
+  name        = "allow-web-nodes"
+  network     = "${google_compute_network.cac-aa3-vpc.name}"
+  description = "Allow web traffic to nodes"
+  direction   = "INGRESS"
+  priority    = "1000"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80", "443", "5000"]
+  }
+
+  target_tags = ["k8s-master", "k8s-node"]
+}
