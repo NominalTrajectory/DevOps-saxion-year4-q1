@@ -224,6 +224,65 @@ Resources:
 
 
 
+  # # NAT Instance instead of NAT Gateway because of the limitations of AWS Educate account
+  # CACAA2NATSecurityGroup:
+  #   Type: AWS::EC2::SecurityGroup
+  #   Properties: 
+  #     GroupDescription: This security group is dedicated to the NAT instance
+  #     GroupName: NATSecurityGroup
+  #     SecurityGroupIngress: 
+  #       - IpProtocol: tcp
+  #         FromPort: 80
+  #         ToPort: 80
+  #         CidrIp: !Ref PrivateSubnet1CIDR
+  #       - IpProtocol: tcp
+  #         FromPort: 22
+  #         ToPort: 22
+  #         CidrIp: !Ref PrivateSubnet1CIDR
+  #       - IpProtocol: tcp
+  #         FromPort: 443
+  #         ToPort: 443
+  #         CidrIp: !Ref PrivateSubnet1CIDR
+  #       - IpProtocol: tcp
+  #         FromPort: 80
+  #         ToPort: 80
+  #         CidrIp: !Ref PrivateSubnet2CIDR
+  #       - IpProtocol: tcp
+  #         FromPort: 22
+  #         ToPort: 22
+  #         CidrIp: !Ref PrivateSubnet2CIDR
+  #       - IpProtocol: tcp
+  #         FromPort: 443
+  #         ToPort: 443
+  #         CidrIp: !Ref PrivateSubnet2CIDR
+  #     SecurityGroupEgress: 
+  #       - IpProtocol: tcp
+  #         FromPort: 80
+  #         ToPort: 80
+  #         CidrIp: 0.0.0.0/0
+  #       - IpProtocol: tcp
+  #         FromPort: 443
+  #         ToPort: 443
+  #         CidrIp: 0.0.0.0/0
+  #     Tags: 
+  #       - Key: Name
+  #         Value: CACAA2NATSecurityGroup
+  #     VpcId: !Ref CACAA2VPC
+
+
+  # CACAA2NATInstance:
+  #   Type: AWS::EC2::Instance
+  #   Properties:
+  #     InstanceType: t2.micro
+  #     ImageId: ami-01ef31f9f39c5aaed
+  #     SubnetId: !Ref CACAA2SubnetPublic1
+  #     SourceDestCheck: false
+  #     KeyName: CAC_Assignments
+  #     SecurityGroupIds: 
+  #       - !Ref CACAA2NATSecurityGroup
+  #     Tags:
+  #       - Key: Name
+  #         Value: CACAA2NATInstance
 
   #Description: This is a Elastic IP, this is used within the vpc by the Nat gateway as an adress.
   CACAA2NATElasticIP:
@@ -252,7 +311,6 @@ Resources:
 
 
 
-
   #Description: This is a route table, it is the second of the two route tables, it is connected to the two private subnets via route table associations
   #             and to the nat gateway via the default route. Finally the route table also connects to the VPC itself by default.
   CACAA2NATPrivateRouteTable:
@@ -269,6 +327,7 @@ Resources:
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref CACAA2NATGateway                                 #DO: CACAA2NATGateway                     (The nat gateway)
+      #InstanceId: !Ref CACAA2NATInstance
       RouteTableId: !Ref CACAA2NATPrivateRouteTable                       #DO: CACAA2NATPrivateRouteTable           (The route table for private subnets)
 
   #Description: This is a SubnetRouteTableAssociation, it connects the first of the two private subnets to the private route table.
@@ -412,11 +471,11 @@ Outputs:
   #Description: This outputs a reference to the nat gateway that connects to the private subnets.
   #This value is used in the stacks:
   # -
-  NatGatewayRef:
-    Description: Reference to the NAT Gateway
-    Value: !Ref CACAA2NATGateway                                          #DO: CACAA2NATGateway                     (The nat gateway)
-    Export:
-      Name: BaseStack:NatGateway
+  # NatGatewayRef:
+  #   Description: Reference to the NAT Gateway
+  #   Value: !Ref CACAA2NATGateway                                          #DO: CACAA2NATGateway                     (The nat gateway)
+  #   Export:
+  #     Name: BaseStack:NatGateway
 
 
 
